@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Generator v84</title>
+<title>Numerics · Place Value Generator v85</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -262,7 +262,20 @@
   #tchBar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;padding:10px 14px;background:#F4F0E8;border-bottom:1px solid #e3ddd2}
   #tchBar input{width:70px;font-size:15px;padding:4px 6px}
   #tchView{position:relative;width:100%;overflow:hidden;background:#fff;border-bottom:1px solid #eee}
-  #tchStage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;padding:40px 70px 60px;box-sizing:border-box}
+  #tchStage{position:absolute;left:0;top:0;width:1280px;height:720px;transform-origin:0 0;padding:0;box-sizing:border-box}
+  .tch.tch2{display:block;position:relative;width:1280px;height:720px}
+  .tch2 .tq{position:absolute;left:50px;right:50px;top:34px}
+  .tch2 .ta{position:absolute;left:0;right:0;top:100px}
+  .tch2 .ttag{position:absolute;left:0;right:0;top:160px;margin:0}
+  .tch2 .treg{position:absolute;left:60px;top:200px;width:1160px;height:400px}
+  .tch2 .tpz{position:absolute;box-sizing:border-box;transition:left .8s ease,top .8s ease,width .8s ease,height .8s ease,transform .8s ease,opacity .6s ease}
+  .tch2 .tpl{position:absolute;left:0;right:0;height:0}
+  .tch2 .tfc{position:absolute;box-sizing:border-box;background:#fff}
+  .tch2 .tnote{position:absolute;left:0;right:0;top:618px;margin:0}
+  .tch2 .tbig{position:absolute;right:110px;top:220px;margin:0}
+  .tch2 .tdig{position:absolute;left:0;right:0;top:240px;margin:0}
+  .tch2 .teq{position:absolute;left:0;right:0;top:300px;margin:0}
+  .tch2 .tknow{position:absolute;left:230px;top:112px;margin:0}
   #tchPos{font-size:13px;color:#666;min-width:60px}
   #tchMsg{font-size:13px;color:#355E3B}
   #tchVid{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
@@ -2459,9 +2472,10 @@ async function svgToPNG(el,r){
 }
 async function stageToSlide(pptx,slide){
   const st=$('slideStage'), R0=st.getBoundingClientRect(), I=v=>v/96;
-  const bg=[], imgs=[], ln=[], tx=[];
+  const bg=[], imgs=[], ln=[], tx=[], keyed=[];
   st.querySelectorAll('*').forEach(el=>{
     const tag=el.tagName.toLowerCase();
+    if(el.closest('[data-k],.tfr')){ if(el.hasAttribute('data-k')) keyed.push(el); return; }   // v85: Teach pieces go out as named shapes (Morph)
     if(tag!=='svg' && el.closest('svg')) return;
     const cs=getComputedStyle(el); if(cs.display==='none'||cs.visibility==='hidden') return;
     const r=el.getBoundingClientRect(); if(r.width<.5 && r.height<.5) return;
@@ -2506,6 +2520,12 @@ async function stageToSlide(pptx,slide){
     tx.push({t:t,x:x,y:r.top-R0.top-lift,w:w,h:r.height,pt:Math.round(fpx*.75*10)/10,color:hexOf(cs.color)||'111111',bold:(+cs.fontWeight||400)>=600,align:align,wrap:multi});
   }
   bg.forEach(o=>slide.addShape(o.rad?pptx.ShapeType.roundRect:pptx.ShapeType.rect,{x:I(o.x),y:I(o.y),w:I(o.w),h:I(o.h),fill:{color:o.color},line:{color:o.color,width:0},rectRadius:o.rad?Math.min(.5,o.rad/Math.min(o.w,o.h)):undefined}));
+  keyed.sort((a,b)=>(+a.dataset.z||0)-(+b.dataset.z||0)).forEach(el=>{
+    const cs=getComputedStyle(el), r=el.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight, cx=r.left-R0.left+r.width/2, cy=r.top-R0.top+r.height/2, nm='!!'+el.dataset.k;
+    if(el.dataset.sh==='line'){ slide.addShape(pptx.ShapeType.line,{objectName:nm,x:I(r.left-R0.left),y:I(r.top-R0.top),w:I(r.width),h:0,line:{color:hexOf(cs.borderTopColor)||'FFFFFF',width:Math.max(.5,(parseFloat(cs.borderTopWidth)||1)*.75)}}); return; }
+    const fill=hexOf(cs.backgroundColor), bw=parseFloat(cs.borderTopWidth)||0, bc=hexOf(cs.borderTopColor);
+    slide.addShape(pptx.ShapeType.rect,{objectName:nm,x:I(cx-w/2),y:I(cy-h/2),w:I(w),h:I(h),rotate:+(el.dataset.r||0),fill: fill? {color:fill} : {type:'none'},line: (bw&&bc)? {color:bc,width:bw*.75} : {type:'none'}});
+  });
   for(const o of imgs){ const data=await svgToPNG(o.el,o.r); slide.addImage({data:data,x:I(o.x),y:I(o.y),w:I(o.r.width),h:I(o.r.height)}); }
   ln.forEach(o=>{
     if(o.rect) slide.addShape(o.rad?pptx.ShapeType.roundRect:pptx.ShapeType.rect,{x:I(o.x),y:I(o.y),w:I(o.w),h:I(o.h),fill:{type:'none'},line:{color:o.color,width:o.pt},rectRadius:o.rad?Math.min(.5,o.rad/Math.min(o.w,o.h)):undefined});
@@ -3126,77 +3146,115 @@ buildSet();
    the counting name gets a numeral -> the numeral tells the structure -> parts name -> equation ->
    unbundle check (the whole stays the same) -> zero.  Shown live in the Teach panel and downloaded as a PowerPoint. */
 const TCH={ n:34, steps:[], i:0, timer:null };
-function onesScene(n){
-  const parts=[], fr=Math.max(1,Math.ceil(n/10));
-  for(let f=0; f<fr; f++){
-    const x=f*3; parts.push({t:'frame',x:x,y:0});
-    const m=Math.min(10,n-10*f);
-    for(let j=0;j<m;j++){ const q=fillPos(j); parts.push({t:'cube',x:x+q.col+.1,y:q.row+.1,s:.8}); }
+/* ---- v85: Teach scenes with keyed pieces, so bundling and unbundling move (live, in the video and as PowerPoint Morph) ----
+   Every one keeps its key (o0, o1 …) all the way through: loose -> ten frame -> stacked under its ten rod -> back out
+   in a ten-frame arrangement when the ten is unbundled. Rods are t0, t1 …; the working frame is fw, the ones frame fo. */
+const TU={ W:0, H:0 };
+function tKeyScenes(n, pre){
+  pre=pre||'';
+  const t=Math.floor(n/10), o=n%10, bs=bundleSteps(n,'100');
+  const loose=bs[0].parts.map(p=>({x:p.x,y:p.y,r:p.r||0,s:1}));
+  const rodXY=r=>({x:(r%ROWLEN)*1.5, y:Math.floor(r/ROWLEN)*(10+ROD_RG)});
+  const rodParts=k=>{ const a=[]; for(let r=0;r<k;r++){ const p=rodXY(r);
+      for(let j=0;j<10;j++) a.push({k:pre+'o'+(10*r+j),t:'cube',x:p.x,y:p.y+9-j,s:1,r:0,z:2});   // its ones, stacked under the rod
+      a.push({k:pre+'t'+r,t:'rod',x:p.x,y:p.y,z:3}); } return a; };
+  const looseFrom=i0=>{ const a=[]; for(let i=i0;i<n;i++) a.push({k:pre+'o'+i,t:'cube',x:loose[i].x,y:loose[i].y,s:1,r:loose[i].r,z:4}); return a; };
+  const inF=(fx,fy,j)=>{ const q=fillPos(j); return {x:fx+q.col+.1,y:fy+q.row+.1}; };
+  const S={ loose:{parts:looseFrom(0)}, fill:[], rod:[], fin:null, unb:[] };
+  let fw=null;
+  for(let k=1;k<=t;k++){
+    const f=bs[2*k-1].parts.find(p=>p.t==='frame'); fw=f;
+    const a=rodParts(k-1).concat([{k:pre+'fw',t:'frame',x:f.x,y:f.y,z:1}]);
+    for(let j=0;j<10;j++){ const p=inF(f.x,f.y,j); a.push({k:pre+'o'+(10*(k-1)+j),t:'cube',x:p.x,y:p.y,s:.8,r:0,z:4}); }
+    S.fill.push({parts:a.concat(looseFrom(10*k))});
+    S.rod.push({parts:rodParts(k).concat(looseFrom(10*k))});
   }
-  return {parts:parts, W:fr*3-1, H:5};
+  const ff=bs[bs.length-1].parts.find(p=>p.t==='frame');
+  const fin=rodParts(t).concat([{k:pre+'fo',t:'frame',x:ff.x,y:ff.y,z:1}]);
+  for(let j=0;j<o;j++){ const p=inF(ff.x,ff.y,j); fin.push({k:pre+'o'+(10*t+j),t:'cube',x:p.x,y:p.y,s:.8,r:0,z:4}); }
+  S.fin={parts:fin};
+  if(t){
+    const us=unbundleSteps(n,'100');
+    for(let k=1;k<=t;k++){
+      const P=us[k].parts.filter(p=>p.t==='cube');            // group(k,o) first, then the opened tens g = 0 … k-1
+      const a=rodParts(t-k); let c=0;
+      for(let j=0;j<o;j++,c++) a.push({k:pre+'o'+(10*t+j),t:'cube',x:P[c].x,y:P[c].y,s:1,r:0,z:4});
+      for(let g=0;g<k;g++){ const r=t-1-g; for(let j=0;j<10;j++,c++) a.push({k:pre+'o'+(10*r+j),t:'cube',x:P[c].x,y:P[c].y,s:1,r:0,z:4}); }
+      S.unb.push({parts:a});
+    }
+  }
+  return S;
 }
-function tightScene(sc){ let W=0; sc.parts.forEach(p=>{ const w= p.t==='frame'? 2 : p.t==='flat'? 10 : p.t==='cube'? (p.s||1) : 1; W=Math.max(W,p.x+w); }); return {parts:sc.parts, W:W, H:sc.H}; }
-function tScene(sc,maxW,maxH){ const u=Math.min(maxW/sc.W, maxH/sc.H, 64); return sceneSVG(sc.parts,sc.W,sc.H,u); }
+function tExtent(scs){ let W=0,H=0; scs.forEach(sc=>sc&&sc.parts.forEach(p=>{ const w=p.t==='frame'?2:p.t==='rod'?1:(p.s||1), h=p.t==='frame'?5:p.t==='rod'?10:(p.s||1); W=Math.max(W,p.x+w); H=Math.max(H,p.y+h); })); return {W:W,H:H}; }
+const TREG={x:60,y:200,w:1160,h:400};
+function tPieceHTML(p,u,ox,oy){
+  const sc=SCHEMES[S.scheme], L=ox+p.x*u, T=oy+p.y*u, k=p.k;
+  if(p.t==='cube'){ const sz=(p.s||1)*u; return '<div class="tpz" data-k="'+k+'" data-z="'+p.z+'" style="left:'+L+'px;top:'+T+'px;width:'+sz+'px;height:'+sz+'px;z-index:'+p.z+';background:'+sc.one.fill+';border:'+Math.max(1.2,u*.06)+'px solid '+sc.one.edge+';transform:rotate('+(p.r||0)+'deg)" data-r="'+(p.r||0)+'"></div>'; }
+  if(p.t==='rod'){ let h='<div class="tpz" data-k="'+k+'" data-z="'+p.z+'" style="left:'+L+'px;top:'+T+'px;width:'+u+'px;height:'+(10*u)+'px;z-index:'+p.z+';background:'+sc.ten.fill+';border:'+Math.max(1.2,u*.06)+'px solid '+sc.ten.edge+'">';
+    for(let j=1;j<10;j++) h+='<div class="tpl" data-k="'+k+'l'+j+'" data-z="'+(p.z+.5)+'" data-sh="line" style="top:'+(j*u-1)+'px;border-top:'+Math.max(1,u*.05)+'px solid '+sc.ten.line+'"></div>';
+    return h+'</div>'; }
+  if(p.t==='frame'){ let h='<div class="tpz tfr" data-z="'+p.z+'" data-g="'+k+'" style="left:'+L+'px;top:'+T+'px;width:'+(2*u)+'px;height:'+(5*u)+'px;z-index:'+p.z+'">';
+    for(let r=0;r<5;r++) for(let c=0;c<2;c++) h+='<div class="tfc" data-k="'+k+'c'+(r*2+c)+'" data-z="'+p.z+'" style="left:'+(c*u)+'px;top:'+(r*u)+'px;width:'+u+'px;height:'+u+'px;border:'+Math.max(1,u*.035)+'px solid #222"></div>';
+    return h+'</div>'; }
+  return '';
+}
+function tSceneHTML(sc){
+  if(!sc) return '<div class="treg"></div>';
+  const u=Math.min(TREG.w/TU.W, TREG.h/TU.H, 64), ox=(TREG.w-TU.W*u)/2, oy=(TREG.h-TU.H*u)/2;
+  return '<div class="treg">'+sc.parts.map(p=>tPieceHTML(p,u,ox,oy)).join('')+'</div>';
+}
 function teachSteps(n){
   const t=Math.floor(n/10), o=n%10, nm=words(n), Nm=nm.charAt(0).toUpperCase()+nm.slice(1), sym=S.astyle==='sym', S_=[];
-  const bs=bundleSteps(n,'100'), loose=bs[0], fin=bs[bs.length-1], ub=t? unbundleSteps(n,'100') : null;
+  const K=tKeyScenes(n), d=t*10, Z=(t&&o)? tKeyScenes(d,'z') : null;
+  const ext=tExtent([K.loose,K.fin].concat(K.fill,K.rod,K.unb, Z? [Z.fin] : [])); TU.W=Math.max(ext.W,4); TU.H=Math.max(ext.H,5);
   const q=(text,ans,o2)=>{ S_.push(Object.assign({q:text,a:ans,show:false},o2||{})); S_.push(Object.assign({q:text,a:ans,show:true},o2||{})); };
   const say=(text,o2)=>S_.push(Object.assign({q:text,a:null,show:true},o2||{}));
-  // 1. what do we know?
   S_.push({know:true,show:false}); S_.push({know:true,show:true});
-  // 2. the whole set: every number is built by ones; the counting name tells the whole
-  q('How many ones?', Nm+(n===1?' one.':' ones.'), {pic:loose});
-  q('What is the counting name?', Nm+'.', {pic:loose, note:'The counting name tells us the whole.'});
-  // 3. bundle in: every 10 ones
+  q('How many ones?', Nm+(n===1?' one.':' ones.'), {sc:K.loose});
+  q('What is the counting name?', Nm+'.', {sc:K.loose, note:'The counting name tells us the whole.'});
   if(t){
-    q('Can we bundle?', 'Yes. We always bundle at ten.', {pic:loose});
-    let k=0;
-    for(let j=1;j<bs.length;j++){ const st=bs[j];
-      if(st.fin) say(o? 'Put the '+o+' left over in a ten frame.' : 'Every one has been bundled.', {pic:st, note:structName(n)+'.', bundle:'in'});
-      else if(/^Fill/.test(st.cap)) say('Bundle 10 ones.', {pic:st, note:'Fill a ten frame with 10 ones.', bundle:'in'});
-      else { k++; say('10 ones make 1 ten.', {pic:st, note:plural(k,'ten')+' so far.', bundle:'in'}); }
+    q('Can we bundle?', 'Yes. We always bundle at ten.', {sc:K.loose});
+    for(let k=1;k<=t;k++){
+      say('Bundle 10 ones.', {sc:K.fill[k-1], note:'Fill a ten frame with 10 ones.'});
+      say('10 ones make 1 ten.', {sc:K.rod[k-1], note:plural(k,'ten')+' so far.'});
     }
-  } else q('Can we bundle?', 'No. We bundle at ten. There are not 10 ones.', {pic:loose});
-  // 4. structure name
-  q('Tell me the structure of the number.', structName(n)+'.', {pic:fin, tag:'structure name'});
-  // 5. the counting name gets a numeral
-  say('The counting name '+nm+' gets a numeral: '+n+'.', {pic:fin, numeral:true, note:'The numeral is the symbol for the counting name.'});
-  // 6. the numeral tells the structure name
+    say(o? 'Put the '+o+' left over in a ten frame.' : 'Every one has been bundled.', {sc:K.fin, note:structName(n)+'.'});
+  } else q('Can we bundle?', 'No. We bundle at ten. There are not 10 ones.', {sc:K.fin});
+  q('Tell me the structure of the number.', structName(n)+'.', {sc:K.fin, tag:'structure name'});
+  say('The counting name '+nm+' gets a numeral: '+n+'.', {sc:K.fin, numeral:true, note:'The numeral is the symbol for the counting name.'});
   q('What does the numeral '+n+' tell us?', 'The structure name: '+structName(n)+'.', {numeral:true, digits:true});
-  // 7. parts name
-  q('What are the parts?', (t*10)+' and '+o+'.', {pic:fin, tag:'parts name'});
-  // 8. equation
+  q('What are the parts?', (t*10)+' and '+o+'.', {sc:K.fin, tag:'parts name'});
   q(sym? 'What is '+(t*10)+' + '+o+'?' : 'What do '+(t*10)+' and '+o+' make?', '', {eq:true});
-  // 9. bundle out: unbundle every ten, the whole stays the same
-  if(ub){
-    q('Unbundle 1 ten. Did the whole change?', 'No. It is still '+n+'.', {pic:ub[1], bundle:'out'});
-    q('What changed?', 'The parts. '+structName(n,t-1,o+10)+'.', {pic:ub[1], bundle:'out'});
-    for(let k=2;k<=t;k++) say('Unbundle 1 more ten.', {pic:ub[k], note:structName(n,t-k,o+10*k)+'.', bundle:'out'});
-    say('Every ten is unbundled.', {pic:ub[t], note:'It is still '+nm+' ones. The whole did not change.', bundle:'out'});
+  if(t){
+    q('Unbundle 1 ten. Did the whole change?', 'No. It is still '+n+'.', {sc:K.unb[0]});
+    q('What changed?', 'The parts. '+structName(n,t-1,o+10)+'.', {sc:K.unb[0]});
+    for(let k=2;k<=t;k++) say('Unbundle 1 more ten.', {sc:K.unb[k-1], note:structName(n,t-k,o+10*k)+'.'});
+    say('Every ten is unbundled.', {sc:K.unb[t-1], note:'It is still '+nm+' ones. The whole did not change.'});
   }
-  // 10. zero: every one has been bundled
   const zeroA='0 ones. Every one has been bundled into tens.';
   if(t && o===0) q('What does the 0 tell us?', zeroA, {numeral:true, digits:true});
-  else if(t){ const d=t*10, dsc=bundleSteps(d,'100'); const dfin=dsc[dsc.length-1];
-    q('What about '+d+'? Tell me the structure of the number.', structName(d)+'.', {pic:dfin, num:d});
-    q('What does the 0 tell us?', zeroA, {numeral:true, digits:true, num:d}); }
+  else if(t){
+    q('What about '+d+'? Tell me the structure of the number.', structName(d)+'.', {sc:Z.fin});
+    q('What does the 0 tell us?', zeroA, {numeral:true, digits:true, num:d});
+  }
   return S_;
 }
 function teachHTML(st,n){
   if(st.num) n=st.num;
   const t=Math.floor(n/10), o=n%10, sym=S.astyle==='sym';
+  let h='<div class="tch tch2">';
   if(st.know){
     const L=[['Every number is built by','ones'],['The counting name tells us the','whole'],['We always bundle at','ten'],['A numeral is a','symbol','for the counting name.'],['The numeral tells us the','structure','name.']];
-    return '<div class="tch"><div class="tq">What do we know?</div><div class="tknow">'+L.map(l=>'<div>'+l[0]+' <span class="tblank'+(st.show?' on':'')+'"><span>'+l[1]+'</span></span>'+(l[2]?' '+l[2]:'.')+'</div>').join('')+'</div></div>';
+    return h+'<div class="tq">What do we know?</div><div class="tknow">'+L.map(l=>'<div>'+l[0]+' <span class="tblank'+(st.show?' on':'')+'"><span>'+l[1]+'</span></span>'+(l[2]?' '+l[2]:'.')+'</div>').join('')+'</div>'+tSceneHTML(null)+'</div>';
   }
-  let h='<div class="tch"><div class="tq">'+st.q+'</div>';
+  h+='<div class="tq">'+st.q+'</div>';
   if(st.a) h+='<div class="ta'+(st.show?' on':'')+'"><span>'+st.a+'</span></div>';
   if(st.tag && st.show) h+='<div class="ttag">'+st.tag+'</div>';
+  h+=tSceneHTML(st.sc||null);
   if(st.numeral){
     if(st.digits){
-      const T=String(t), O=String(o);
-      h+='<div class="tdig">'+(t? '<div class="tdc"><div class="tdn">'+T+'</div><div class="tdl'+(st.show?' on':'')+'">'+plural(t,'ten')+'</div></div>' : '')+
-         '<div class="tdc"><div class="tdn">'+O+'</div><div class="tdl'+(st.show?' on':'')+'">'+plural(o,'one')+'</div></div></div>';
+      h+='<div class="tdig">'+(t? '<div class="tdc"><div class="tdn">'+t+'</div><div class="tdl'+(st.show?' on':'')+'">'+plural(t,'ten')+'</div></div>' : '')+
+         '<div class="tdc"><div class="tdn">'+o+'</div><div class="tdl'+(st.show?' on':'')+'">'+plural(o,'one')+'</div></div></div>';
     } else h+='<div class="tbig">'+n+'</div>';
   }
   if(st.eq){
@@ -3204,27 +3262,38 @@ function teachHTML(st,n){
     h+='<div class="teq">'+(sym? B(t*10)+'<span class="top">+</span>'+B(o)+'<span class="top">=</span>'+B(n,true)
                                  : B(t*10)+'<span class="top w">and</span>'+B(o)+'<span class="top w">make</span>'+B(n,true))+'</div>';
   }
-  if(st.pic){ const sc=st.W? Object.assign({},st.pic,{W:Math.max(st.pic.W,st.W),H:Math.max(st.pic.H,st.H)}) : st.pic;
-    h+='<div class="tpic">'+tScene(sc, st.numeral?760:1000, st.numeral? 210 : (st.a? 330 : 380))+'</div>'; }
   if(st.note && st.show) h+='<div class="tnote">'+st.note+'</div>';
   return h+'</div>';
 }
-function teachNum(){ const v=Math.round(+String($('tchNum').value).replace(/[^0-9]/g,'')); return (v>=1&&v<=100)? v : null; }
+/* live view: keep each keyed piece and move it, so the change is seen (like Morph) */
 function teachRender(){
   const st=TCH.steps[TCH.i]; if(!st) return;
-  RODWIDE=true; LABMIN=28;
-  try{ $('tchStage').innerHTML=teachHTML(st,TCH.n); } finally{ RODWIDE=false; LABMIN=11; }
+  const stage=$('tchStage'), tmp=document.createElement('div');
+  tmp.innerHTML=teachHTML(st,TCH.n);
+  const newReg=tmp.querySelector('.treg'), oldReg=stage.querySelector('.treg');
+  if(oldReg && newReg){
+    const keep=new Map(); oldReg.querySelectorAll(':scope>.tpz').forEach(e=>keep.set(e.dataset.k||e.dataset.g,e));
+    const seen=new Set();
+    [...newReg.children].forEach(ne=>{ const key=ne.dataset.k||ne.dataset.g; seen.add(key); const oe=keep.get(key);
+      if(oe && oe.className===ne.className){ oe.style.cssText=ne.style.cssText; oe.style.opacity='1'; oe.classList.remove('gone'); }
+      else { if(oe) oe.remove(); ne.style.opacity='0'; oldReg.appendChild(ne); void ne.offsetWidth; ne.style.opacity='1'; } });
+    keep.forEach((e,key)=>{ if(!seen.has(key)){ e.classList.add('gone'); e.style.opacity='0'; setTimeout(()=>{ if(e.classList.contains('gone')) e.remove(); },800); } });
+    // swap everything except the picture
+    [...stage.firstElementChild.children].forEach(c=>{ if(c!==oldReg) c.remove(); });
+    const host=stage.firstElementChild;
+    [...tmp.firstElementChild.children].forEach(c=>{ if(!c.classList.contains('treg')) host.appendChild(c); });
+  } else stage.innerHTML=tmp.innerHTML;
   $('tchPos').textContent=(TCH.i+1)+' of '+TCH.steps.length;
   teachFit();
 }
-function teachFit(){ const box=$('tchView'), sc=Math.min(box.clientWidth/1280, (box.clientHeight||720)/720); $('tchStage').style.transform='scale('+sc+')'; $('tchView').style.height=(720*sc)+'px'; }
-function teachLoad(n){ TCH.n=n; TCH.steps=teachSteps(n); TCH.i=0; teachStop(); teachRender(); $('tchMsg').textContent=''; }
-function teachStop(){ if(TCH.timer){ clearInterval(TCH.timer); TCH.timer=null; } $('tchPlay').textContent='Play ▶'; }
-function teachPlay(){
-  if(TCH.timer){ teachStop(); return; }
-  if(TCH.i>=TCH.steps.length-1) TCH.i=0, teachRender();
-  $('tchPlay').textContent='Pause ❚❚';
-  TCH.timer=setInterval(()=>{ if(TCH.i>=TCH.steps.length-1){ teachStop(); return; } TCH.i++; teachRender(); }, 3200);
+const MORPH_XML='<mc:AlternateContent xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"><mc:Choice xmlns:p159="http://schemas.microsoft.com/office/powerpoint/2015/09/main" Requires="p159"><p:transition xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" spd="slow" p14:dur="900"><p159:morph option="byObject"/></p:transition></mc:Choice><mc:Fallback><p:transition spd="slow"><p:fade/></p:transition></mc:Fallback></mc:AlternateContent>';
+async function addMorph(blob){
+  const Z=window.JSZip; if(!Z) return blob;
+  const zip=await Z.loadAsync(blob), names=Object.keys(zip.files).filter(f=>/^ppt\/slides\/slide\d+\.xml$/.test(f));
+  for(const f of names){ if(f==='ppt/slides/slide1.xml') continue;
+    let x=await zip.file(f).async('string');
+    if(x.indexOf('p159:morph')<0){ x= x.indexOf('</p:clrMapOvr>')>=0 ? x.replace('</p:clrMapOvr>','</p:clrMapOvr>'+MORPH_XML) : x.replace('</p:sld>',MORPH_XML+'</p:sld>'); zip.file(f,x); } }
+  return zip.generateAsync({type:'blob',mimeType:'application/vnd.openxmlformats-officedocument.presentationml.presentation'});
 }
 async function teachDownload(){
   const btn=$('tchDown'), msg=$('tchMsg');
@@ -3232,24 +3301,37 @@ async function teachDownload(){
   btn.disabled=true;
   try{
     const n=TCH.n, steps=teachSteps(n), pptx=new PptxGenJS(); pptx.layout='LAYOUT_WIDE'; pptx.title='Numerics · Teach '+n; pptx.company='Numerics';
-    const stage=$('slideStage'), was=stage.style.cssText;
+    const stage=$('slideStage'), keepPad=stage.style.padding;
+    stage.style.padding='0';
     for(let k=0;k<steps.length;k++){
       msg.textContent='Building slide '+(k+1)+' of '+steps.length+'…';
-      RODWIDE=true; LABMIN=28;
-      try{ stage.firstElementChild.innerHTML=teachHTML(steps[k],n); } finally{ RODWIDE=false; LABMIN=11; }
+      stage.firstElementChild.innerHTML=teachHTML(steps[k],n);
       const slide=pptx.addSlide(); slide.background={color:'FFFFFF'};
       await stageToSlide(pptx,slide);
       slide.addText('© 2026 Numerics. All rights reserved. · Structured Numeracy · Teach '+n,{x:.45,y:7.08,w:9,h:.3,fontFace:'Century Gothic',fontSize:10,color:'8A9099',margin:0});
       slide.slideNumber={x:12.3,y:7.08,w:.6,h:.3,fontFace:'Century Gothic',fontSize:10,color:'8A9099',align:'right'};
       await new Promise(r=>setTimeout(r,0));
     }
-    stage.firstElementChild.innerHTML=''; stage.style.cssText=was;
+    stage.firstElementChild.innerHTML=''; stage.style.padding=keepPad;
+    msg.textContent='Adding Morph…';
+    const blob=await addMorph(await pptx.write({outputType:'blob'}));
     const name='Numerics_Teach_'+n+'.pptx'; let saved=false;
-    try{ const dl=await window.claude?.use?.('downloads'); if(dl){ const blob=await pptx.write({outputType:'blob'}); await dl.save({filename:name,data:blob}); saved=true; } }catch(e){}
-    if(!saved) await pptx.writeFile({fileName:name});
-    msg.textContent='Done: '+name+' ('+steps.length+' slides).';
+    try{ const dl=await window.claude?.use?.('downloads'); if(dl){ await dl.save({filename:name,data:blob}); saved=true; } }catch(e){}
+    if(!saved){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },2000); }
+    msg.textContent='Done: '+name+' ('+steps.length+' slides, Morph between slides).';
   }catch(e){ msg.textContent='Could not make the PowerPoint ('+(e&&e.message||e)+').'; }
   finally{ btn.disabled=false; }
+}
+
+function teachNum(){ const v=Math.round(+String($('tchNum').value).replace(/[^0-9]/g,'')); return (v>=1&&v<=100)? v : null; }
+function teachFit(){ const box=$('tchView'), sc=Math.max(.2, Math.min(box.clientWidth/1280, (window.innerHeight-130)/720)); $('tchStage').style.transform='scale('+sc+')'; $('tchView').style.height=(720*sc)+'px'; }
+function teachLoad(n){ TCH.n=n; TCH.steps=teachSteps(n); TCH.i=0; teachStop(); teachRender(); $('tchMsg').textContent=''; }
+function teachStop(){ if(TCH.timer){ clearInterval(TCH.timer); TCH.timer=null; } $('tchPlay').textContent='Play ▶'; }
+function teachPlay(){
+  if(TCH.timer){ teachStop(); return; }
+  if(TCH.i>=TCH.steps.length-1) TCH.i=0, teachRender();
+  $('tchPlay').textContent='Pause ❚❚';
+  TCH.timer=setInterval(()=>{ if(TCH.i>=TCH.steps.length-1){ teachStop(); return; } TCH.i++; teachRender(); }, 3200);
 }
 function bindTeach(){
   const w=$('teachWrap'); if(!w) return;
@@ -3270,7 +3352,7 @@ function bindTeach(){
   $('tchWatchBtn').addEventListener('click',()=>{ teachStop(); $('tchLive').classList.add('hidden'); $('tchWatch').classList.remove('hidden'); const v=$('tchVid'); if(!v.getAttribute('src')) v.setAttribute('src','teach.mp4'); try{ const p=v.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){} });
   $('tchLiveBtn').addEventListener('click',()=>{ try{ $('tchVid').pause(); }catch(e){} $('tchWatch').classList.add('hidden'); $('tchLive').classList.remove('hidden'); teachFit(); });
   /* teacher captions for teach.mp4 (CC button turns them off when showing the class) */
-  const TEACH_VTT="WEBVTT\n\n00:00:03.000 --> 00:00:06.950\nOpen with \u201cWhat do we know?\u201d Students say the missing word in each line.\n\n00:00:07.000 --> 00:00:11.450\nReveal the words: ones, ten, symbol.\n\n00:00:11.500 --> 00:00:15.450\nAsk: \u201cHow many ones?\u201d Give think time.\n\n00:00:15.500 --> 00:00:19.950\nStudents answer together: \u201c34 ones.\u201d\n\n00:00:20.000 --> 00:00:23.950\nAsk: \u201cWhat is the number name?\u201d Give think time.\n\n00:00:24.000 --> 00:00:28.450\nStudents answer together: \u201cThirty-four.\u201d Then say: \u201cThe number name tells how many ones.\u201d\n\n00:00:28.500 --> 00:00:32.450\nAsk: \u201cCan we bundle?\u201d Give think time.\n\n00:00:32.500 --> 00:00:36.950\nStudents answer together: \u201cYes. We always bundle at ten.\u201d\n\n00:00:37.000 --> 00:00:42.450\nTell students: \u201c10 ones make 1 ten.\u201d \u201c3 full ten frames become 3 tens.\u201d\n\n00:00:42.500 --> 00:00:46.450\nAsk: \u201cTell me the structure of the number.\u201d Give think time.\n\n00:00:46.500 --> 00:00:50.950\nStudents answer together: \u201c3 tens 4 ones.\u201d\n\n00:00:51.000 --> 00:00:56.450\nTell students: \u201cThis is the numeral 34.\u201d \u201cIt is a symbol for thirty-four.\u201d\n\n00:00:56.500 --> 00:01:00.450\nAsk: \u201cWhat does the numeral 34 tell us?\u201d Give think time.\n\n00:01:00.500 --> 00:01:04.950\nStudents answer together: \u201c3 tens 4 ones.\u201d\n\n00:01:05.000 --> 00:01:08.950\nAsk: \u201cWhat are the parts?\u201d Give think time.\n\n00:01:09.000 --> 00:01:13.450\nStudents answer together: \u201c30 and 4.\u201d\n\n00:01:13.500 --> 00:01:17.450\nAsk: \u201cWhat is 30 + 4?\u201d Give think time.\n\n00:01:17.500 --> 00:01:21.950\nStudents answer together: \u201c34.\u201d Reveal the answer.\n\n00:01:22.000 --> 00:01:25.950\nAsk: \u201cUnbundle 1 ten. Did the whole change?\u201d Give think time.\n\n00:01:26.000 --> 00:01:30.450\nStudents answer together: \u201cNo. It is still 34.\u201d\n\n00:01:30.500 --> 00:01:34.450\nAsk: \u201cWhat changed?\u201d Give think time.\n\n00:01:34.500 --> 00:01:38.950\nStudents answer together: \u201cThe parts. 2 tens 14 ones.\u201d\n\n00:01:39.000 --> 00:01:42.950\nAsk: \u201cWhat about 30? Tell me the structure of the number.\u201d Give think time.\n\n00:01:43.000 --> 00:01:47.450\nStudents answer together: \u201c3 tens 0 ones. The 0 tells us there are no ones.\u201d\n";
+  const TEACH_VTT="WEBVTT\n\n00:00:03.000 --> 00:00:07.950\nOpen with \u201cWhat do we know?\u201d Students say the missing word in each line.\n\n00:00:08.000 --> 00:00:13.517\nReveal the words: ones, whole, ten, symbol, structure.\n\n00:00:13.567 --> 00:00:18.583\nAsk: \u201cHow many ones?\u201d Give think time.\n\n00:00:18.633 --> 00:00:24.183\nStudents answer together: \u201cThirty-four ones.\u201d\n\n00:00:24.233 --> 00:00:29.283\nAsk: \u201cWhat is the counting name?\u201d Give think time.\n\n00:00:29.333 --> 00:00:34.817\nStudents answer together: \u201cThirty-four.\u201d Then say: \u201cThe counting name tells us the whole.\u201d\n\n00:00:34.867 --> 00:00:39.850\nAsk: \u201cCan we bundle?\u201d Give think time.\n\n00:00:39.900 --> 00:00:45.417\nStudents answer together: \u201cYes. We always bundle at ten.\u201d\n\n00:00:45.467 --> 00:00:50.017\nSay: \u201cBundle 10 ones.\u201d \u201cFill a ten frame with 10 ones.\u201d\n\n00:00:50.067 --> 00:00:54.617\nSay: \u201c10 ones make 1 ten.\u201d \u201c1 ten so far.\u201d\n\n00:00:54.667 --> 00:00:59.150\nSay: \u201cBundle 10 ones.\u201d \u201cFill a ten frame with 10 ones.\u201d\n\n00:00:59.200 --> 00:01:03.717\nSay: \u201c10 ones make 1 ten.\u201d \u201c2 tens so far.\u201d\n\n00:01:03.767 --> 00:01:08.250\nSay: \u201cBundle 10 ones.\u201d \u201cFill a ten frame with 10 ones.\u201d\n\n00:01:08.300 --> 00:01:12.783\nSay: \u201c10 ones make 1 ten.\u201d \u201c3 tens so far.\u201d\n\n00:01:12.833 --> 00:01:17.317\nSay: \u201cPut the 4 left over in a ten frame.\u201d \u201c3 tens 4 ones.\u201d\n\n00:01:17.367 --> 00:01:22.417\nAsk: \u201cTell me the structure of the number.\u201d Give think time.\n\n00:01:22.467 --> 00:01:27.983\nStudents answer together: \u201c3 tens 4 ones.\u201d\n\n00:01:28.033 --> 00:01:32.550\nSay: \u201cThe counting name thirty-four gets a numeral: 34.\u201d \u201cThe numeral is the symbol for the counting name.\u201d\n\n00:01:32.600 --> 00:01:37.617\nAsk: \u201cWhat does the numeral 34 tell us?\u201d Give think time.\n\n00:01:37.667 --> 00:01:43.217\nStudents answer together: \u201cThe structure name: 3 tens 4 ones.\u201d\n\n00:01:43.267 --> 00:01:48.283\nAsk: \u201cWhat are the parts?\u201d Give think time.\n\n00:01:48.333 --> 00:01:53.817\nStudents answer together: \u201c30 and 4.\u201d\n\n00:01:53.867 --> 00:01:58.883\nAsk: \u201cWhat is 30 + 4?\u201d Give think time.\n\n00:01:58.933 --> 00:02:04.450\nStudents answer together: \u201c34.\u201d Reveal the answer.\n\n00:02:04.500 --> 00:02:09.517\nAsk: \u201cUnbundle 1 ten. Did the whole change?\u201d Give think time.\n\n00:02:09.567 --> 00:02:15.117\nStudents answer together: \u201cNo. It is still 34.\u201d\n\n00:02:15.167 --> 00:02:20.150\nAsk: \u201cWhat changed?\u201d Give think time.\n\n00:02:20.200 --> 00:02:25.717\nStudents answer together: \u201cThe parts. 2 tens 14 ones.\u201d\n\n00:02:25.767 --> 00:02:30.250\nSay: \u201cUnbundle 1 more ten.\u201d \u201c1 ten 24 ones.\u201d\n\n00:02:30.300 --> 00:02:34.817\nSay: \u201cUnbundle 1 more ten.\u201d \u201c0 tens 34 ones.\u201d\n\n00:02:34.867 --> 00:02:39.383\nSay: \u201cEvery ten is unbundled.\u201d \u201cIt is still thirty-four ones. The whole did not change.\u201d\n\n00:02:39.433 --> 00:02:44.450\nAsk: \u201cWhat about 30? Tell me the structure of the number.\u201d Give think time.\n\n00:02:44.500 --> 00:02:50.050\nStudents answer together: \u201c3 tens 0 ones.\u201d\n\n00:02:50.100 --> 00:02:55.083\nAsk: \u201cWhat does the 0 tell us?\u201d Give think time.\n\n00:02:55.133 --> 00:03:00.617\nStudents answer together: \u201c0 ones. Every one has been bundled into tens.\u201d\n";
   try{ const tr=document.createElement('track'); tr.kind='captions'; tr.label='Teacher captions'; tr.srclang='en'; tr.default=true;
        tr.src=URL.createObjectURL(new Blob([TEACH_VTT],{type:'text/vtt'})); $('tchVid').appendChild(tr);
        $('tchVid').addEventListener('loadedmetadata',()=>{ try{ $('tchVid').textTracks[0].mode='showing'; }catch(e){} }); }catch(e){}
@@ -3322,7 +3404,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
         <span id="tchPos"></span><button class="btn" id="tchDown" type="button">Download PowerPoint</button><span id="tchMsg"></span></div>
       <div id="tchView"><div id="tchStage"></div></div>
     </div>
-    <div id="tchWatch" class="hidden"><video id="tchVid" controls preload="none" playsinline></video><div id="tchVmsg">A model lesson for 34. The captions give the teacher wording; turn them off with the CC button to show the video to the class. Use Step through a number to teach any number to 100.</div></div>
+    <div id="tchWatch" class="hidden"><video id="tchVid" controls preload="none" playsinline></video><div id="tchVmsg">A 3-minute model lesson for 34 with the bundling moving in and out. The captions give the teacher wording; turn them off with the CC button to show the video to the class. Use Step through a number to teach any number to 100.</div></div>
   </div>
 </div>
 <div id="howWrap" class="hidden" role="dialog" aria-label="How to use the Place Value Generator">
