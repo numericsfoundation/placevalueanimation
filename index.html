@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v100</title>
+<title>Numerics · Place Value Toolkit v101</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -2367,7 +2367,7 @@ function cMat(it,i){
   else if(it.kind==='npt'){ const V=nptVals(it); top='<div class="mtitle">Build <b>'+V.n+'</b>.</div>';
     rec='Fill to the next '+V.unit+': '+ln(3)+' more. The next '+V.unit+' is '+ln(3)+'.<br>Take away to the previous '+V.unit+': '+ln(3)+' less. The previous '+V.unit+' is '+ln(3)+'.'; }
   else if(it.kind==='cmp'){ top='<div class="mtitle">Build <b>'+it.A+'</b> and <b>'+it.B+'</b>.</div>';
-    rec=it.A+' '+ln(2)+' '+it.B+'<br>Which place decides? '+ln(6); }
+    rec=it.A+' '+ln(2)+' '+it.B+'<br>Which place did you compare to find the answer? '+ln(6); }
   else { const b=big?100:10, r=it.A%b, Tn= it.op==='-'? it.A-r : it.A-r+b, sg=cSign(it); top='<div class="mtitle">Build <b>'+it.A+'</b>. '+(it.op==='-'?'Take away':'Add')+' <b>'+it.B+'</b>.</div>';
     rec=(it.op==='-'?'Take away':'Add')+' to make '+Tn+': '+it.A+' '+sg+' '+ln(2.5)+' = '+Tn+'<br>'+it.B+' is '+ln(2.5)+' and '+ln(2.5)+'<br>'+Tn+' '+sg+' '+ln(2.5)+' = '+ln(3); }
   return '<div class="mat">'+top+mat+'<div class="mrec">'+rec+'</div></div>';
@@ -3762,7 +3762,8 @@ function tPieceHTML(p,u,ox,oy){
 }
 function tSceneHTML(sc){
   if(!sc) return '<div class="treg"></div>';
-  const EW=sc.W||TU.W, EH=sc.H||TU.H, u=Math.min(TREG.w/EW, TREG.h/EH, 64), ox=(TREG.w-EW*u)/2, oy=(TREG.h-EH*u)/2;
+  const EW=sc.W||TU.W, EH=sc.H||TU.H, u=Math.min(TREG.w/EW, TREG.h/EH, 64); let ox=(TREG.w-EW*u)/2, oy=(TREG.h-EH*u)/2;
+  if(sc.parts.length && sc.parts.every(p=>p.t==='cube' && (p.s||1)===1 && p.r)){ let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; sc.parts.forEach(p=>{ x0=Math.min(x0,p.x); x1=Math.max(x1,p.x+1); y0=Math.min(y0,p.y); y1=Math.max(y1,p.y+1); }); ox=(TREG.w-(x1-x0)*u)/2-x0*u; oy=(TREG.h-(y1-y0)*u)/2-y0*u; }   // v100: a pile of loose items sits in the middle
   return '<div class="treg">'+sc.parts.map(p=>kPieceHTML(p,u,ox,oy)).join('')+'</div>';
 }
 function tPair(a,b){   // two scenes side by side, each with its own keys
@@ -3776,8 +3777,8 @@ function teachHTML(st,n){
   let h='<div class="tch tch2">';
   if(st.know){
     const L= st.lesson==='cmp'? [['A ten is','10','ones.'],['We always bundle at','ten'],['The structure name tells how many tens and how many','ones'],['4 tens is','more','than 3 tens.'],['The numeral tells us the','structure','name.']]
-      : st.lesson==='npt'? [['A ten frame holds','10','ones.'],['We always bundle at','ten'],['10 ones make','1 ten'],['The structure name tells how many tens and how many','ones'],['When we take away, there are','fewer','left.']]
-      : [['When we count, we say one number for each','object'],['The last number we say tells us','how many'],['A ten frame holds','10','ones.'],['5 and 5 make','10'],['We count ones to find the','whole']];
+      : st.lesson==='npt'? [['A ten frame holds','10','ones.'],['We always bundle at','ten'],['10 ones make','1 ten'],['The structure name tells how many tens and how many','ones'],['When we take away, there are','fewer','items left.']]
+      : [['When we count, we say one number for each','item'],['The last number we say tells us','how many'],['A ten frame holds','10','items.'],['5 and 5 make','10'],['The counting name tells','how many']];
     const kn= st.kn===undefined? (st.show?5:0) : st.kn;
     return h+'<div class="tq">What do we know?</div><div class="tknow">'+L.map((l,i)=>'<div>'+l[0]+' <span class="tblank'+(i<kn?' on':'')+'"><span>'+l[1]+'</span></span>'+(l[2]?' '+l[2]:'.')+'</div>').join('')+'</div>'+tSceneHTML(null)+'</div>';
   }
@@ -3892,49 +3893,50 @@ function tOther(n,list,ok){ for(const v of list) if(ok(v) && v!==n) return v; re
 function teachSteps(n){
   const T_=tSteps(), {q,say,word,sec,goal}=T_;
   const t=Math.floor(n/10), o=n%10, nm=words(n), Nm=nm.charAt(0).toUpperCase()+nm.slice(1), sym=S.astyle==='sym';
-  const K=tKeyScenes(n), TEN=tKeyScenes(10,'w').fin;
+  const K=tKeyScenes(n), TEN=tKeyScenes(10,'w').rod[0];
   const m=tOther(n,[n+12,n-13,n+21,n-21,47],v=>v>=11&&v<=99&&v%10&&Math.floor(v/10)!==t&&v%10!==o), tm=Math.floor(m/10), om=m%10, mn=words(m), Mn=mn.charAt(0).toUpperCase()+mn.slice(1), L=tKeyScenes(m,'m');
   const youdo=[]; [n+5,n-11,n+23,n-24,36,58,71].forEach(v=>{ if(v>=11&&v<=99&&v!==n&&v!==m&&youdo.indexOf(v)<0) youdo.push(v); }); youdo.length=Math.min(3,youdo.length);
   const Y=youdo.map((v,i)=>tKeyScenes(v,'y'+i).fin);
-  const rv=[8,13].map((v,i)=>({v:v,sc:tKeyScenes(v,'r'+i).loose}));
-  tFit([K.loose,K.fin,TEN].concat(K.fill,K.rod,K.unb,[L.loose,L.fin],Y,rv.map(r=>r.sc)));
+  const fitSet=arr=>{ const e=tExtent(arr); arr.forEach(sc=>{ sc.W=Math.max(e.W,4); sc.H=Math.max(e.H,5); }); return e; };
+  const eM=fitSet([K.loose,K.fin,TEN].concat(K.fill,K.rod,t? [K.unb[0]] : [])); TU.W=Math.max(eM.W,4); TU.H=Math.max(eM.H,5);
+  fitSet([L.loose,L.fin]); Y.forEach(sc=>fitSet([sc]));
+  const countOn=(tt,oo)=>{ const a=[]; for(let k=1;k<=tt;k++) a.push(10*k); for(let k=1;k<=oo;k++) a.push(10*tt+k); return a.length>12? a.slice(0,tt).concat(['…',10*tt+oo]).join(', ') : a.join(', '); };
   T_.know();
-  sec('Review');
-  rv.forEach(r=>q('How many ones?', words(r.v).replace(/^./,c=>c.toUpperCase())+' ones.', {sc:r.sc}));
-  goal('Today we will build a number with tens and ones, and name it.');
-  say('Every number is built by ones.', {sc:K.loose, note:'This is the big idea.'});
+  goal('Today we will bundle items into tens to find how many, and name the number.');
+  say('Every number is built by ones.', {sc:K.loose});
   sec('New words');
-  word('counting name','The counting name tells how many ones. It tells us the whole.', {sc:K.loose, note:Nm+' ones.'});
+  word('counting name','The counting name tells how many. It tells the number of items.', {sc:K.fin, note:'There are '+nm+' items.'});
   word('ten','A ten is 10 ones bundled together.', {sc:TEN, note:'10 ones make 1 ten.'});
   word('structure name','The structure name tells how many tens and how many ones.', {sc:K.fin, note:n+' is '+structName(n)+'.'});
-  word('numeral','A numeral is the symbol we write for the counting name.', {numeral:true});
-  sec('I do · '+n);
-  say('Watch. I count the ones.', {sc:K.loose, note:Nm+' ones.'});
-  say('The counting name is '+nm+'. It tells us the whole.', {sc:K.loose});
+  word('numeral','Each number is represented by a numeral. The numeral shows the structure and tells the structure name.', {numeral:true, digits:true});
+  sec('Build '+n);
+  say('How many items are there? We bundle them, so we do not have to count every single one.', {sc:K.loose});
   if(t){
     say('We always bundle at ten.', {sc:K.loose});
-    for(let k=1;k<=t;k++){ say('I bundle 10 ones.', {sc:K.fill[k-1], note:'I fill a ten frame with 10 ones.'}); say('10 ones make 1 ten.', {sc:K.rod[k-1], note:plural(k,'ten')+' so far.'}); }
-    say(o? 'There '+(o===1?'is ':'are ')+plural(o,'one')+' left. I put '+(o===1?'it':'them')+' in a ten frame.' : 'Every one is bundled. There are 0 ones left.', {sc:K.fin});
-  } else say('There are not 10 ones, so I cannot bundle.', {sc:K.fin});
-  say('The structure name is '+structName(n)+'.', {sc:K.fin, tag:'structure name'});
+    for(let k=1;k<=t;k++){ say('I bundle 10 items.', {sc:K.fill[k-1], note:'I fill a ten frame.'}); say('10 ones make 1 ten.', {sc:K.rod[k-1], note:plural(k,'ten')+' so far.'}); }
+    say(o? 'There '+(o===1?'is ':'are ')+o+' left. I put '+(o===1?'it':'them')+' in a ten frame.' : 'Every item is bundled. There are 0 ones left.', {sc:K.fin});
+  } else say('There are not 10 items, so I cannot bundle.', {sc:K.fin});
+  say('I count the tens, then the ones: '+countOn(t,o)+'.', {sc:K.fin});
+  say('There are '+nm+' items. The counting name tells how many.', {sc:K.fin});
+  say('The structure name is '+structName(n)+'.', {sc:K.fin});
   if(n>=11 && n<=19) say(n<=12? 'The counting name '+nm+' does not tell us 1 ten '+plural(o,'one')+'. We learn it.' : 'The counting name '+nm+' says the '+o+' first. The numeral starts with the ten.', {sc:K.fin, note:n+' is 1 ten '+plural(o,'one')+'.'});
-  say('The counting name '+nm+' gets a numeral: '+n+'.', {sc:K.fin, numeral:true});
-  say('The numeral tells us the structure name.', {numeral:true, digits:true});
-  say('The parts are '+(t*10)+' and '+o+'.', {sc:K.fin, tag:'parts'});
+  say('Each number is represented by a numeral. '+Nm+' is represented by '+n+'.', {sc:K.fin, numeral:true});
+  say('The numeral shows the structure. It tells the structure name: '+structName(n)+'.', {numeral:true, digits:true});
+  say('The parts are '+(t*10)+' and '+o+'.', {sc:K.fin});
   say(sym? (t*10)+' + '+o+' = '+n+'.' : (t*10)+' and '+o+' make '+n+'.', {eq:true});
-  if(t){ say('If I unbundle 1 ten, the whole does not change.', {sc:K.unb[0], note:'It is still '+n+'. '+structName(n,t-1,o+10)+'.'}); }
-  if(t && !o) say('The 0 tells us 0 ones. Every one has been bundled into tens.', {numeral:true, digits:true});
-  sec('We do · '+m);
-  q('How many ones?', Mn+' ones.', {sc:L.loose});
-  q('What is the counting name?', Mn+'.', {sc:L.loose});
-  q('We bundle at ten. How many tens can we make?', plural(tm,'ten')+'.', {sc:L.loose}, {sc:L.fin});
-  q('How many ones are left?', plural(om,'one')+'.', {sc:L.fin});
-  q('What is the structure name?', structName(m)+'.', {sc:L.fin});
-  q('What is the numeral?', m+'.', {sc:L.fin}, {numeral:true, num:m});
-  q('What are the parts?', (tm*10)+' and '+om+'.', {sc:L.fin});
+  if(t){ say('If I unbundle 1 ten, the number of items does not change.', {sc:K.unb[0], note:'There are still '+nm+' items. '+structName(n,t-1,o+10)+'.'}); }
+  if(t && !o) say('The 0 tells us 0 ones. Every item has been bundled into tens.', {numeral:true, digits:true});
+  sec('We do · Build '+m);
+  say('How many items are there? Let us bundle to find out.', {sc:L.loose});
+  q('How many tens can we make?', 'We can make '+plural(tm,'ten')+'.', {sc:L.loose}, {sc:L.fin});
+  q('How many ones are left?', 'There '+(om===1?'is ':'are ')+plural(om,'one')+' left.', {sc:L.fin});
+  q('How many items are there?', countOn(tm,om)+'. There are '+mn+' items.', {sc:L.fin, note:'Count the tens, then the ones.'});
+  q('What is the structure name?', 'The structure name is '+structName(m)+'.', {sc:L.fin});
+  q('What numeral represents '+mn+'?', 'The numeral '+m+' represents '+mn+'.', {sc:L.fin}, {numeral:true, num:m});
+  q('What are the parts?', 'The parts are '+(tm*10)+' and '+om+'.', {sc:L.fin});
   q(sym? 'What is '+(tm*10)+' + '+om+'?' : 'What do '+(tm*10)+' and '+om+' make?', '', {eq:true, num:m});
   if(Y.length){ sec('You do');
-    Y.forEach((sc,i)=>q('Build '+youdo[i]+'. What is the structure name?', structName(youdo[i])+'.', {numeral:true, num:youdo[i], solo:true}, {sc:sc})); }
+    Y.forEach((sc,i)=>q('Build '+youdo[i]+'. What is the structure name?', youdo[i]+' is '+structName(youdo[i])+'.', {numeral:true, num:youdo[i], solo:true}, {sc:sc})); }
   return T_.S_;
 }
 /* ---------- Next And Previous Ten ---------- */
@@ -3949,13 +3951,13 @@ function nptTeachSteps(n){
   rv.forEach(r=>{ const e=tExtent([r.sc]); r.sc.W=Math.max(TU.W,e.W); r.sc.H=Math.max(TU.H,e.H); });
   T_.know('npt');
   sec('Review');
-  rv.forEach(r=>q('What is the structure name?', r.v+'. '+structName(r.v)+'.', {sc:r.sc}));
+  rv.forEach(r=>q('What is the structure name?', r.v+' is '+structName(r.v)+'.', {sc:r.sc}));
   goal('Today we will find the next ten and the previous ten.');
   sec('New words');
   word('next ten','The next ten is the ten that comes after a number. To make it, we fill the ten frame.', {sc:K.fill});
   word('previous ten','The previous ten is the ten that comes before a number. To make it, we take away the ones.', {sc:K.gone});
-  sec('I do · '+n);
-  say('This is '+n+'. '+structName(n)+'.', {sc:K.base});
+  sec('Find The Next And Previous Ten · '+n);
+  say('This is '+n+'. '+n+' is '+structName(n)+'.', {sc:K.base});
   say('To find the next ten, I fill the ten frame.', {sc:K.fill, note:'I add '+plural(mm,'one')+'.'});
   say('10 ones make 1 ten. Now there are '+plural(t+1,'ten')+'.', {sc:K.bun});
   say('The next ten is '+N+'. '+N+' is '+mm+' more than '+n+'.', {sc:K.bun});
@@ -3965,14 +3967,14 @@ function nptTeachSteps(n){
   say(n+' is between '+Pv+' and '+N+'.', {line:'both'});
   say(sym? n+' + '+mm+' = '+N+'.   '+n+' − '+l+' = '+Pv+'.' : n+' and '+mm+' make '+N+'. '+n+' take away '+l+' is '+Pv+'.', {eq2:true});
   sec('We do · '+w);
-  q('How much more is the next ten?', (NW-w)+' more. '+NW+' is '+(NW-w)+' more than '+w+'.', {sc:L.base}, {sc:L.fill});
-  q('What is the next ten?', NW+'. '+plural(tw+1,'ten')+'.', {sc:L.fill}, {sc:L.bun});
-  q('How much less is the previous ten?', ow+' less. '+PW+' is '+ow+' less than '+w+'.', {sc:L.base}, {sc:L.gone});
-  q('What is the previous ten?', PW+'. '+plural(tw,'ten')+'.', {sc:L.tens});
-  q('Where is '+w+' on the number line?', 'Between '+PW+' and '+NW+'.', {line:'none', lineN:w}, {line:'both', lineN:w});
+  q('How much more is the next ten?', NW+' is '+(NW-w)+' more than '+w+'.', {sc:L.base}, {sc:L.fill});
+  q('What is the next ten?', 'The next ten is '+NW+'. '+NW+' is '+plural(tw+1,'ten')+'.', {sc:L.fill}, {sc:L.bun});
+  q('How much less is the previous ten?', PW+' is '+ow+' less than '+w+'.', {sc:L.base}, {sc:L.gone});
+  q('What is the previous ten?', 'The previous ten is '+PW+'. '+PW+' is '+plural(tw,'ten')+'.', {sc:L.tens});
+  q('Where is '+w+' on the number line?', w+' is between '+PW+' and '+NW+'.', {line:'none', lineN:w}, {line:'both', lineN:w});
   q('What goes in the boxes?', '', {eq2:true, num:w});
   if(youdo.length){ sec('You do');
-    youdo.forEach(v=>{ const o2=v%10, N2=v-o2+10, P2=v-o2; q(v+': How much more? How much less?', (N2-v)+' more to '+N2+'. '+o2+' less to '+P2+'.', {numeral:true,num:v,solo:true}, {numeral:false, line:'both', lineN:v}); }); }
+    youdo.forEach(v=>{ const o2=v%10, N2=v-o2+10, P2=v-o2; q(v+': How much more? How much less?', N2+' is '+(N2-v)+' more than '+v+'. '+P2+' is '+o2+' less than '+v+'.', {numeral:true,num:v,solo:true}, {numeral:false, line:'both', lineN:v}); }); }
   return T_.S_;
 }
 /* ---------- Compare Numbers ---------- */
@@ -4002,37 +4004,37 @@ function cmpTeachSteps(n){
   const t1=Math.floor(B1/10), big=(a,b)=>Math.max(a,b), small=(a,b)=>Math.min(a,b);
   T_.know('cmp');
   sec('Review');
-  rv.forEach(r=>q('What is the structure name?', r.v+'. '+structName(r.v)+'.', {sc:r.sc}));
+  rv.forEach(r=>q('What is the structure name?', r.v+' is '+structName(r.v)+'.', {sc:r.sc}));
   goal('Today we will compare two numbers.');
   sec('New words');
   word('compare','To compare is to find which number is greater and which is less.', {sc:P0});
   word('greater than ( > )','Greater than means more. '+big(n,B1)+' > '+small(n,B1)+' means '+big(n,B1)+' is greater than '+small(n,B1)+'.', {sc:P0});
   word('less than ( < )','Less than means fewer. '+small(n,B1)+' < '+big(n,B1)+' means '+small(n,B1)+' is less than '+big(n,B1)+'.', {sc:P0});
   word('equal to ( = )','Equal to means the same. '+n+' = '+n+'.', {});
-  sec('I do · '+n+' and '+B1);
-  say('Here are '+n+' and '+B1+'. '+structName(n)+'. '+structName(B1)+'.', {sc:P0});
+  sec('Compare '+n+' and '+B1);
+  say('Here are '+n+' and '+B1+'. '+n+' is '+structName(n)+'. '+B1+' is '+structName(B1)+'.', {sc:P0});
   say('First I compare the biggest place: the tens.', {sc:P0t});
   say(plural(t,'ten')+' and '+plural(t1,'ten')+'. '+plural(Math.max(t,t1),'ten')+' is more.', {sc:P0t});
   say(big(n,B1)+' is greater than '+small(n,B1)+'. '+n+' '+rel(n,B1)+' '+B1+'.', {sc:P0t, note:n+' '+relW(n,B1)+' '+B1+'.'});
-  sec('I do · '+n+' and '+B2);
+  sec('Compare '+n+' and '+B2);
   say('Here are '+n+' and '+B2+'. First I compare the tens.', {sc:P1t});
   say(plural(t,'ten')+' and '+plural(t,'ten')+'. The tens are the same.', {sc:P1t});
   say('When the tens are the same, I compare the ones.', {sc:P1o});
   say(plural(o,'one')+' and '+plural(o2,'one')+'. '+plural(Math.max(o,o2),'one')+' is more.', {sc:P1o});
   say(big(n,B2)+' is greater than '+small(n,B2)+'. '+n+' '+rel(n,B2)+' '+B2+'.', {sc:P1o, note:n+' '+relW(n,B2)+' '+B2+'.'});
   sec('We do · '+W1a+' and '+W1b);
-  q('Which place do we compare first?', 'The tens.', {sc:Q1}, {sc:Q1t});
-  q('Compare the tens.', plural(Math.floor(W1a/10),'ten')+' and '+plural(Math.floor(W1b/10),'ten')+'.', {sc:Q1t});
-  q('Which number is greater?', big(W1a,W1b)+'.', {sc:Q1t});
-  q('Write it with a symbol: '+W1a+' ☐ '+W1b, W1a+' '+rel(W1a,W1b)+' '+W1b+'.', {sc:Q1t});
+  q('Which place do we compare first?', 'We compare the tens first.', {sc:Q1}, {sc:Q1t});
+  q('Compare the tens.', plural(Math.max(Math.floor(W1a/10),Math.floor(W1b/10)),'ten')+' is more than '+plural(Math.min(Math.floor(W1a/10),Math.floor(W1b/10)),'ten')+'.', {sc:Q1t});
+  q('Which number is greater?', big(W1a,W1b)+' is greater than '+small(W1a,W1b)+'.', {sc:Q1t});
+  q('Write it with a symbol: '+W1a+' ☐ '+W1b, W1a+' '+rel(W1a,W1b)+' '+W1b+'. '+W1a+' '+relW(W1a,W1b)+' '+W1b+'.', {sc:Q1t});
   sec('We do · '+W2a+' and '+W2b);
-  q('Compare the tens.', plural(Math.floor(W2a/10),'ten')+' and '+plural(Math.floor(W2b/10),'ten')+'. The same.', {sc:Q2}, {sc:Q2t});
-  q('The tens are the same. What do we compare next?', 'The ones.', {sc:Q2t}, {sc:Q2o});
-  q('Compare the ones.', plural(W2a%10,'one')+' and '+plural(W2b%10,'one')+'.', {sc:Q2o});
-  q('Write it with a symbol: '+W2a+' ☐ '+W2b, W2a+' '+rel(W2a,W2b)+' '+W2b+'.', {sc:Q2o});
+  q('Compare the tens.', plural(Math.floor(W2a/10),'ten')+' and '+plural(Math.floor(W2b/10),'ten')+' are the same.', {sc:Q2}, {sc:Q2t});
+  q('The tens are the same. What do we compare next?', 'Next we compare the ones.', {sc:Q2t}, {sc:Q2o});
+  q('Compare the ones.', plural(Math.max(W2a%10,W2b%10),'one')+' is more than '+plural(Math.min(W2a%10,W2b%10),'one')+'.', {sc:Q2o});
+  q('Write it with a symbol: '+W2a+' ☐ '+W2b, W2a+' '+rel(W2a,W2b)+' '+W2b+'. '+W2a+' '+relW(W2a,W2b)+' '+W2b+'.', {sc:Q2o});
   if(Y.length){ sec('You do');
     Y.forEach((sc,i)=>{ const a=you[i][0], b=you[i][1];
-      q('Compare '+a+' and '+b+'.', a+' '+rel(a,b)+' '+b+'. '+(Math.floor(a/10)!==Math.floor(b/10)? 'The tens decide.' : 'The tens are the same. The ones decide.'), {big:a+' ☐ '+b, solo:true}, {big:null, sc:sc}); }); }
+      q('Compare '+a+' and '+b+'.', a+' '+rel(a,b)+' '+b+'. '+a+' '+relW(a,b)+' '+b+'.', {big:a+' ☐ '+b, solo:true}, {big:null, sc:sc}); }); }
   return T_.S_;
 }
 
