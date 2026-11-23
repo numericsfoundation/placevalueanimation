@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v96</title>
+<title>Numerics · Place Value Toolkit v97</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -293,6 +293,37 @@
   #tchMsg{font-size:13px;color:#355E3B}
   #tchVid{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
   #tchVmsg{padding:10px 16px;font-size:14px;color:#555}
+  /* v97: moving pieces */
+  .kpic .ktxt{position:absolute;transform:translateX(-50%);white-space:nowrap;line-height:1.1;font-family:'Century Gothic',Poppins,Futura,Arial,sans-serif}
+  .kpic .kround{display:flex;align-items:center;justify-content:center}
+  .kpic .klab{font-family:Arial,Helvetica,sans-serif;font-weight:bold;line-height:1}
+  .kpic .kx{color:#C2483D;font-weight:bold;line-height:1;font-family:sans-serif}
+  .qgrid .row.kb .line{border-bottom-color:#4A90B8}.qgrid .row.kb .f{color:#2f6f99}.qgrid .row.kb{}
+  .qgrid .row.kr .line{border-bottom-color:#C2483D}.qgrid .row.kr .f{color:#C2483D}
+  /* v97: lesson picker */
+  .lpline{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+  .lpg{display:inline-flex;align-items:center;gap:6px}
+  select.lp{font-size:14px;padding:4px 6px;border:2px solid var(--green);border-radius:6px;max-width:300px;background:#fff}
+  .lpg > .t{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#777}
+  .lptxt{font-size:14px;color:#333;padding:4px 2px}
+  .lpm button{padding:4px 8px}
+  #intro .ibar select.lp{font-size:14px;max-width:300px;padding:4px 6px}
+  #intro .ibar select.lps{width:250px}
+  #intro .ibar .btn{white-space:nowrap;flex-shrink:0}
+  #intro .ibar{flex-wrap:nowrap!important}
+  #intro .ibar .lpline{flex-wrap:nowrap}
+  #intro .isteps .gstep:nth-child(4) .row{justify-content:flex-start}
+  select.lp:disabled{border-color:#d6d1c7;color:#333;opacity:1;background:#faf8f4}
+  .lpm button{min-width:34px}
+  .owntag{display:none;font-size:12px;background:#F3E3C0;color:#7a5a12;border-radius:8px;padding:2px 8px}
+  body.ownset .owntag{display:inline-block}
+  #intro .isteps .gstep, #guide .gstep{min-width:0}
+  #intro .isteps .gstep:nth-child(-n+3) .gc, #guide.steps .gstep:nth-child(-n+3) .gc{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  #intro .isteps select.lp, #guide.steps select.lp{max-width:100%;width:100%}
+  #intro .isteps .gstep{background:#fff;border:1px solid #e3ded4;border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
+  #intro .isteps .gt{font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px;font-size:15px}
+  #intro .isteps .gn{background:var(--navy);color:#fff;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+  #intro .isteps .row{display:flex;gap:8px;flex-wrap:wrap}
   /* v92: intro page and simple view */
   #howWrap{z-index:9600!important}
   body.teachonly #teachWrap{background:#F7F5F1}
@@ -312,7 +343,7 @@
   #intro .iskip button{background:none;border:0;color:var(--green);font:inherit;font-size:16px;cursor:pointer;padding:0}
   #intro .ibody{max-width:1300px;margin:0 auto;padding:22px 34px 40px}
   #intro .ipanel{margin-bottom:26px}
-  #intro h3{margin:0;color:var(--navy);font-size:21px}
+  #intro h3{margin:0 0 10px;color:var(--navy);font-size:21px}
   #intro .isub{margin:3px 0 10px;color:#666;font-size:14px}
   #intro .iwin{background:#fff;border:1px solid #e3ded4;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)}
   #intro .iwin.pad{padding:18px 20px}
@@ -343,7 +374,7 @@
   body.simple .bar.shared, body.simple section > .bar{display:none!important}
   #guide{display:none}
   body.simple #guide{display:flex}
-  #guide.strip{flex-wrap:wrap;align-items:center;gap:8px 18px;padding:10px 20px;border-bottom:1px solid #e3e3e3;background:#faf8f4}
+  #guide.strip{flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 20px;border-bottom:1px solid #e3e3e3;background:#faf8f4}
   #guide .gi{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   #guide .spacer{flex:1}
   #guide.steps{flex-wrap:wrap;align-items:stretch;gap:14px;padding:14px 20px;border-bottom:1px solid #e3e3e3;background:#faf8f4}
@@ -434,7 +465,7 @@
 
 <!-- shared settings -->
 <div class="bar shared">
-  <div class="grp lessonGrp"><span class="t">Lesson</span><select id="lessonSel"><option value="">Choose a lesson…</option></select><span class="drafttag" title="This list is a draft for Laurie to check">draft</span><button class="btn ghost" id="moreBtn" type="button">More settings ⚙</button></div>
+  <div class="grp lessonGrp"><span class="t">Lesson</span><span class="lpline" id="lpBar"></span><button class="btn ghost" id="moreBtn" type="button">More settings ⚙</button></div>
   <div class="grp"><span class="t">Topic</span>
     <div class="seg" id="topic"><button data-v="pv" class="on">Place Value</button><button data-v="as">Add &amp; Subtract</button><button data-v="cmp">Compare</button><button data-v="npt">Next &amp; Previous Ten</button></div>
   </div>
@@ -1697,7 +1728,7 @@ const GAP='<div class="op gap"></div>';
 function eqT(a,o,b,c){ return a+opDiv(o)+b+opDiv('=',o)+c; }
 function linesHTML(Ls,ctx){
   const on=k=>ctx.key||ctx.shown.has(k);
-  const row=l=>'<div class="row'+(l.lab?' lrow':'')+cls(l.k,ctx)+(l.hl&&on(l.k)?' hl':'')+'">'+l.t+'</div>';
+  const row=l=>'<div class="row'+(l.c?' '+l.c:'')+(l.lab?' lrow':'')+cls(l.k,ctx)+(l.hl&&on(l.k)?' hl':'')+'">'+l.t+'</div>';
   if(!Ls.some(l=>l.q)) return '<div class="tlines">'+Ls.map(row).join('')+'</div>';
   return '<div class="tlines qgrid">'+Ls.map(l=>'<div class="qtxt">'+(l.q||'')+'</div>'+row(l)).join('')+'</div>';
 }
@@ -1860,8 +1891,7 @@ function makeNextAddSVG(p,rep,u){
 }
 function asPic(p,rep,u){
   const L=p.lvl;
-  if(p.strat==='ten' && p.op==='+') return makeNextAddSVG(p,rep,u);
-  if(p.strat==='ten') return rep==='disks'? makeNextDisksSVG(p,u) : L==='1000'? makeHundredSVG(p,u) : makeTenSVG(p,u);
+  if(p.strat==='ten'){ const K=asKeyScenes(p,rep); return svgWrap(K.W*u,K.H*u,''); }
   const r= rep;
   const a=d3(p.A,L), b=d3(p.B,L);
   if(p.op==='+') return compose([buildD(r,a,L,u,null), buildD(r,b,L,u,null)], u, WS()?'and':'+');
@@ -1873,7 +1903,7 @@ function cmpPic(p,rep,u){
   const L=p.lvl, r= (L==='1000'&&rep==='frames')? 'rods' : rep;
   return compose([buildD(r,d3(p.A,L),L,u,null,true), buildD(r,d3(p.B,L),L,u,null,true)], u, '|');
 }
-function topicPic(p,rep,u){ return p.kind==='as'? asPic(p,rep,u) : p.kind==='npt'? (p.lvl==='1000'? svgWrap(10,10,'') : nptPic(p,u,'none')) : cmpPic(p,rep,u); }
+function topicPic(p,rep,u){ return p.kind==='as'? asPic(p,rep,u) : p.kind==='npt'? (p.lvl==='1000'? (K=>svgWrap(K.W*u,K.H*u,''))(nptBigScenes(p.A)) : nptPic(p,u,'none')) : cmpPic(p,rep,u); }
 
 /* ---------- add & subtract ---------- */
 function asLines(p,mode){
@@ -1887,8 +1917,8 @@ function asLines(p,mode){
       L.push({k:'s1',t:eqT(cellN(Tn),p.op,cellN(y),cellN(p.R))});
     } else {
       const v= sub? takeV : 'Add';
-      L.push({k:'s0',q:v+' how many to make '+Tn+'?',t:cellN(x)});
-      L.push({k:'s1',q:p.B+' is '+x+' and how many?',t:cellN(y)});
+      L.push({k:'s0',q:v+' how many to make '+Tn+'?',t:cellN(x),c:sub?'kr':'kb'});
+      L.push({k:'s1',q:p.B+' is '+x+' and how many?',t:cellN(y),c:sub?'kr':''});
       L.push({k:'s2',q: sub?'How much is left?':'How much altogether?',t:cellN(p.R)});
     }
     return L;
@@ -1919,7 +1949,8 @@ function asHTML(p,ctx){
   const mode=ctx.mode, Ls=asLines(p,mode), ord=topicOrder(p,mode), on=k=>ctx.key||ctx.shown.has(k);
   let h='<div class="prob'+(ctx.key?' key':'')+'">';
   h+='<div class="row eqrow">'+gn(p.A)+opDiv(p.op)+gn(p.B)+opDiv('=')+'<div class="cell'+(on(ord[ord.length-1])?' shown':'')+'"><div class="line" style="width:'+wid(p.R)+'em"><span class="f">'+p.R+'</span></div></div></div>';
-  if(mode==='C') h+='<div class="pic">'+asPic(p,ctx.rep,ctx.u)+'</div>';
+  if(mode==='C' && p.strat==='ten'){ const K=asKeyScenes(p,ctx.rep); h+='<div class="pic">'+kPicHTML(K[asKeyState(p,ctx)],K.W,K.H,ctx.u||24)+'</div>'; }
+  else if(mode==='C') h+='<div class="pic">'+asPic(p,ctx.rep,ctx.u)+'</div>';
   if(mode==='P'){
     const PL=PLACES(p.lvl), split=n=>dg(n,p.lvl).map((v,i)=>v*PL[i][1]);
     if(p.strat==='ten'){ const b=p.lvl==='1000'?100:10, r=p.A%b, x= p.op==='-'? r : b-r; h+='<div class="pbonds">'+bondBlock(p.B,[x,p.B-x],['s0','s1'],ctx)+'</div>'; }
@@ -2035,6 +2066,7 @@ function nptHTML(p,ctx){
   const mode=ctx.mode, V=nptVals(p), st=nptState(p,ctx);
   let h='<div class="prob nptp'+(ctx.key?' key':'')+'"><div class="bignum">'+V.n+'</div>';
   if(mode==='C' && !V.big){ const K=nptKeyScenes(V.n), sc={none:K.base,nx:K.fill,nt:K.bun,pv:K.gone,pt:K.tens}[st]; h+='<div class="pic">'+keyedPicHTML(sc,K.W,K.H,ctx.u||24)+'</div>'; }
+  else if(mode==='C'){ const K=nptBigScenes(V.n); h+='<div class="pic">'+kPicHTML(K[st],K.W,K.H,ctx.u||24)+'</div>'; }
   else if(mode!=='A') h+='<div class="pic nline">'+nptLineSVG(p, ctx.key? 'none' : (st==='none'?'none':(ctx.shown.has('pv')? (ctx.shown.has('nx')?'both':'pv') : 'nx')), ctx.lineW||900)+'</div>';
   h+=linesHTML(nptLines(p,mode),ctx);
   return h+'</div>';
@@ -2089,6 +2121,142 @@ function nptTeachSteps(n){
   return S_;
 }
 
+/* ================= v97: moving, highlighted pieces for making and breaking a ten (or hundred) =================
+   Add & Subtract (make the next ten) and Next & Previous Hundred (concrete, disks) are drawn with keyed pieces,
+   so each step moves the pieces on the screen (FLIP) and in PowerPoint (Morph).
+   Adding: the part of the second number that makes the ten is light blue; it moves across into the empty
+   spaces, the full frame is outlined ("a new ten") and becomes a ten; the rest moves in after it.
+   Subtracting: the ones are taken away first (red X, moved to the "take away" box); then a ten is outlined
+   and broken into 10 ones ("break a ten"), and the rest are taken away. */
+const KB={fill:'#BFE3F5',edge:'#4A90B8',text:'#2f6f99'}, KR={fill:'#F6DAD7',edge:'#C2483D'};
+function kPieceHTML(p,u,ox,oy){
+  const sc=SCHEMES[S.scheme], L=ox+p.x*u, T=oy+p.y*u, k=p.k, op=p.f? 'opacity:0;' : '';
+  if(p.t==='ctr' || p.t==='disk'){
+    const sz=(p.s||(p.t==='ctr'?.74:.84))*u, gone=p.col==='gone', blue=p.col==='blue';
+    let f,e,tc='#fff';
+    if(p.t==='ctr'){ const b=p.c==='ten'? sc.ten : sc.one; f=b.fill; e=b.edge; }
+    else { f= p.v==='1'? sc.one.fill : p.v==='10'? sc.ten.fill : '#355E3B'; e= p.v==='1'? sc.one.edge : p.v==='10'? sc.ten.edge : '#1f3a24'; tc= p.v==='1'? '#3a2f00' : '#fff'; }
+    if(blue){ f=KB.fill; e=KB.edge; tc=KB.text; } if(gone){ f=KR.fill; e=KR.edge; tc=KR.edge; }
+    const bw= blue? Math.max(2,u*.09) : Math.max(1.2,u*.05);
+    let h='<div class="tpz kround" data-k="'+k+'" data-z="'+p.z+'"'+(p.t==='disk'&&!gone?' data-lab="'+p.v+'" data-tc="'+tc+'"':'')+' style="'+op+'left:'+L+'px;top:'+T+'px;width:'+sz+'px;height:'+sz+'px;z-index:'+p.z+';background:'+f+';border:'+bw+'px '+(gone?'dashed':'solid')+' '+e+';border-radius:50%">';
+    if(gone) h+='<span class="kx" style="font-size:'+(sz*.72)+'px">✕</span>';
+    else if(p.t==='disk') h+='<span class="klab" style="color:'+tc+';font-size:'+(sz*(p.v==='1'?.5:p.v==='10'?.42:.34))+'px">'+p.v+'</span>';
+    return h+'</div>';
+  }
+  if(p.t==='box'){
+    const st=p.st||'dash', c= st==='hl'? KB.edge : st==='hlr'? KR.edge : '#9AA3AD', bw= st==='dash'? Math.max(1.2,u*.05) : Math.max(2.5,u*.11);
+    return '<div class="tpz kbox" data-k="'+k+'" data-z="'+(p.z||0)+'" style="'+op+'left:'+L+'px;top:'+T+'px;width:'+(p.w*u)+'px;height:'+(p.h*u)+'px;z-index:'+(p.z||0)+';border:'+bw+'px '+(st==='dash'?'dashed':'solid')+' '+c+';border-radius:'+(u*.3)+'px;background:transparent"></div>';
+  }
+  if(p.t==='txt') return '<div class="ktxt" style="left:'+(ox+p.x*u)+'px;top:'+T+'px;font-size:'+(p.fs*u)+'px;color:'+(p.c||'#444')+';font-weight:'+(p.b?'bold':'normal')+'">'+p.s+'</div>';
+  if(p.t==='cube' && p.f){ return tPieceHTML(p,u,ox,oy).replace('style="','style="opacity:0;'); }
+  return tPieceHTML(p,u,ox,oy);
+}
+function kPicHTML(sc,W,H,u){ return '<div class="kpic" style="width:'+(W*u)+'px;height:'+(H*u)+'px">'+sc.parts.map(p=>kPieceHTML(p,u,0,0)).join('')+'</div>'; }
+const KTOP=1.2;
+function kCell(fx,fy,j,s){ const q=fillPos(j), o=(1-s)/2; return {x:fx+q.col+o, y:fy+q.row+o}; }
+/* Add & Subtract, make the next ten (hundred): scenes base, s0, s1 */
+function asKeyScenes(p,rep){
+  const big=p.lvl==='1000', b=big?100:10, step=b/10, sub=p.op==='-';
+  if(big) rep='disks';
+  const nB=Math.floor(p.A/b), r=(p.A%b)/step, k=p.B/step, x= sub? r : 10-r, y=k-x;
+  const vBig=big?'100':'10', vSm=big?'10':'1', labBig=big?'hundreds':'tens', labSm=big?'tens':'ones', unit=big?'hundred':'ten';
+  const FY= KTOP + (rep==='rods'? 5 : 0), H0= rep==='rods'? 10 : 5;
+  const bigW= rep==='rods'? (nB+(sub?0:1))*1.5 : rep==='frames'? (nB+(sub?0:1))*2.5 : 2;
+  const OX=bigW+1.2;
+  const smS= rep==='rods'? .8 : rep==='frames'? .74 : .84;
+  const sm=(key,pos,col,f)=>{ const o={k:key,x:pos.x,y:pos.y,s:smS,z:4,col:col,f:f}; if(rep==='rods'){ o.t='cube'; o.r=0; } else if(rep==='frames'){ o.t='ctr'; o.c='one'; } else { o.t='disk'; o.v=vSm; } return o; };
+  const at=(fx,fy,j)=>kCell(fx,fy,j,smS);
+  const rodPos=i=>({x:i*1.5,y:KTOP});
+  // the tens (or hundreds) of the first number
+  const bigs=(n,skip)=>{ const a=[];
+    if(rep==='disks') a.push({k:'fb',t:'frame',x:0,y:FY,z:1});
+    for(let i=0;i<n;i++){ if(i===skip) continue;
+      if(rep==='rods'){ const q=rodPos(i); for(let j=0;j<10;j++) a.push({k:'B'+i+'_'+j,t:'cube',x:q.x,y:q.y+9-j,s:1,r:0,z:2}); a.push({k:'B'+i,t:'rod',x:q.x,y:q.y,z:3}); }
+      else if(rep==='frames'){ a.push({k:'fw'+i,t:'frame',x:i*2.5,y:FY,z:1}); for(let j=0;j<10;j++){ const c=kCell(i*2.5,FY,j,.74); a.push({k:'B'+i+'_'+j,t:'ctr',c:'ten',x:c.x,y:c.y,s:.74,z:4}); } }
+      else { const c=kCell(0,FY,i,.84); a.push({k:'B'+i,t:'disk',v:vBig,x:c.x,y:c.y,s:.84,z:4}); } }
+    return a; };
+  const labY=FY+5+.25, txt=(s,cx,y,o)=>Object.assign({t:'txt',s:s,x:cx,y:y,fs:.6},o||{});
+  const labs=()=>[txt(labBig,bigW/2,KTOP+H0+.25), txt(labSm,OX+1,labY)];
+  const hlBox=(key,x0,y0,w,h,red)=>({k:key,t:'box',st:red?'hlr':'hl',x:x0,y:y0,w:w,h:h,z:6});
+  const hlTxt=(s,cx,y0,red)=>txt(s,cx,y0,{c:red?KR.edge:KB.text,b:true,fs:.55});
+  const Sc={};
+  if(!sub){
+    const BX=OX+2+2.3, YX=BX+3.1, W= y? YX+2.7 : BX+2.7;
+    const boxX={k:'bx',t:'box',x:BX-.3,y:FY-.3,w:2.6,h:5.6}, boxY={k:'by',t:'box',x:YX-.3,y:FY-.3,w:2.6,h:5.6};
+    const tX=txt(String(x*step),BX+1,labY,{c:KB.text,b:true}), tY=txt(String(y*step),YX+1,labY,{b:true});
+    const plus=txt(WS()?'and':'+',OX+2+1.15,FY+1.6,{fs:WS()?.9:1.6,c:'#111'});
+    const aIn=()=>{ const a=[{k:'fo',t:'frame',x:OX,y:FY,z:1}]; for(let j=0;j<r;j++) a.push(sm('a'+j,at(OX,FY,j))); return a; };
+    const xs=(where)=>{ const a=[]; for(let j=0;j<x;j++) a.push(sm('x'+j, where==='box'? at(BX,FY,j) : at(OX,FY,r+j),'blue')); return a; };
+    const ys=(where)=>{ const a=[]; for(let j=0;j<y;j++) a.push(sm('y'+j, where==='box'? at(YX,FY,j) : at(OX,FY,j))); return a; };
+    Sc.base={parts:bigs(nB).concat(aIn(),[boxX],xs('box'),y?[boxY]:[],ys('box'),labs(),[plus,tX],y?[tY]:[])};
+    Sc.s0={parts:bigs(nB).concat(aIn(),xs('frame'),y?[boxY]:[],ys('box'),labs(),[plus],y?[tY]:[],[hlBox('hl',OX-.3,FY-.3,2.6,5.6),hlTxt('a new '+unit,OX+1,FY-1.05)])};
+    let s1=bigs(nB);
+    if(rep==='rods'){ const q=rodPos(nB); for(let j=0;j<10;j++) s1.push(Object.assign(sm(j<r?'a'+j:'x'+(j-r),{x:q.x,y:q.y+9-j},j<r?null:'blue'),{s:1,z:2})); s1.push({k:'B'+nB,t:'rod',x:q.x,y:q.y,z:3}); s1.push(hlBox('hl',q.x-.3,q.y-.3,1.6,10.6)); s1.push(hlTxt('a new '+unit,q.x+.5,q.y-1.05));
+      s1.push({k:'fo',t:'frame',x:OX,y:FY,z:1}); }
+    else if(rep==='frames'){ const fx=nB*2.5; s1.push({k:'fo',t:'frame',x:fx,y:FY,z:1}); for(let j=0;j<10;j++) s1.push(sm(j<r?'a'+j:'x'+(j-r),kCell(fx,FY,j,.74),j<r?null:'blue')); s1.push(hlBox('hl',fx-.3,FY-.3,2.6,5.6)); s1.push(hlTxt('a new '+unit,fx+1,FY-1.05));
+      s1.push({k:'fo2',t:'frame',x:OX,y:FY,z:1}); }
+    else { const c=kCell(0,FY,nB,.84); for(let j=0;j<10;j++) s1.push(Object.assign(sm(j<r?'a'+j:'x'+(j-r),{x:c.x+.3,y:c.y+.3},j<r?null:'blue',1),{s:.25})); s1.push({k:'B'+nB,t:'disk',v:vBig,x:c.x,y:c.y,s:.84,z:5,col:'blue'}); s1.push(hlBox('hl',c.x-.2,c.y-.2,1.24,1.24)); s1.push(hlTxt('a new '+unit,1,FY-1.05));
+      s1.push({k:'fo',t:'frame',x:OX,y:FY,z:1}); }
+    s1=s1.concat(ys('frame'),labs());
+    Sc.s1={parts:s1};
+    return {base:Sc.base,s0:Sc.s0,s1:Sc.s1,W:W,H:KTOP+H0+1.3};
+  }
+  // subtracting: take away the ones first, then break a ten
+  const TB=OX+2+1.6, W=TB+2.7;
+  const tbox={k:'tb',t:'box',st:'dash',x:TB-.3,y:FY-.3,w:2.6,h:5.6}, tlab=txt('take away '+p.B,TB+1,labY,{c:KR.edge,b:true});
+  const aIn=(gone)=>{ const a=[{k:'fo',t:'frame',x:OX,y:FY,z:1}]; for(let j=0;j<r;j++) a.push(sm('a'+j, gone? at(TB,FY,j) : at(OX,FY,j), gone?'gone':null)); return a; };
+  Sc.base={parts:bigs(nB).concat(aIn(false),[tbox,tlab],labs())};
+  Sc.s0={parts:bigs(nB).concat(aIn(true),[tbox,tlab],labs())};
+  const i=nB-1; let s1=bigs(nB,i).concat([tbox,tlab],labs());
+  for(let j=0;j<r;j++) s1.push(sm('a'+j,at(TB,FY,j),'gone'));
+  const keep=10-y;
+  if(rep==='rods'){ s1.push({k:'fo',t:'frame',x:OX,y:FY,z:1}); for(let j=0;j<10;j++) s1.push(Object.assign(sm('B'+i+'_'+j, j<keep? at(OX,FY,j) : at(TB,FY,r+j-keep), j<keep?null:'gone'),{})); }
+  else if(rep==='frames'){ s1.push({k:'fw'+i,t:'frame',x:OX,y:FY,z:1}); for(let j=0;j<10;j++){ const o=sm('B'+i+'_'+j, j<keep? at(OX,FY,j) : at(TB,FY,r+j-keep), j<keep?null:'gone'); o.c='ten'; s1.push(o); } }
+  else { s1.push({k:'fo',t:'frame',x:OX,y:FY,z:1}); for(let j=0;j<10;j++) s1.push(sm('br'+j, j<keep? at(OX,FY,j) : at(TB,FY,r+j-keep), j<keep?null:'gone')); }
+  s1.push(hlBox('hl',OX-.3,FY-.3,2.6,5.6,true)); s1.push(hlTxt('break a '+unit,OX+1,FY-1.05,true));
+  Sc.s1={parts:s1};
+  return {base:Sc.base,s0:Sc.s0,s1:Sc.s1,W:W,H:KTOP+H0+1.3};
+}
+function asKeyState(p,ctx){ if(ctx.key) return 's1'; let s='base'; ['s0','s1','s2'].forEach(k=>{ if(ctx.shown.has(k)) s=k; }); return s==='s2'?'s1':s; }
+/* Next & Previous Hundred, concrete with disks: hundreds, tens and ones frames */
+function nptBigScenes(n){
+  const H=Math.floor(n/100), t=Math.floor(n/10)%10, o=n%10, V=nptVals({A:n,lvl:'1000'}), FY=KTOP;
+  const XH=0, XT=2.9, XO=5.8, W=XO+2.2;
+  const dk=(key,v,fx,j,col,f,s)=>{ const c=kCell(fx,FY,j,.84); return {k:key,t:'disk',v:v,x:c.x,y:c.y,s:s||.84,z:4,col:col,f:f}; };
+  const frames=()=>[{k:'fh',t:'frame',x:XH,y:FY,z:1},{k:'ft',t:'frame',x:XT,y:FY,z:1},{k:'fo',t:'frame',x:XO,y:FY,z:1},
+    {t:'txt',s:'hundreds',x:XH+1,y:FY+5.25,fs:.55},{t:'txt',s:'tens',x:XT+1,y:FY+5.25,fs:.55},{t:'txt',s:'ones',x:XO+1,y:FY+5.25,fs:.55}];
+  const hs=m=>{ const a=[]; for(let i=0;i<m;i++) a.push(dk('h'+i,'100',XH,i)); return a; };
+  const ts=(col)=>{ const a=[]; for(let i=0;i<t;i++) a.push(dk('t'+i,'10',XT,i,col)); return a; };
+  const os=(col)=>{ const a=[]; for(let i=0;i<o;i++) a.push(dk('o'+i,'1',XO,i,col)); return a; };
+  const hl=(key,x0,red)=>({k:key,t:'box',st:red?'hlr':'hl',x:x0-.3,y:FY-.3,w:2.6,h:5.6,z:6});
+  const addT=V.a2/10, addO=V.a;
+  const nx=[]; for(let j=0;j<addO;j++) nx.push(dk('ob'+j,'1',XO,o+j,'blue')); for(let j=0;j<addT;j++) nx.push(dk('tb'+j,'10',XT,t+j,'blue'));
+  const into=(key,v)=>{ const c=kCell(XH,FY,H,.84); return {k:key,t:'disk',v:v,x:c.x+.3,y:c.y+.3,s:.25,z:3,f:1}; };
+  const nt=[]; for(let i=0;i<o;i++) nt.push(into('o'+i,'1')); for(let j=0;j<addO;j++) nt.push(into('ob'+j,'1')); for(let i=0;i<t;i++) nt.push(into('t'+i,'10')); for(let j=0;j<addT;j++) nt.push(into('tb'+j,'10'));
+  nt.push(dk('h'+H,'100',XH,H,'blue')); nt.push({t:'txt',s:'a new hundred',x:XH+1,y:FY-1.05,fs:.55,c:KB.text,b:true});
+  return {
+    none:{parts:frames().concat(hs(H),ts(),os())},
+    nx:{parts:frames().concat(hs(H),ts(),os(),nx,addO?[hl('hlo',XO)]:[],[hl('hlt',XT)])},
+    nt:{parts:frames().concat(hs(H),nt,[hl('hlt',XH)])},
+    pv:{parts:frames().concat(hs(H),ts('gone'),os('gone'))},
+    pt:{parts:frames().concat(hs(H))},
+    W:W, H:FY+5+1.2 };
+}
+/* move the keyed pieces from where they were to where they are now */
+function flipRender(host,sig,render){
+  const old=new Map(); if(host.dataset.ksig===sig) host.querySelectorAll('.kpic [data-k]').forEach(e=>{ if(e.parentElement.closest('[data-k]')) return; old.set(e.dataset.k,e.getBoundingClientRect()); });
+  render(); host.dataset.ksig=sig; if(!old.size) return;
+  host.querySelectorAll('.kpic [data-k]').forEach(e=>{ if(e.parentElement.closest('[data-k]')) return;
+    const o=old.get(e.dataset.k), r=e.getBoundingClientRect(), base=e.style.transform||'', op=e.style.opacity;
+    if(o){ const dx=o.left-r.left, dy=o.top-r.top, sx=o.width/(r.width||1), sy=o.height/(r.height||1);
+      if(Math.abs(dx)<.5 && Math.abs(dy)<.5 && Math.abs(sx-1)<.02) return;
+      e.style.transition='none'; e.style.transformOrigin='0 0'; e.style.transform='translate('+dx+'px,'+dy+'px) scale('+sx+','+sy+') '+base;
+      if(op==='0') e.style.opacity='1';
+      void e.offsetWidth; e.style.transition='transform .9s ease, opacity .9s ease'; e.style.transform=base; if(op==='0') e.style.opacity='0'; }
+    else if(op!=='0'){ e.style.transition='none'; e.style.opacity='0'; void e.offsetWidth; e.style.transition='opacity .6s ease .4s'; e.style.opacity=''; }
+  });
+}
+
 /* ---------- shared ---------- */
 function topicOrder(p,mode){
   if(!p) return [];
@@ -2098,7 +2266,7 @@ function topicOrder(p,mode){
 }
 function topicHTML(p,ctx){ return p.kind==='as'? asHTML(p,ctx) : p.kind==='npt'? nptHTML(p,ctx) : cmpHTML(p,ctx); }
 function overheadT(fs,lab,p,mode){
-  if(p.kind==='npt') return fs*1.35 + nptOrder(p,mode).length*(fs*.8*1.15+lab*1.6) + ((mode==='P'||p.lvl==='1000')? 200 : 0) + fs*.5;
+  if(p.kind==='npt') return fs*1.35 + nptOrder(p,mode).length*(fs*.8*1.15+lab*1.6) + ((mode==='P'||(p.lvl==='1000'&&mode!=='C'))? 200 : 0) + fs*.5;
   if(p.kind==='cmp') return fs*1.3 + fs*.5 + (mode!=='A'? fs*1.15+lab*1.6 : 0) + (S.cmpDiff? fs*.8*1.15+lab*1.6 : 0) + (mode==='P'? fs*1.6 : 0) + fs*.4;
   const n=topicOrder(p,mode).filter(k=>k!=='sp'&&k!=='res').length;
   return fs*1.35 + n*(fs*.8*1.15+lab*1.6) + (mode==='P'? fs*1.9 : 0) + fs*.5;
@@ -2141,10 +2309,11 @@ function renderTopic(){
     const m=svgInner(topicPic(p,S.pRep,10));
     const availW=Math.max(300,stage.clientWidth-40);
     const availH=Math.max(140,(window.innerHeight-stage.getBoundingClientRect().top-30)-overheadT(fs,lab,p,mode));
-    u=Math.max(3,Math.min(32*z, 10*availW/m.w, 10*availH/m.h));
+    const cap=((p.kind==='as'&&p.strat==='ten')||(p.kind==='npt'&&p.lvl==='1000'))? 46 : 32;
+    u=Math.max(3,Math.min(cap*z, 10*availW/m.w, 10*availH/m.h));
     u=shrinkFit(u,uu=>svgInner(topicPic(p,S.pRep,uu)),availW,availH);
   }
-  stage.innerHTML=topicHTML(p,{mode:mode,rep:S.pRep,u:u,shown:P.shown,hl:P.hl,lineW:Math.min(1100,Math.max(500,stage.clientWidth-80))});
+  flipRender(stage,T.idx+'|'+mode+'|'+S.pRep+'|'+u.toFixed(2),()=>{ stage.innerHTML=topicHTML(p,{mode:mode,rep:S.pRep,u:u,shown:P.shown,hl:P.hl,lineW:Math.min(1100,Math.max(500,stage.clientWidth-80))}); });
 }
 function tTag(){ return [S.topic,S.level,S.range,S.cmin,S.cmax,S.asOp,S.asStrat,S.cmpT,S.wPer,S.wPages].join('|'); }
 function buildTopicSet(){
@@ -2165,9 +2334,11 @@ function renderTopicSheets(){
       const f=cmpFit(idx.map(i=>W.probs[i]),k=>repFor(idx[k]),fs,cellW-24,(q,f2)=>Math.max(40,cellH-overheadT(f2,f2*lab/fs,q,'C')-18),32);
       u=f.u; fsC=f.fs; labC=lab*f.fs/fs;
     }
-  } else W.probs.forEach((p,i)=>{ if(modeFor(i,total)!=='C') return; const m=svgInner(topicPic(p,repFor(i),10)); const ph=Math.max(40,cellH-overheadT(fs,lab,p,'C')-18); u=Math.min(u,10*picW/m.w,10*ph/m.h); });
+  } else W.probs.forEach((p,i)=>{ if(modeFor(i,total)!=='C' || (p.kind==='as'&&p.strat==='ten') || (p.kind==='npt'&&p.lvl==='1000')) return; const m=svgInner(topicPic(p,repFor(i),10)); const ph=Math.max(40,cellH-overheadT(fs,lab,p,'C')-18); u=Math.min(u,10*picW/m.w,10*ph/m.h); });
+  const isK=p=>(p.kind==='as'&&p.strat==='ten')||(p.kind==='npt'&&p.lvl==='1000');
+  const uK=W.probs.map((p,i)=>{ if(!isK(p)||modeFor(i,total)!=='C') return 0; const m=svgInner(topicPic(p,repFor(i),10)); const ph=Math.max(40,cellH-overheadT(fs,lab,p,'C')-18); return Math.max(3,Math.min(40,10*picW/m.w,10*ph/m.h)); });
   u=Math.max(3,u);
-  if(S.topic!=='cmp') W.probs.forEach((p,i)=>{ if(modeFor(i,total)!=='C') return; const ph=Math.max(40,cellH-overheadT(fs,lab,p,'C')-18); u=shrinkFit(u,uu=>svgInner(topicPic(p,repFor(i),uu)),picW,ph); });
+  if(S.topic!=='cmp') W.probs.forEach((p,i)=>{ if(modeFor(i,total)!=='C' || isK(p)) return; const ph=Math.max(40,cellH-overheadT(fs,lab,p,'C')-18); u=shrinkFit(u,uu=>svgInner(topicPic(p,repFor(i),uu)),picW,ph); });
   let html='';
   (S.wKey?[false,true]:[false]).forEach(key=>{
     for(let pg=0;pg<pages;pg++){
@@ -2177,7 +2348,7 @@ function renderTopicSheets(){
         const i=pg*per+c, p=W.probs[i], last=c>=per-cols?' lastrow':'';
         if(!p){ html+='<div class="wcell'+last+'"></div>'; continue; }
         const mode=modeFor(i,total);
-        html+='<div class="wcell'+last+'"><span class="no">'+(c+1)+'.</span>'+topicHTML(p,{mode:mode,rep:repFor(i),u:u,shown:new Set(key?topicOrder(p,mode):[]),hl:null,key:key})+'</div>';
+        html+='<div class="wcell'+last+'"><span class="no">'+(c+1)+'.</span>'+topicHTML(p,{mode:mode,rep:repFor(i),u:uK[i]||u,shown:new Set(key?topicOrder(p,mode):[]),hl:null,key:key})+'</div>';
       }
       html+='</div><div class="pfoot">© '+2026+' Numerics · Structured Numeracy. All rights reserved.</div></div>';
     }
@@ -2727,7 +2898,7 @@ async function stageToSlide(pptx,slide){
   const tw=document.createTreeWalker(st,NodeFilter.SHOW_TEXT); let n;
   while((n=tw.nextNode())){
     const t=n.nodeValue.replace(/\s+/g,' ').trim(); if(!t) continue;
-    const pe=n.parentElement; if(pe.closest('svg')) continue; if(rich.has(pe) || (pe.nodeName==='B' && rich.has(pe.parentElement))) continue;
+    const pe=n.parentElement; if(pe.closest('svg')) continue; if(pe.closest('[data-lab]')) continue; { const hp=pe.closest('[data-k]'); if(hp && getComputedStyle(hp).opacity==='0') continue; } if(rich.has(pe) || (pe.nodeName==='B' && rich.has(pe.parentElement))) continue;
     const cs=getComputedStyle(pe); if(cs.visibility==='hidden'||cs.display==='none') continue;
     const rg=document.createRange(); rg.selectNodeContents(n);
     const r=rg.getBoundingClientRect(); if(!r.width) continue;
@@ -2744,7 +2915,11 @@ async function stageToSlide(pptx,slide){
   keyed.sort((a,b)=>(+a.dataset.z||0)-(+b.dataset.z||0)).forEach(el=>{
     const cs=getComputedStyle(el), r=el.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight, cx=r.left-R0.left+r.width/2, cy=r.top-R0.top+r.height/2, nm='!!'+el.dataset.k;
     if(el.dataset.sh==='line'){ slide.addShape(pptx.ShapeType.line,{objectName:nm,x:I(r.left-R0.left),y:I(r.top-R0.top),w:I(r.width),h:0,line:{color:hexOf(cs.borderTopColor)||'FFFFFF',width:Math.max(.5,(parseFloat(cs.borderTopWidth)||1)*.75)}}); return; }
-    const fill=hexOf(cs.backgroundColor), bw=parseFloat(cs.borderTopWidth)||0, bc=hexOf(cs.borderTopColor);
+    const fill=hexOf(cs.backgroundColor), bw=parseFloat(cs.borderTopWidth)||0, bc=hexOf(cs.borderTopColor), round=el.classList.contains('kround'), hid=cs.opacity==='0';
+    if(hid){ slide.addShape(round?pptx.ShapeType.ellipse:pptx.ShapeType.rect,{objectName:nm,x:I(cx-w/2),y:I(cy-h/2),w:I(w),h:I(h),fill:{color:fill||'FFFFFF',transparency:100},line:{type:'none'}}); return; }
+    const dash= cs.borderTopStyle==='dashed'? 'dash' : undefined;
+    if(el.dataset.lab){ slide.addText(el.dataset.lab,{shape:pptx.ShapeType.ellipse,objectName:nm,x:I(cx-w/2),y:I(cy-h/2),w:I(w),h:I(h),fill:{color:fill},line:{color:bc,width:bw*.75},fontFace:'Arial',bold:true,fontSize:Math.max(6,Math.round(h*(el.dataset.lab==='1'?.5:el.dataset.lab==='10'?.42:.34)*.75)),color:(el.dataset.tc||'#ffffff').replace('#',''),align:'center',valign:'middle',margin:0}); return; }
+    if(round||el.classList.contains('kbox')){ slide.addShape(round?pptx.ShapeType.ellipse:pptx.ShapeType.roundRect,{objectName:nm,x:I(cx-w/2),y:I(cy-h/2),w:I(w),h:I(h),rectRadius:round?undefined:.15,fill: fill? {color:fill} : {type:'none'},line: (bw&&bc)? {color:bc,width:bw*.75,dashType:dash} : {type:'none'}}); return; }
     slide.addShape(pptx.ShapeType.rect,{objectName:nm,x:I(cx-w/2),y:I(cy-h/2),w:I(w),h:I(h),rotate:+(el.dataset.r||0),fill: fill? {color:fill} : {type:'none'},line: (bw&&bc)? {color:bc,width:bw*.75} : {type:'none'}});
   });
   for(const o of imgs){ const data=await svgToPNG(o.el,o.r); slide.addImage({data:data,x:I(o.x),y:I(o.y),w:I(o.r.width),h:I(o.r.height)}); }
@@ -3691,15 +3866,11 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   <div class="ihead"><b>Numerics</b><span>Place Value Toolkit</span><button type="button" id="introHow" class="ihow">How to use ▶</button></div>
   <div class="ibody">
     <section class="ipanel">
-      <h3>Preset Lessons</h3><p class="isub">One list sets the lesson. Only the essentials show; everything else is in More settings.</p>
-      <div class="iwin"><div class="ibar">
-        <span class="t">Lesson</span><select id="introLesson"><option value="">Choose a lesson…</option></select><span class="drafttag">draft</span>
-        <button type="button" class="btn alt" id="introBoard">Show on the board ▸</button>
-        <span class="spacer"></span><button type="button" class="btn ghost" id="introMore">More settings ⚙</button>
-      </div><div class="itip">Pick the lesson; everything else is set to match it.</div></div>
+      <h3>Preset Lessons</h3>
+      <div class="iwin"><div class="ibar"><span class="lpline" id="introPick"></span><button type="button" class="btn alt" id="introBoard">Show on the board ▸</button><span class="spacer"></span><button type="button" class="btn ghost" id="introMore">More settings ⚙</button></div></div>
     </section>
     <section class="ipanel">
-      <h3>What do you want to do?</h3><p class="isub">Four jobs. Each opens a simple screen with only the steps that job needs. You can switch at any time.</p>
+      <h3>What do you want to do?</h3>
       <div class="iwin pad">
       <div class="icards">
         <div class="icard" data-job="teach" style="background:#1F3A5F"><h2>Teach a lesson</h2><p>Step through the I do, we do, you do sequence for a number, or watch the model lesson.</p><span class="igo" style="color:#1F3A5F">Start ▸</span></div>
@@ -3711,13 +3882,8 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
       </div>
     </section>
     <section class="ipanel">
-      <h3>Practice pages or slides, step by step</h3><p class="isub">Four steps, then print or download.</p>
-      <div class="iwin pad"><div class="isteps">
-        <div class="istep"><div class="gt"><span class="gn">1</span>What are you practising?</div><select id="introLesson2"><option value="">Choose a lesson…</option></select></div>
-        <div class="istep"><div class="gt"><span class="gn">2</span>Which numbers?</div><div class="row"><div class="seg" id="introLevel"><button type="button" data-v="100" class="on">Within 100</button><button type="button" data-v="1000">Within 1000</button></div><select id="introRange"></select></div></div>
-        <div class="istep"><div class="gt"><span class="gn">3</span>How should it look?</div><div class="seg" id="introLook"><button type="button" data-v="C" class="on">Concrete</button><button type="button" data-v="P">Pictorial</button><button type="button" data-v="A">Symbolic</button><button type="button" data-v="CPA">Mixed</button></div></div>
-        <div class="istep"><div class="gt"><span class="gn">4</span>Print or download</div><div class="row"><button type="button" class="btn" id="introPrint">Practice pages ▸</button><button type="button" class="btn alt" id="introSlides">Slides ▸</button></div></div>
-      </div><div class="iskip"><button type="button" id="introMore2">More choices ⚙</button></div></div>
+      <h3>Practice pages or slides, step by step</h3>
+      <div class="iwin pad"><div class="isteps" id="introSteps"></div><div class="iskip"><button type="button" id="introMore2">More choices ⚙</button></div></div>
     </section>
   </div>
 </div>
@@ -3758,59 +3924,107 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !w.classList.contains('hidden')) close(); },true);
 })();
 </script>
-<script>/* v92: intro page ("What do you want to do?"), lesson presets and the simple view (More settings shows everything) */
+<script>/* v97: start page (Preset Lessons, What do you want to do?, step by step), the lesson picker
+   (number range → skill → method → representation) and the simple view (More settings shows everything) */
 (function(){
   var $=function(id){ return document.getElementById(id); };
-  /* DRAFT lesson list: by grade and skill. Each sets the Starting point first, then the topic, range, C/P/S, build with, partition. */
-  var PRESETS=[
-    {g:'Grade 1', id:'g1-pv20c',  label:'Place value to 20 · concrete (ten frames)', grade:'g1', topic:'pv', range:'1-20', mode:'C', rep:'frames', canon:'canon'},
-    {g:'Grade 1', id:'g1-pv50c',  label:'Place value to 50 · concrete (rods)',       grade:'g1', topic:'pv', range:'1-50', mode:'C', rep:'rods',   canon:'canon'},
-    {g:'Grade 1', id:'g1-pv50p',  label:'Place value to 50 · pictorial',             grade:'g1', topic:'pv', range:'1-50', mode:'P', rep:'rods',   canon:'canon'},
-    {g:'Grade 1', id:'g1-pv50s',  label:'Place value to 50 · symbolic',              grade:'g1', topic:'pv', range:'1-50', mode:'A', rep:'rods',   canon:'canon', aform:'mix'},
-    {g:'Grade 1', id:'g1-non50',  label:'Bundle and unbundle to 50 (non-canonical)', grade:'g1', topic:'pv', range:'1-50', mode:'C', rep:'rods',   canon:'non'},
-    {g:'Grade 1', id:'g1-npt50',  label:'Next & previous ten to 50 · concrete',      grade:'g1', topic:'npt',range:'1-50', mode:'C', rep:'rods'},
-    {g:'Grade 2', id:'g2-pv100c', label:'Place value to 100 · concrete',             grade:'g2', topic:'pv', range:'1-100', mode:'C', rep:'rods', canon:'canon'},
-    {g:'Grade 2', id:'g2-pv100p', label:'Place value to 100 · pictorial',            grade:'g2', topic:'pv', range:'1-100', mode:'P', rep:'rods', canon:'canon'},
-    {g:'Grade 2', id:'g2-pv100s', label:'Place value to 100 · symbolic',             grade:'g2', topic:'pv', range:'1-100', mode:'A', rep:'rods', canon:'canon', aform:'mix'},
-    {g:'Grade 2', id:'g2-non100', label:'Bundle and unbundle to 100 (non-canonical)',grade:'g2', topic:'pv', range:'1-100', mode:'C', rep:'rods', canon:'non'},
-    {g:'Grade 2', id:'g2-nptc',   label:'Next & previous ten · concrete',            grade:'g2', topic:'npt',range:'1-100', mode:'C', rep:'rods'},
-    {g:'Grade 2', id:'g2-nptp',   label:'Next & previous ten · number line',         grade:'g2', topic:'npt',range:'1-100', mode:'P', rep:'rods'},
-    {g:'Grade 2', id:'g2-npts',   label:'Next & previous ten · symbolic',            grade:'g2', topic:'npt',range:'1-100', mode:'A', rep:'rods'},
-    {g:'Grade 2', id:'g2-cmp',    label:'Compare numbers to 100',                    grade:'g2', topic:'cmp',range:'1-100', mode:'C', rep:'rods'},
-    {g:'Grade 3', id:'g3-pvc',    label:'Place value to 1000 · concrete (disks)',    grade:'g3', topic:'pv', range:'100-1000', mode:'C', rep:'disks', canon:'canon'},
-    {g:'Grade 3', id:'g3-pvp',    label:'Place value to 1000 · pictorial',           grade:'g3', topic:'pv', range:'100-1000', mode:'P', rep:'disks', canon:'canon'},
-    {g:'Grade 3', id:'g3-pvs',    label:'Place value to 1000 · symbolic',            grade:'g3', topic:'pv', range:'100-1000', mode:'A', rep:'disks', canon:'canon', aform:'mix'},
-    {g:'Grade 3', id:'g3-non',    label:'Bundle and unbundle to 1000 (non-canonical)',grade:'g3', topic:'pv', range:'100-1000', mode:'C', rep:'disks', canon:'non'},
-    {g:'Grade 3', id:'g3-nptp',   label:'Next & previous hundred · number line',     grade:'g3', topic:'npt',range:'100-1000', mode:'P', rep:'disks'},
-    {g:'Grade 3', id:'g3-npts',   label:'Next & previous hundred · symbolic',        grade:'g3', topic:'npt',range:'100-1000', mode:'A', rep:'disks'},
-    {g:'Grade 3', id:'g3-cmp',    label:'Compare numbers to 1000',                   grade:'g3', topic:'cmp',range:'100-1000', mode:'C', rep:'disks'}
+  /* ---------- the lesson picker ---------- */
+  var RANGES=[
+    {id:'w20', label:'1–20 in words (Primary)', grade:'primary', level:'100', range:'1-20'},
+    {id:'20',  label:'1–20 (Grade 1)',          grade:'g1', level:'100',  range:'1-20'},
+    {id:'50',  label:'1–50 (Grade 1)',          grade:'g1', level:'100',  range:'1-50'},
+    {id:'100', label:'1–100 (Grade 2)',         grade:'g2', level:'100',  range:'1-100'},
+    {id:'1000',label:'100–1000 (Grade 3)',      grade:'g3', level:'1000', range:'100-1000'}
   ];
-  var sel=$('lessonSel'); if(!sel) return;
-  var groups={}; PRESETS.forEach(function(p){ (groups[p.g]=groups[p.g]||[]).push(p); });
-  Object.keys(groups).forEach(function(g){ var og=document.createElement('optgroup'); og.label=g; groups[g].forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=g+' · '+p.label; og.appendChild(o); }); sel.appendChild(og); });
+  var METHODS=[{id:'C',label:'Concrete'},{id:'P',label:'Pictorial'},{id:'A',label:'Symbolic'},{id:'CPA',label:'Mixed C → P → S'}];
+  var LS={range:'100', skill:'pv', method:'C', rep:{}};
+  try{ var sv=JSON.parse(localStorage.getItem('numerics-pick')||'null'); if(sv && sv.range) LS=sv; if(!LS.rep) LS.rep={}; }catch(e){}
+  function bigR(){ return LS.range==='1000'; }
+  function skills(){ return [
+    {id:'pv', label:'Place value'},
+    {id:'non',label:'Bundle & unbundle (non-canonical)'},
+    {id:'npt',label: bigR()? 'Next & previous hundred' : 'Next & previous ten'},
+    {id:'cmp',label:'Compare'},
+    {id:'as', label: bigR()? 'Add & subtract (make / break a hundred)' : 'Add & subtract (make / break a ten)'} ]; }
+  function reps(m){
+    var s=LS.skill, b=bigR(); if(m==='CPA') m='C';
+    if(m==='C'){
+      if(s==='npt') return b? [{id:'disks',label:'Disks'}] : [{id:'rods',label:'Rods and a ten frame'}];
+      if(s==='as')  return b? [{id:'disks',label:'Disks'}] : [{id:'rods',label:'Rods'},{id:'frames',label:'Ten frames'},{id:'disks',label:'Disks'}];
+      return b? [{id:'rods',label:'Flats and rods'},{id:'disks',label:'Disks'}] : [{id:'rods',label:'Rods'},{id:'frames',label:'Ten frames'},{id:'disks',label:'Disks'}];
+    }
+    if(m==='P'){
+      if(s==='npt') return [{id:'line',label:'Number line'}];
+      if(s==='cmp'||s==='as') return [{id:'bond',label:'Number bond'}];
+      return [{id:'bond',label:'Number bond'},{id:'bar',label:'Bar model'},{id:'expanded',label:'Expanded form'}];
+    }
+    if(s==='npt'||s==='as') return [{id:'eq',label:'Equation'}];
+    if(s==='cmp') return [{id:'sym',label:'Symbols ( <  >  = )'}];
+    return [{id:'parts',label:'Expression (30 + 4 = ☐)'},{id:'whole',label:'Equation (34 = ☐ + ☐)'},{id:'mix',label:'Mixed'}];
+  }
+  function curRep(){ var m=LS.method==='CPA'?'C':LS.method, L=reps(m), r=LS.rep[m]; if(!L.some(function(x){return x.id===r;})) r=L[0].id; LS.rep[m]=r; return r; }
+  function opt(sel,list,v){ sel.innerHTML=list.map(function(o){ return '<option value="'+o.id+'">'+o.label+'</option>'; }).join(''); sel.value=v; sel.disabled=list.length<2; }
+  var PICKS=[];
+  function picker(mixed){
+    var P={mixed:mixed};
+    P.range=document.createElement('select'); P.range.className='lp lpr'; P.range.title='Number range';
+    P.skill=document.createElement('select'); P.skill.className='lp lps'; P.skill.title='Skill';
+    P.method=document.createElement('div'); P.method.className='seg lpm';
+    P.method.innerHTML=METHODS.filter(function(m){ return mixed||m.id!=='CPA'; }).map(function(m){ return '<button type="button" data-v="'+m.id+'" title="'+m.label+'">'+(m.id==='CPA'?'Mixed':m.id==='A'?'S':m.id)+'</button>'; }).join('');
+    P.rep=document.createElement('select'); P.rep.className='lp lprep'; P.rep.title='Representation';
+    P.repTxt=document.createElement('span'); P.repTxt.className='lptxt';
+    P.range.addEventListener('change',function(){ LS.range=P.range.value; changed(); });
+    P.skill.addEventListener('change',function(){ LS.skill=P.skill.value; changed(); });
+    P.method.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; LS.method=b.dataset.v; changed(); });
+    P.rep.addEventListener('change',function(){ LS.rep[LS.method==='CPA'?'C':LS.method]=P.rep.value; changed(); });
+    PICKS.push(P); refreshOne(P); return P;
+  }
+  function refreshOne(P){
+    opt(P.range,RANGES,LS.range); P.range.disabled=false;
+    opt(P.skill,skills(),LS.skill); P.skill.disabled=false;
+    var m= (!P.mixed && LS.method==='CPA')? 'C' : LS.method;
+    [].forEach.call(P.method.querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.v===m); });
+    var RL=reps(m); opt(P.rep,RL,curRep()); var one=RL.length<2; P.rep.style.display=one?'none':''; P.repTxt.style.display=one?'':'none'; P.repTxt.textContent=RL[0].label;
+  }
+  function refreshAll(){ curRep(); PICKS.forEach(refreshOne); try{ localStorage.setItem('numerics-pick',JSON.stringify(LS)); }catch(e){} }
+  function inline(P,host,labels){
+    var add=function(lab,el){ var g=document.createElement('span'); g.className='lpg'; if(labels&&lab) g.innerHTML='<span class="t">'+lab+'</span>'; g.appendChild(el); host.appendChild(g); };
+    add('Numbers',P.range); add('Skill',P.skill); add('Method',P.method); add('Show',P.rep); P.rep.parentNode.appendChild(P.repTxt);
+  }
+  /* ---------- applying the choice to the toolkit ---------- */
   function fire(el,ev){ el.dispatchEvent(new Event(ev||'change',{bubbles:true})); }
   function setSel(id,v){ var e=$(id); if(!e||v===undefined) return; if([].some.call(e.options,function(o){return o.value===v;})){ e.value=v; fire(e); } }
   function clickSeg(id,v){ var e=$(id); if(!e||v===undefined) return; var b=e.querySelector('button[data-v="'+v+'"]'); if(b && !b.classList.contains('on')) b.click(); }
-  function apply(id){
-    var p=PRESETS.filter(function(x){ return x.id===id; })[0]; if(!p) return; applying=true; try{ applyP(p,id); } finally{ applying=false; } }
-  function applyP(p,id){
-    setSel('grade',p.grade);
-    clickSeg('topic',p.topic);
-    clickSeg('level', p.grade==='g3'? '1000' : '100');
-    setSel('range',p.range);
-    clickSeg('pMode',p.mode); setSel('wMode',p.mode); setSel('sKind','prob'); setSel('sMode',p.mode);
-    clickSeg('pRep',p.rep); setSel('wRep',p.rep); setSel('sRep',p.rep);
-    if(p.canon){ clickSeg('pCanon',p.canon); setSel('wCanon',p.canon); setSel('sCanon',p.canon); }
-    if(p.aform) setSel('aform',p.aform);
-    try{ localStorage.setItem('numerics-lesson',id); }catch(e){}
-    var np=$('newP'); if(np) np.click();
+  var applying=false;
+  function apply(){ applying=true; try{ applyLS(); } finally{ applying=false; } ownOff(); }
+  function applyLS(){
+    var R=RANGES.filter(function(r){ return r.id===LS.range; })[0]||RANGES[3], s=LS.skill, m=LS.method, pm= m==='CPA'?'C':m;
+    setSel('grade',R.grade);
+    clickSeg('topic', s==='non'? 'pv' : s);
+    clickSeg('level',R.level);
+    setSel('range',R.range);
+    clickSeg('pMode',pm); setSel('wMode',m); setSel('sKind','prob'); setSel('sMode',m);
+    var c=reps('C'), cr= (LS.rep.C && c.some(function(x){return x.id===LS.rep.C;}))? LS.rep.C : c[0].id;
+    clickSeg('pRep',cr); setSel('wRep',cr); setSel('sRep',cr);
+    if(s==='pv'||s==='non'){
+      var can= s==='non'? 'non' : 'canon'; clickSeg('pCanon',can); setSel('wCanon',can); setSel('sCanon',can);
+      var pr=LS.rep.P, ar=LS.rep.A;
+      if(pr && ['bond','bar','expanded'].indexOf(pr)>=0) setSel('pform',pr);
+      if(ar && ['parts','whole','mix'].indexOf(ar)>=0) setSel('aform',ar);
+    }
+    if(s==='as'){ setSel('asStrat','ten'); setSel('asOp','mix'); }
+    var view=document.querySelector('section:not(.hidden)'), vid=view? view.id : 'present';
+    var nb= vid==='sheets'? $('wNew') : vid==='slides'? $('sNew') : $('newP'); if(nb) nb.click();
   }
-  sel.addEventListener('change',function(){ if(sel.value) apply(sel.value); });
-  var applying=false, own=document.createElement('option'); own.value='own'; own.textContent='Your own settings'; own.hidden=true; sel.insertBefore(own,sel.options[0].nextSibling);
-  function markOwn(e){ if(applying || !document.getElementById('intro').classList.contains('hidden')) return; var t=e.target; if(!t||t===sel||t.closest('#lessonSel')) return;
-    if(e.type==='click'? !t.closest('.seg button') : !t.closest('select,input')) return; own.hidden=false; sel.value='own'; }
+  function changed(){ refreshAll(); if(intro.classList.contains('hidden')) apply(); }
+  /* "Your own settings": shown when a teacher changes something in More settings */
+  function ownOn(){ document.body.classList.add('ownset'); }
+  function ownOff(){ document.body.classList.remove('ownset'); }
+  function markOwn(e){ if(applying || !intro.classList.contains('hidden')) return; var t=e.target; if(!t || t.closest('.lp,.lpm,.lpg')) return;
+    if(e.type==='click'? !t.closest('.seg button') : !t.closest('select,input')) return; ownOn(); }
   ['change','click'].forEach(function(ev){ document.addEventListener(ev,function(e){ if(e.target.closest && (e.target.closest('.bar')||e.target.closest('#drawer')||e.target.closest('#guide'))) markOwn(e); },true); });
-  /* simple view: a guide strip with only what the job needs; More settings opens a side panel */
+  /* ---------- simple view: a guide strip with only what the job needs; More settings opens a side panel ---------- */
+  var intro=$('intro');
   var guide=document.createElement('div'); guide.id='guide'; document.querySelector('header.top').after(guide);
   var drawer=document.createElement('aside'); drawer.id='drawer';
   drawer.innerHTML='<div class="dhead"><b>More settings</b><button type="button" class="dx" id="drawerX" title="Close">✕</button></div><div class="dbody" id="drawerBody"></div><div class="dfoot">Set by the lesson. Change only if needed.<br><button type="button" class="btn ghost" id="drawerBack">Back to lesson settings</button></div>';
@@ -3819,7 +4033,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   function park(el,dest,list){ if(!el) return; var ph=document.createComment('p'); el.parentNode.insertBefore(ph,el); list.push([el,ph]); dest.appendChild(el); }
   function unpark(list){ while(list.length){ var x=list.pop(); x[1].parentNode.insertBefore(x[0],x[1]); x[1].remove(); } }
   function mk(tag,cls,html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html) e.innerHTML=html; return e; }
-  function step(n,title){ var c=mk('div','gstep','<div class="gt"><span class="gn">'+n+'</span>'+title+'</div><div class="gc"></div>'); guide.appendChild(c); return c.querySelector('.gc'); }
+  function step(host,n,title){ var c=mk('div','gstep','<div class="gt"><span class="gn">'+n+'</span>'+title+'</div><div class="gc"></div>'); host.appendChild(c); return c.querySelector('.gc'); }
   function closeDrawer(){ unpark(parkedD); document.body.classList.remove('more'); var b=$('moreBtn'); if(b) b.classList.remove('on'); }
   function openDrawer(){
     closeDrawer(); var body=$('drawerBody'); var view=document.querySelector('section:not(.hidden)');
@@ -3831,26 +4045,25 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     var hd=document.querySelector('header.top'); drawer.style.top=(hd? hd.getBoundingClientRect().bottom:0)+'px';
     document.body.classList.add('more'); $('moreBtn').classList.add('on');
   }
+  var ownTag='<span class="owntag" title="You changed a setting in More settings">your own settings</span>';
   function buildGuide(job){
     closeDrawer(); unpark(parkedG); guide.innerHTML='';
+    PICKS=PICKS.filter(function(P){ return document.body.contains(P.range) && !guide.contains(P.range); });
     var more=$('moreBtn'); more.textContent='More settings ⚙';
     if(job==='sheets'||job==='slides'){
-      guide.className='steps';
-      var c1=step(1,'What are you practising?'); park($('lessonSel'),c1,parkedG); park(document.querySelector('.lessonGrp .drafttag'),c1,parkedG);
-      var c2=step(2,'Which numbers?'); park($('level'),c2,parkedG); park($('range'),c2,parkedG); park($('customBox'),c2,parkedG);
-      var c3=step(3,'How should it look?');
+      guide.className='steps'; var P=picker(true);
+      step(guide,1,'Which numbers?').appendChild(P.range);
+      step(guide,2,'What are you practising?').appendChild(P.skill);
+      var c3=step(guide,3,'How should it look?'); c3.appendChild(P.method); c3.appendChild(P.rep); c3.appendChild(P.repTxt);
       if(job==='sheets'){
-        park($('wMode'),c3,parkedG);
-        var c4=step(4,'Print'); park($('wPer').closest('.grp'),c4,parkedG); park($('wPages').closest('.grp'),c4,parkedG); park($('wKey').closest('label'),c4,parkedG); park($('wNew'),c4,parkedG); park($('wPrint'),c4,parkedG);
+        var c4=step(guide,4,'Print'); park($('wPer').closest('.grp'),c4,parkedG); park($('wPages').closest('.grp'),c4,parkedG); park($('wKey').closest('label'),c4,parkedG); park($('wNew'),c4,parkedG); park($('wPrint'),c4,parkedG);
       } else {
-        park($('sMode'),c3,parkedG);
-        var c4b=step(4,'Download'); park($('sCount').closest('.grp'),c4b,parkedG); park($('sTitle').closest('label'),c4b,parkedG); park($('sNew'),c4b,parkedG); park($('sDown'),c4b,parkedG);
+        var c4b=step(guide,4,'Download'); park($('sCount').closest('.grp'),c4b,parkedG); park($('sTitle').closest('label'),c4b,parkedG); park($('sNew'),c4b,parkedG); park($('sDown'),c4b,parkedG);
       }
-      var m=mk('div','gmore'); guide.appendChild(m); park(more,m,parkedG); more.textContent='More choices ⚙';
+      var m=mk('div','gmore',ownTag); guide.appendChild(m); park(more,m,parkedG); more.textContent='More choices ⚙';
     } else {
-      guide.className='strip';
-      var l=mk('div','gi','<span class="t">Lesson</span>'); guide.appendChild(l); park($('lessonSel'),l,parkedG); park(document.querySelector('.lessonGrp .drafttag'),l,parkedG);
-      var sh=mk('div','gi','<span class="t">Show</span>'); guide.appendChild(sh); park($('pMode'),sh,parkedG);
+      guide.className='strip'; var Q=picker(false);
+      var l=mk('div','gi lpline'); guide.appendChild(l); inline(Q,l,true); l.insertAdjacentHTML('beforeend',ownTag);
       var bt=mk('div','gi'); guide.appendChild(bt);
       ['hideAll','showAll','reveal','prev','next','newP','animOpen','animOpenUn','animOpenEst'].forEach(function(id){ park($(id),bt,parkedG); });
       guide.appendChild(mk('div','spacer')); park(more,guide,parkedG);
@@ -3862,19 +4075,21 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   }
   $('moreBtn').addEventListener('click',function(){ if(document.body.classList.contains('more')) closeDrawer(); else openDrawer(); });
   $('drawerX').addEventListener('click',closeDrawer);
-  $('drawerBack').addEventListener('click',function(){ if(sel.value) apply(sel.value); });
-  var intro=$('intro');
-  function showIntro(){ intro.classList.remove('hidden'); }
+  $('drawerBack').addEventListener('click',function(){ apply(); });
+  /* the full view's shared bar gets its own picker */
+  inline(picker(false),$('lpBar'),false); $('lpBar').insertAdjacentHTML('beforeend',ownTag);
+  /* ---------- start page ---------- */
+  function showIntro(){ intro.classList.remove('hidden'); refreshAll(); }
   function go(job){
     intro.classList.add('hidden');
     var map={present:'present',sheets:'sheets',slides:'slides',teach:'present'};
     var t=document.querySelector('button.tab[data-view="'+map[job]+'"]'); if(t) t.click();
-    simple(true,job);
+    simple(true,job); apply();
     document.body.classList.toggle('teachonly',job==='teach');
     if(job==='teach'){ var tb=$('teachBtn'); if(tb) setTimeout(function(){ tb.click(); },50); }
   }
   [].forEach.call(document.querySelectorAll('#intro .icard'),function(c){ c.addEventListener('click',function(){ go(c.dataset.job); }); });
-  $('introSkip').addEventListener('click',function(){ intro.classList.add('hidden'); simple(false); try{ localStorage.setItem('numerics-full',$('introRemember').checked?'1':'0'); }catch(e){} });
+  $('introSkip').addEventListener('click',function(){ intro.classList.add('hidden'); simple(false); apply(); try{ localStorage.setItem('numerics-full',$('introRemember').checked?'1':'0'); }catch(e){} });
   function goHome(){
     var tw=$('teachWrap'); if(tw && !tw.classList.contains('hidden')){ var c=$('tchClose'); if(c) c.click(); }
     var hw=$('howWrap'); if(hw && !hw.classList.contains('hidden')){ var h=$('howClose'); if(h) h.click(); }
@@ -3885,47 +4100,26 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   $('tchClose').addEventListener('click',function(){ if(document.body.classList.contains('teachonly')){ document.body.classList.remove('teachonly'); showIntro(); } });
   if($('tchHome')) $('tchHome').addEventListener('click',goHome);
   document.addEventListener('keydown',function(e){ if(!intro.classList.contains('hidden')) e.stopImmediatePropagation(); },true);
-  try{ var last=localStorage.getItem('numerics-lesson'); if(last && [].some.call(sel.options,function(o){return o.value===last;})) sel.value=last; }catch(e){}
-  /* entry page: three panels */
-  var iL=$('introLesson'), iL2=$('introLesson2');
-  [iL,iL2].forEach(function(s){ [].slice.call(sel.children).forEach(function(c){ if(c.tagName==='OPTGROUP') s.appendChild(c.cloneNode(true)); }); });
-  function segOn(id,v){ [].forEach.call($(id).querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.v===v); }); }
-  function segVal(id){ var b=$(id).querySelector('button.on'); return b? b.dataset.v : ''; }
-  ['introLevel','introLook'].forEach(function(id){ $(id).addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; segOn(id,b.dataset.v); if(id==='introLevel') syncRange(); }); });
-  function syncRange(keep){
-    clickSeg('level',segVal('introLevel'));
-    var r=$('range'), ir=$('introRange'); ir.innerHTML='';
-    [].forEach.call(r.options,function(o){ if(o.value==='custom') return; var n=document.createElement('option'); n.value=o.value; n.textContent=o.textContent; ir.appendChild(n); });
-    ir.value= keep && [].some.call(ir.options,function(o){return o.value===keep;}) ? keep : r.value;
-  }
-  function lessonPicked(v){
-    iL.value=v; iL2.value=v; sel.value=v;
-    var p=PRESETS.filter(function(x){ return x.id===v; })[0]; if(!p) return;
-    segOn('introLevel', p.grade==='g3'? '1000':'100'); syncRange(p.range); segOn('introLook', p.mode);
-  }
-  iL.addEventListener('change',function(){ lessonPicked(iL.value); });
-  iL2.addEventListener('change',function(){ lessonPicked(iL2.value); });
-  function useLesson(){ var v=iL.value; if(v){ sel.value=v; apply(v); } }
-  [].forEach.call(document.querySelectorAll('#intro .icard'),function(c){ c.addEventListener('click',function(){ setTimeout(useLesson,0); }); });
-  $('introBoard').addEventListener('click',function(){ go('present'); useLesson(); });
-  function openFull(view){ intro.classList.add('hidden'); simple(false); var t=document.querySelector('button.tab[data-view="'+view+'"]'); if(t) t.click(); useLesson(); }
+  /* panel 1: Preset Lessons */
+  var P1=picker(false); inline(P1,$('introPick'),true);
+  $('introBoard').addEventListener('click',function(){ go('present'); });
+  function openFull(view){ intro.classList.add('hidden'); simple(false); var t=document.querySelector('button.tab[data-view="'+view+'"]'); if(t) t.click(); apply(); }
   $('introMore').addEventListener('click',function(){ openFull('present'); });
   $('introMore2').addEventListener('click',function(){ openFull('sheets'); });
-  function stepGo(job){
-    go(job); useLesson();
-    clickSeg('level',segVal('introLevel')); setSel('range',$('introRange').value);
-    var m=segVal('introLook'); if(job==='sheets'){ setSel('wMode',m); var n=$('wNew'); if(n) n.click(); } else { setSel('sKind','prob'); setSel('sMode',m); var s=$('sNew'); if(s) s.click(); }
-  }
-  $('introPrint').addEventListener('click',function(){ stepGo('sheets'); });
-  $('introSlides').addEventListener('click',function(){ stepGo('slides'); });
+  /* panel 3: step by step */
+  var P3=picker(true), st3=$('introSteps');
+  step(st3,1,'Which numbers?').appendChild(P3.range);
+  step(st3,2,'What are you practising?').appendChild(P3.skill);
+  var s3=step(st3,3,'How should it look?'); s3.appendChild(P3.method); s3.appendChild(P3.rep); s3.appendChild(P3.repTxt);
+  var s4=step(st3,4,'Print or download'); s4.innerHTML='<div class="row"><button type="button" class="btn" id="introPrint">Practice pages ▸</button><button type="button" class="btn alt" id="introSlides">Slides ▸</button></div>';
+  $('introPrint').addEventListener('click',function(){ go('sheets'); });
+  $('introSlides').addEventListener('click',function(){ go('slides'); });
   $('introHow').addEventListener('click',function(){ var h=$('howBtn'); if(h) h.click(); });
-  syncRange();
-  try{ var lastL=localStorage.getItem('numerics-lesson'); if(lastL) lessonPicked(lastL); }catch(e){}
+  refreshAll();
   function tchTitle(){ var t=$('tchTitle'), l=$('tchLesson'); if(t&&l) t.textContent='Teach: '+(l.value==='npt'? 'next & previous ten' : 'every number is built by ones'); }
   if($('tchLesson')){ $('tchLesson').addEventListener('change',tchTitle); new MutationObserver(tchTitle).observe($('teachWrap'),{attributes:true,attributeFilter:['class']}); }
   var full=false; try{ full=localStorage.getItem('numerics-full')==='1'; }catch(e){}
-  if(full){ intro.classList.add('hidden'); simple(false); } else showIntro();
-})();
-</script>
+  if(full){ intro.classList.add('hidden'); simple(false); apply(); } else showIntro();
+})();</script>
 </body>
 </html>
