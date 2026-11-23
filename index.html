@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v97</title>
+<title>Numerics · Place Value Toolkit v98</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -218,6 +218,12 @@
     body{background:#fff}
     header.top,.bar,#present,#slides,#slideStage{display:none!important}
     #sheets{display:block!important}
+    #guide,#drawer,#intro,.cnote,#teachWrap,#howWrap{display:none!important}
+    body.pc #sheets{display:none!important}
+    body.pc #centers{display:block!important}
+    #centers .cnote{display:none}
+    #cpages{padding:0!important;gap:0!important;background:#fff!important;display:block!important}
+    #centers{background:#fff}
     #pages{padding:0;gap:0;background:#fff}
     .page{box-shadow:none;page-break-after:always;break-after:page}
     .page:last-child{page-break-after:auto;break-after:auto}
@@ -293,6 +299,36 @@
   #tchMsg{font-size:13px;color:#355E3B}
   #tchVid{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
   #tchVmsg{padding:10px 16px;font-size:14px;color:#555}
+  /* v98: center activities */
+  #cpages{display:flex;flex-direction:column;align-items:center;gap:24px;padding:24px;background:#e8e6e1}
+  .cnote{text-align:center;color:#555;font-size:14px;padding:8px 20px 0}
+  .cpage{display:flex;flex-direction:column}
+  .xcgrid{flex:none;height:9.05in;display:grid;gap:0;margin-top:.12in}
+  .xcgrid.c2{grid-template-columns:1fr 1fr;grid-template-rows:repeat(3,minmax(0,1fr))}
+  .xcgrid.c3{grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(4,minmax(0,1fr))}
+  .xccard{position:relative;border:1.5px dashed #9AA3AD;margin:-0.75px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;text-align:center;overflow:hidden;font-family:'Century Gothic',Poppins,Futura,Arial,sans-serif}
+  .xccard .xcno{position:absolute;left:8px;top:6px;font-size:12px;color:#888}
+  .xccard .xcq{font-size:17px;color:#1F3A5F;font-weight:bold;line-height:1.3}
+  .xccard .xcbig{font-size:34px;line-height:1.15}
+  .xccard .xcmid{font-size:20px;line-height:1.3}
+  .xccard .xcans{font-size:44px;color:#355E3B;font-weight:bold}
+  .xccard .xcsub{font-size:17px;line-height:1.45;color:#333}
+  .xccard .xcbox{display:inline-block;width:1.1em;height:1em;border:2px solid #111;border-radius:4px;vertical-align:-.1em}
+  .xccard .xcbond{font-size:30px}
+  .xccard.xcm .xcbig{font-size:30px}
+  .xckey{margin-top:.2in;font-size:15px;line-height:1.9}
+  .xckey span{margin:0 4px}
+  .mats{flex:none;height:9.05in;display:grid;grid-template-rows:1fr 1fr;gap:.25in;margin-top:.12in}
+  .mat{border:2px solid #1F3A5F;border-radius:10px;padding:.15in .2in;display:flex;flex-direction:column;gap:.1in;font-family:'Century Gothic',Poppins,Futura,Arial,sans-serif;min-height:0}
+  .mat .mtitle{font-size:24px;color:#1F3A5F}
+  .mat .mmat{flex:1;display:flex;gap:.12in}
+  .mat .mcol{flex:1;border:1.5px solid #9AA3AD;border-radius:8px;display:flex;flex-direction:column}
+  .mat .mhead{text-align:center;font-size:16px;background:#EAE3D8;border-bottom:1.5px solid #9AA3AD;padding:3px 0;border-radius:8px 8px 0 0}
+  .mat .mbody{flex:1;display:flex;align-items:center;justify-content:center}
+  .mat .mframe{display:grid;grid-template-columns:repeat(2,.42in);grid-template-rows:repeat(5,.3in);border:1.5px solid #555}
+  .mat .mframe i{border:1px dashed #9AA3AD}
+  .mat .mrec{font-size:17px;line-height:2}
+  .mat .mln{display:inline-block;border-bottom:1.5px solid #111;height:1em;vertical-align:-.15em}
   /* v97: moving pieces */
   .kpic .ktxt{position:absolute;transform:translateX(-50%);white-space:nowrap;line-height:1.1;font-family:'Century Gothic',Poppins,Futura,Arial,sans-serif}
   .kpic .kround{display:flex;align-items:center;justify-content:center}
@@ -300,6 +336,14 @@
   .kpic .kx{color:#C2483D;font-weight:bold;line-height:1;font-family:sans-serif}
   .qgrid .row.kb .line{border-bottom-color:#4A90B8}.qgrid .row.kb .f{color:#2f6f99}.qgrid .row.kb{}
   .qgrid .row.kr .line{border-bottom-color:#C2483D}.qgrid .row.kr .f{color:#C2483D}
+  /* v98: home page */
+  #intro .isteps.i5{grid-template-columns:repeat(4,minmax(0,1fr)) minmax(0,1.5fr)}
+  @media(max-width:1100px){#intro .isteps.i5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  #intro .ifmt{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}
+  #intro .fbtn{color:#fff;border:0;border-radius:10px;padding:14px 10px;font:inherit;font-size:15px;font-weight:bold;cursor:pointer;line-height:1.2}
+  #intro .fbtn:hover{filter:brightness(1.12)}
+  #intro .isteps .gstep:nth-child(5) .gc{display:block}
+  .tchnote{color:#F3E3C0;font-size:13px;margin-left:12px}
   /* v97: lesson picker */
   .lpline{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
   .lpg{display:inline-flex;align-items:center;gap:6px}
@@ -454,11 +498,11 @@
 <header class="top">
   <div class="brand"><b>Numerics</b><span id="brandSub">Place Value within 100</span></div>
   <nav>
-    <button class="howto teachb" id="homeBtn" type="button" title="Back to the start page">⌂ Start</button>
-    <button class="howto teachb" id="teachBtn" type="button">Teach ▶</button>
+    <button class="howto teachb" id="homeBtn" type="button" title="Back to Home">⌂ Home</button>
+    <button class="howto teachb" id="teachBtn" type="button">Lesson ▶</button>
     <button class="tab on" data-view="present">Present</button>
-    <button class="tab" data-view="sheets">Practice Problems</button>
-    <button class="tab" data-view="slides">Slides</button>
+    <button class="tab" data-view="sheets">Practice Pages</button>
+    <button class="tab" data-view="slides">Slides</button><button class="tab" data-view="centers">Centers</button>
   </nav>
   <button class="howto" id="howBtn" type="button">How to use ▶</button>
 </header>
@@ -617,6 +661,17 @@
 </section>
 
 <!-- ============ SLIDES ============ -->
+<section id="centers" class="hidden">
+  <div class="bar">
+    <div class="grp"><span class="t">Activity</span><div class="seg" id="cKind"><button type="button" data-v="task" class="on">Task cards</button><button type="button" data-v="match">Match-up cards</button><button type="button" data-v="mat">Build-it mats</button></div></div>
+    <div class="grp"><span class="t">How many</span><select id="cCount"><option value="6">6</option><option value="12" selected>12</option><option value="18">18</option></select></div>
+    <div class="spacer"></div>
+    <button class="btn alt" id="cNew" type="button">New set</button>
+    <button class="btn" id="cPrint" type="button">Print</button>
+  </div>
+  <div class="cnote" id="cNote"></div>
+  <div id="cpages"></div>
+</section>
 <section id="slides" class="hidden">
   <div class="bar">
     <div class="grp tp-pv"><span class="t">Slides for</span>
@@ -2257,6 +2312,124 @@ function flipRender(host,sig,render){
   });
 }
 
+/* ================= v98: CENTER ACTIVITIES =================
+   Task cards (front: the problem, back: the answer; print double-sided, flip on the long edge),
+   Match-up cards (picture, numeral and name to match; cut apart and shuffle),
+   Build-it mats (build the number with real materials, then record).
+   Each uses the lesson settings: numbers, skill, method (C, P, S) and representation. */
+const CT={kind:'task', n:12, items:null, tag:''};
+function cfit(make,W,H,cap){ const m=svgInner(make(10)); const u=Math.max(2,Math.min(cap||30,10*W/m.w,10*H/m.h)); return make(u); }
+function cSname(n,L){ const d=dg(n,L); return L==='1000'? plural(d[0],'hundred')+' '+plural(d[1],'ten')+' '+plural(d[2],'one') : plural(d[0],'ten')+' '+plural(d[1],'one'); }
+function cExp(n,L){ const PL=PLACES(L), d=dg(n,L); const parts=d.map((v,i)=>v*PL[i][1]).filter(v=>v); return (parts.length?parts:[0]).join(' + '); }
+function cMode(i,total){ const m=S.wMode; if(m!=='CPA') return m; return ['C','P','A'][Math.min(2,Math.floor(i*3/Math.max(1,total)))]; }
+function cNum(i){ const pl=pool(); let n; const L=S.level; for(let k=0;k<60;k++){ n=pl[rint(0,pl.length-1)]; if(L==='1000'? n>=100&&n<1000 : n>=10&&n<100) break; } return n; }
+function cItems(){
+  const t=S.topic, a=[], used=new Set();
+  for(let i=0;i<CT.n;i++){
+    let it;
+    if(t==='pv'){ let n; for(let k=0;k<30;k++){ n=cNum(i); if(!used.has(n)) break; } used.add(n);
+      const non= S.wCanon==='non' || (S.wCanon==='mix' && i%2===1); it={kind:'pv',n:n,non:non}; }
+    else it=genT(i);
+    a.push(it);
+  }
+  return a;
+}
+/* the picture of a number for a card or mat: C = build, P = number bond, S = expanded form */
+function cPic(n,mode,rep,non,W,H){
+  const L=S.level;
+  if(mode==='C'){ let d=d3(n,L); if(non){ d=d.slice(); if(d[1]>0){ d[1]--; d[2]+=10; } else if(d[0]>0){ d[0]--; d[1]+=10; } }
+    return '<div class="xcpic">'+cfit(u=>buildD(rep,d,L,u,null),W,H,28)+'</div>'; }
+  if(mode==='P'){ const PL=PLACES(L), d=dg(n,L), parts=d.map((v,i)=>v*PL[i][1]);
+    return '<div class="xcbond">'+bondBlock('',parts,parts.map(()=>'x'),{key:true,shown:new Set()}).replace('<div class="mwhole"></div>','<div class="mwhole">?</div>')+'</div>'; }
+  return '<div class="xcbig">'+cExp(n,L)+'</div>';
+}
+function cTopicPic(p,mode,rep,W,H){   // add & subtract, next & previous, compare: the problem's picture (first step)
+  if(mode!=='C') return '';
+  if(p.kind==='as' && p.strat==='ten'){ const K=asKeyScenes(p,rep), u=Math.min(26,W/K.W,H/K.H); return '<div class="xcpic">'+kPicHTML(K.base,K.W,K.H,u)+'</div>'; }
+  if(p.kind==='npt'){ if(p.lvl==='1000'){ const K=nptBigScenes(p.A), u=Math.min(26,W/K.W,H/K.H); return '<div class="xcpic">'+kPicHTML(K.none,K.W,K.H,u)+'</div>'; }
+    const K=nptKeyScenes(p.A), u=Math.min(26,W/K.W,H/K.H); return '<div class="xcpic">'+keyedPicHTML(K.base,K.W,K.H,u)+'</div>'; }
+  if(p.kind==='cmp') return '<div class="xcpic">'+cfit(u=>compose([buildD(rep,d3(p.A,p.lvl),p.lvl,u,null,true),buildD(rep,d3(p.B,p.lvl),p.lvl,u,null,true)],u,'|'),W,H,22)+'</div>';
+  return '<div class="xcpic">'+cfit(u=>asPic(p,rep,u),W,H,22)+'</div>';
+}
+function cSign(p){ return p.op==='-'? (WS()?'take away':'−') : (WS()?'and':'+'); }
+/* front and back of a task card */
+function cTask(it,i,total){
+  const mode=cMode(i,total), rep=repFor(i), L=S.level, W=320, H=190;
+  if(it.kind==='pv'){
+    const front= mode==='A'? '<div class="xcq">What number is this?</div>'+cPic(it.n,'A',rep,false,W,H) : '<div class="xcq">What number is this?</div>'+cPic(it.n,mode,rep,it.non,W,H);
+    const back='<div class="xcans">'+it.n+'</div><div class="xcsub">'+cSname(it.n,L)+(it.non && mode==='C'? '<br>(built as '+(L==='1000'? cSname(it.n-100,L).replace(/^(\d+)/,m=>m)+'' : plural(Math.floor(it.n/10)-1,'ten')+' '+plural(it.n%10+10,'one'))+')' : '')+'</div>';
+    return {front:front, back:back};
+  }
+  if(it.kind==='npt'){ const V=nptVals(it);
+    const pic= mode==='P'? '<div class="xcpic">'+nptLineSVG(it,'none',300)+'</div>' : mode==='C'? cTopicPic(it,'C',rep,W,130) : '';
+    return {front:'<div class="xcbig">'+V.n+'</div>'+pic+'<div class="xcq">Next '+V.unit+'? How much more?<br>Previous '+V.unit+'? How much less?</div>',
+            back:'<div class="xcsub">'+V.N+' is '+V.m+' more than '+V.n+'.<br>'+V.Pv+' is '+V.l+' less than '+V.n+'.</div>'}; }
+  if(it.kind==='cmp'){ const s=it.A<it.B?'<':it.A>it.B?'>':'=', wd=it.A<it.B?'is less than':it.A>it.B?'is greater than':'is equal to';
+    return {front:cTopicPic(it,mode,rep,W,H)+'<div class="xcbig">'+it.A+' <span class="xcbox">&nbsp;</span> '+it.B+'</div><div class="xcq">Write &lt;, &gt; or =.</div>',
+            back:'<div class="xcans">'+it.A+' '+s+' '+it.B+'</div><div class="xcsub">'+it.A+' '+wd+' '+it.B+'.</div>'}; }
+  // add & subtract
+  const b=it.lvl==='1000'?100:10, r=it.A%b, Tn= it.op==='-'? it.A-r : it.A-r+b, x= it.op==='-'? r : b-r;
+  const bond= mode==='P'? '<div class="xcbond">'+bondBlock(it.B,[x,it.B-x],['a','b'],{key:false,shown:new Set()})+'</div>' : '';
+  return {front:'<div class="xcbig">'+it.A+' '+cSign(it)+' '+it.B+' = <span class="xcbox">&nbsp;</span></div>'+cTopicPic(it,mode,rep,W,H-20)+bond,
+          back:'<div class="xcans">'+it.R+'</div><div class="xcsub">'+it.A+' '+cSign(it)+' '+x+' = '+Tn+'<br>'+Tn+' '+cSign(it)+' '+(it.B-x)+' = '+it.R+'</div>'};
+}
+/* the three cards that match */
+function cMatch(it,i,total){
+  const mode=cMode(i,total), rep=repFor(i), L=S.level, W=220, H=150;
+  if(it.kind==='pv'){ const pic= mode==='A'? '<div class="xcbig">'+cExp(it.n,L)+'</div>' : cPic(it.n,mode,rep,it.non,W,H);
+    return [pic,'<div class="xcbig">'+it.n+'</div>','<div class="xcmid">'+cSname(it.n,L)+'</div>']; }
+  if(it.kind==='npt'){ const V=nptVals(it); return ['<div class="xcbig">'+V.n+'</div>','<div class="xcmid">next '+V.unit+'<br><b>'+V.N+'</b> ('+V.m+' more)</div>','<div class="xcmid">previous '+V.unit+'<br><b>'+V.Pv+'</b> ('+V.l+' less)</div>']; }
+  if(it.kind==='cmp'){ const s=it.A<it.B?'<':it.A>it.B?'>':'=', wd=it.A<it.B?'is less than':it.A>it.B?'is greater than':'is equal to';
+    return ['<div class="xcbig">'+it.A+' and '+it.B+'</div>','<div class="xcbig">'+it.A+' '+s+' '+it.B+'</div>','<div class="xcmid">'+it.A+' '+wd+' '+it.B+'</div>']; }
+  const b=it.lvl==='1000'?100:10, r=it.A%b, x= it.op==='-'? r : b-r, sg=cSign(it);
+  return ['<div class="xcbig">'+it.A+' '+sg+' '+it.B+'</div>','<div class="xcmid">'+it.A+' '+sg+' '+x+' '+sg+' '+(it.B-x)+'</div>','<div class="xcbig">'+it.R+'</div>'];
+}
+/* build-it mat */
+function cMat(it,i){
+  const L=S.level, PL=PLACES(L), big=L==='1000';
+  const col=(nm)=>'<div class="mcol"><div class="mhead">'+nm+'</div><div class="mbody">'+(nm==='ones'||(big&&nm==='tens')? '<div class="mframe">'+'<i></i>'.repeat(10)+'</div>' : '')+'</div></div>';
+  const mat='<div class="mmat">'+PL.map(p=>col(p[0])).join('')+'</div>';
+  const ln=w=>'<span class="mln" style="width:'+w+'em"></span>';
+  let top, rec;
+  if(it.kind==='pv'){ top='<div class="mtitle">Build <b>'+it.n+'</b>'+(it.non?' another way':'')+'.</div>';
+    rec= (big? ln(2.2)+' hundreds '+ln(2.2)+' tens '+ln(2.2)+' ones' : ln(2.2)+' tens '+ln(2.2)+' ones')+'<br>'+it.n+' = '+ln(3)+' + '+ln(3)+(big?' + '+ln(3):'')+'<br>'+(it.non? 'Another way: '+ln(2.2)+' tens '+ln(2.2)+' ones' : 'Counting name: '+ln(12)); }
+  else if(it.kind==='npt'){ const V=nptVals(it); top='<div class="mtitle">Build <b>'+V.n+'</b>.</div>';
+    rec='Fill to the next '+V.unit+': '+ln(3)+' more. The next '+V.unit+' is '+ln(3)+'.<br>Take away to the previous '+V.unit+': '+ln(3)+' less. The previous '+V.unit+' is '+ln(3)+'.'; }
+  else if(it.kind==='cmp'){ top='<div class="mtitle">Build <b>'+it.A+'</b> and <b>'+it.B+'</b>.</div>';
+    rec=it.A+' '+ln(2)+' '+it.B+'<br>Which place decides? '+ln(6); }
+  else { const b=big?100:10, r=it.A%b, Tn= it.op==='-'? it.A-r : it.A-r+b, sg=cSign(it); top='<div class="mtitle">Build <b>'+it.A+'</b>. '+(it.op==='-'?'Take away':'Add')+' <b>'+it.B+'</b>.</div>';
+    rec=(it.op==='-'?'Take away':'Add')+' to make '+Tn+': '+it.A+' '+sg+' '+ln(2.5)+' = '+Tn+'<br>'+it.B+' is '+ln(2.5)+' and '+ln(2.5)+'<br>'+Tn+' '+sg+' '+ln(2.5)+' = '+ln(3); }
+  return '<div class="mat">'+top+mat+'<div class="mrec">'+rec+'</div></div>';
+}
+function cHead(sub){ return '<div class="phead"><span class="nm">'+(CT.kind==='mat'?'Name: ':'')+'</span><span class="pt"><b>Numerics</b> · '+topicName()+' · '+rangeLabel()+' · '+sub+'</span></div>'; }
+function cFoot(){ return '<div class="pfoot">© 2026 Numerics · Structured Numeracy. All rights reserved.</div>'; }
+function renderCenters(){
+  const tag=[S.topic,S.level,S.range,S.wMode,S.wRep,S.wCanon,S.asOp,S.asStrat,S.cmpT,CT.n].join('|');
+  if(!CT.items || CT.tag!==tag){ CT.items=cItems(); CT.tag=tag; }
+  const its=CT.items, total=its.length; let h='';
+  if(CT.kind==='task'){
+    const per=6, pages=Math.ceil(total/per), C=its.map((it,i)=>cTask(it,i,total));
+    for(let pg=0;pg<pages;pg++){
+      const idx=[]; for(let c=0;c<per;c++) idx.push(pg*per+c);
+      h+='<div class="page cpage">'+cHead('Task cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c2">'+idx.map((i,c)=>'<div class="xccard"><span class="xcno">'+(i<total?i+1:'')+'</span>'+(i<total?C[i].front:'')+'</div>').join('')+'</div>'+cFoot()+'</div>';
+      // back: columns swapped so each answer lands behind its card (double-sided, flip on the long edge)
+      const back=[]; for(let rr=0;rr<per/2;rr++){ back.push(idx[rr*2+1]); back.push(idx[rr*2]); }
+      h+='<div class="page cpage">'+cHead('Task cards'+(pages>1?' · '+(pg+1):'')+' · backs')+'<div class="xcgrid c2">'+back.map(i=>'<div class="xccard xcback"><span class="xcno">'+(i<total?i+1:'')+'</span>'+(i<total?C[i].back:'')+'</div>').join('')+'</div>'+cFoot()+'</div>';
+    }
+  } else if(CT.kind==='match'){
+    const cards=[]; its.forEach((it,i)=>cMatch(it,i,total).forEach((f,j)=>cards.push({f:f,set:i+1}))); shuffleSeed(cards,its.length*7+3);
+    const per=12, pages=Math.ceil(cards.length/per);
+    for(let pg=0;pg<pages;pg++){ const cs=cards.slice(pg*per,pg*per+per); while(cs.length<per) cs.push(null);
+      h+='<div class="page cpage">'+cHead('Match-up cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(c=>'<div class="xccard xcm">'+(c?c.f:'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
+    h+='<div class="page cpage">'+cHead('Match-up cards · answer key')+'<div class="xckey">'+its.map((it,i)=>'<div class="xckrow"><b>'+(i+1)+'.</b> '+cMatch(it,i,total).map(f=>f.replace(/<div class="xcpic">[\s\S]*<\/div>$/,'<i>picture</i>')).map(f=>'<span>'+f.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()+'</span>').join(' · ')+'</div>').join('')+'</div>'+cFoot()+'</div>';
+  } else {
+    const per=2, pages=Math.ceil(total/per);
+    for(let pg=0;pg<pages;pg++){ h+='<div class="page cpage">'+cHead('Build-it mats'+(pages>1?' · '+(pg+1):''))+'<div class="mats">'+its.slice(pg*per,pg*per+per).map((it,i)=>cMat(it,pg*per+i)).join('')+'</div>'+cFoot()+'</div>'; }
+  }
+  $('cpages').innerHTML=h;
+}
+function shuffleSeed(a,seed){ let s=seed; const r=()=>{ s=(s*9301+49297)%233280; return s/233280; }; for(let i=a.length-1;i>0;i--){ const j=Math.floor(r()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
 /* ---------- shared ---------- */
 function topicOrder(p,mode){
   if(!p) return [];
@@ -3516,10 +3689,19 @@ function pickShow(){ const v=Math.round(+String($('pick').value).replace(/[^0-9]
 $('pickGo').onclick=pickShow;
 $('pick').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); pickShow(); } });
 $('wPrint').onclick=()=>window.print();
+$('cPrint').onclick=()=>window.print();
+const cNotes={task:'Print double-sided and flip on the long edge: each answer prints on the back of its card. Or use the backs as an answer key.',match:'Cut the cards apart and shuffle. Students match each set of three. The last page is the answer key.',mat:'Students build the number on the mat with rods, ten frames or disks, then record.'};
+const cSetNote=()=>{ $('cNote').textContent=cNotes[CT.kind]; };
+$('cKind').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; CT.kind=b.dataset.v; $('cKind').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); cSetNote(); renderCenters(); });
+$('cCount').addEventListener('change',()=>{ CT.n=+$('cCount').value; CT.items=null; renderCenters(); });
+$('cNew').onclick=()=>{ CT.items=null; renderCenters(); };
+cSetNote();
 
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x===t));
-  ['present','sheets','slides'].forEach(v=>$(v).classList.toggle('hidden',t.dataset.view!==v));
+  ['present','sheets','slides','centers'].forEach(v=>$(v).classList.toggle('hidden',t.dataset.view!==v));
+  document.body.classList.toggle('pc',t.dataset.view==='centers');
+  if(t.dataset.view==='centers') renderCenters();
   if(t.dataset.view==='present') renderPresent();
   if(t.dataset.view==='slides') renderSlidePreview();
 });
@@ -3865,31 +4047,14 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
 <div id="intro" class="hidden">
   <div class="ihead"><b>Numerics</b><span>Place Value Toolkit</span><button type="button" id="introHow" class="ihow">How to use ▶</button></div>
   <div class="ibody">
-    <section class="ipanel">
-      <h3>Preset Lessons</h3>
-      <div class="iwin"><div class="ibar"><span class="lpline" id="introPick"></span><button type="button" class="btn alt" id="introBoard">Show on the board ▸</button><span class="spacer"></span><button type="button" class="btn ghost" id="introMore">More settings ⚙</button></div></div>
-    </section>
-    <section class="ipanel">
-      <h3>What do you want to do?</h3>
-      <div class="iwin pad">
-      <div class="icards">
-        <div class="icard" data-job="teach" style="background:#1F3A5F"><h2>Teach a lesson</h2><p>Step through the I do, we do, you do sequence for a number, or watch the model lesson.</p><span class="igo" style="color:#1F3A5F">Start ▸</span></div>
-        <div class="icard" data-job="present" style="background:#355E3B"><h2>Show problems on the board</h2><p>One problem at a time. Reveal each answer when the class is ready.</p><span class="igo" style="color:#355E3B">Start ▸</span></div>
-        <div class="icard" data-job="sheets" style="background:#8E4F3A"><h2>Print practice pages</h2><p>Practice problems with an answer key, ready to print.</p><span class="igo" style="color:#8E4F3A">Start ▸</span></div>
-        <div class="icard" data-job="slides" style="background:#6E4E63"><h2>Make slides</h2><p>Download a PowerPoint with one question per slide.</p><span class="igo" style="color:#6E4E63">Start ▸</span></div>
-      </div>
-      <div class="iskip"><button type="button" id="introSkip">Skip to the full view ›</button> <label><input type="checkbox" id="introRemember"> Always open the full view</label></div>
-      </div>
-    </section>
-    <section class="ipanel">
-      <h3>Practice pages or slides, step by step</h3>
-      <div class="iwin pad"><div class="isteps" id="introSteps"></div><div class="iskip"><button type="button" id="introMore2">More choices ⚙</button></div></div>
-    </section>
+    <h3>Choose your lesson</h3>
+    <div class="iwin pad"><div class="isteps i5" id="introSteps"></div></div>
+    <div class="iskip"><button type="button" id="introSkip">Full view with every setting ›</button> <label><input type="checkbox" id="introRemember"> Always open the full view</label></div>
   </div>
 </div>
 <div id="teachWrap" class="hidden" role="dialog" aria-label="Teach">
   <div id="teachBox">
-    <div id="tchHead"><b id="tchTitle">Teach: every number is built by ones</b><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchHome" type="button" title="Back to the start page">⌂ Start</button> <button id="tchClose" type="button">Close ✕</button></div>
+    <div id="tchHead"><b id="tchTitle">Teach: every number is built by ones</b><span class="tchnote" id="tchNote"></span><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchHome" type="button" title="Back to Home">⌂ Home</button> <button id="tchClose" type="button">Close ✕</button></div>
     <div id="tchLive">
       <div id="tchBar"><select id="tchLesson" title="Lesson"><option value="build">Every number is built by ones</option><option value="npt">Next &amp; previous ten</option></select> Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
         <button class="btn round" id="tchPrev" type="button" title="Previous">←</button><button class="btn alt" id="tchPlay" type="button">Play ▶</button><button class="btn round" id="tchNext" type="button" title="Next">→</button>
@@ -3930,11 +4095,11 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   var $=function(id){ return document.getElementById(id); };
   /* ---------- the lesson picker ---------- */
   var RANGES=[
-    {id:'w20', label:'1–20 in words (Primary)', grade:'primary', level:'100', range:'1-20'},
-    {id:'20',  label:'1–20 (Grade 1)',          grade:'g1', level:'100',  range:'1-20'},
-    {id:'50',  label:'1–50 (Grade 1)',          grade:'g1', level:'100',  range:'1-50'},
-    {id:'100', label:'1–100 (Grade 2)',         grade:'g2', level:'100',  range:'1-100'},
-    {id:'1000',label:'100–1000 (Grade 3)',      grade:'g3', level:'1000', range:'100-1000'}
+    {id:'w20', label:'1–20 in words', grade:'primary', level:'100', range:'1-20'},
+    {id:'20',  label:'1–20',          grade:'g1', level:'100',  range:'1-20'},
+    {id:'50',  label:'1–50',          grade:'g1', level:'100',  range:'1-50'},
+    {id:'100', label:'1–100',         grade:'g2', level:'100',  range:'1-100'},
+    {id:'1000',label:'100–1000',      grade:'g3', level:'1000', range:'100-1000'}
   ];
   var METHODS=[{id:'C',label:'Concrete'},{id:'P',label:'Pictorial'},{id:'A',label:'Symbolic'},{id:'CPA',label:'Mixed C → P → S'}];
   var LS={range:'100', skill:'pv', method:'C', rep:{}};
@@ -4014,7 +4179,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     }
     if(s==='as'){ setSel('asStrat','ten'); setSel('asOp','mix'); }
     var view=document.querySelector('section:not(.hidden)'), vid=view? view.id : 'present';
-    var nb= vid==='sheets'? $('wNew') : vid==='slides'? $('sNew') : $('newP'); if(nb) nb.click();
+    var nb= vid==='sheets'? $('wNew') : vid==='slides'? $('sNew') : vid==='centers'? $('cNew') : $('newP'); if(nb) nb.click();
   }
   function changed(){ refreshAll(); if(intro.classList.contains('hidden')) apply(); }
   /* "Your own settings": shown when a teacher changes something in More settings */
@@ -4061,11 +4226,19 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
         var c4b=step(guide,4,'Download'); park($('sCount').closest('.grp'),c4b,parkedG); park($('sTitle').closest('label'),c4b,parkedG); park($('sNew'),c4b,parkedG); park($('sDown'),c4b,parkedG);
       }
       var m=mk('div','gmore',ownTag); guide.appendChild(m); park(more,m,parkedG); more.textContent='More choices ⚙';
+    } else if(job==='centers'){
+      guide.className='steps'; var R=picker(true);
+      step(guide,1,'Numbers').appendChild(R.range);
+      step(guide,2,'Skill').appendChild(R.skill);
+      var k3=step(guide,3,'How should it look?'); k3.appendChild(R.method); k3.appendChild(R.rep); k3.appendChild(R.repTxt);
+      var k4=step(guide,4,'Activity'); park($('cKind'),k4,parkedG); park($('cCount').closest('.grp'),k4,parkedG); park($('cNew'),k4,parkedG); park($('cPrint'),k4,parkedG);
+      var mm=mk('div','gmore',ownTag); guide.appendChild(mm); park(more,mm,parkedG); more.textContent='More choices ⚙';
     } else {
       guide.className='strip'; var Q=picker(false);
       var l=mk('div','gi lpline'); guide.appendChild(l); inline(Q,l,true); l.insertAdjacentHTML('beforeend',ownTag);
       var bt=mk('div','gi'); guide.appendChild(bt);
       ['hideAll','showAll','reveal','prev','next','newP','animOpen','animOpenUn','animOpenEst'].forEach(function(id){ park($(id),bt,parkedG); });
+      if(job==='present'){ var pp=mk('button','btn ghost'); pp.type='button'; pp.textContent='PowerPoint ▸'; pp.title='Download this practice as a PowerPoint'; pp.addEventListener('click',function(){ go('slides'); }); bt.appendChild(pp); }
       guide.appendChild(mk('div','spacer')); park(more,guide,parkedG);
     }
   }
@@ -4082,13 +4255,12 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   function showIntro(){ intro.classList.remove('hidden'); refreshAll(); }
   function go(job){
     intro.classList.add('hidden');
-    var map={present:'present',sheets:'sheets',slides:'slides',teach:'present'};
+    var map={present:'present',sheets:'sheets',slides:'slides',teach:'present',centers:'centers'};
     var t=document.querySelector('button.tab[data-view="'+map[job]+'"]'); if(t) t.click();
     simple(true,job); apply();
     document.body.classList.toggle('teachonly',job==='teach');
     if(job==='teach'){ var tb=$('teachBtn'); if(tb) setTimeout(function(){ tb.click(); },50); }
   }
-  [].forEach.call(document.querySelectorAll('#intro .icard'),function(c){ c.addEventListener('click',function(){ go(c.dataset.job); }); });
   $('introSkip').addEventListener('click',function(){ intro.classList.add('hidden'); simple(false); apply(); try{ localStorage.setItem('numerics-full',$('introRemember').checked?'1':'0'); }catch(e){} });
   function goHome(){
     var tw=$('teachWrap'); if(tw && !tw.classList.contains('hidden')){ var c=$('tchClose'); if(c) c.click(); }
@@ -4097,23 +4269,20 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     closeDrawer(); showIntro(); window.scrollTo(0,0);
   }
   $('homeBtn').addEventListener('click',goHome);
+  function teachNote(){ var n=$('tchNote'); if(!n) return; var s=LS.skill, nm={cmp:'Compare',as:'Add & subtract'}[s]; n.textContent= (document.body.classList.contains('teachonly') && nm)? 'There is no lesson presentation for '+nm+' yet. This is the place value lesson.' : ''; }
+  new MutationObserver(teachNote).observe($('teachWrap'),{attributes:true,attributeFilter:['class']});
   $('tchClose').addEventListener('click',function(){ if(document.body.classList.contains('teachonly')){ document.body.classList.remove('teachonly'); showIntro(); } });
   if($('tchHome')) $('tchHome').addEventListener('click',goHome);
   document.addEventListener('keydown',function(e){ if(!intro.classList.contains('hidden')) e.stopImmediatePropagation(); },true);
-  /* panel 1: Preset Lessons */
-  var P1=picker(false); inline(P1,$('introPick'),true);
-  $('introBoard').addEventListener('click',function(){ go('present'); });
-  function openFull(view){ intro.classList.add('hidden'); simple(false); var t=document.querySelector('button.tab[data-view="'+view+'"]'); if(t) t.click(); apply(); }
-  $('introMore').addEventListener('click',function(){ openFull('present'); });
-  $('introMore2').addEventListener('click',function(){ openFull('sheets'); });
-  /* panel 3: step by step */
-  var P3=picker(true), st3=$('introSteps');
-  step(st3,1,'Which numbers?').appendChild(P3.range);
-  step(st3,2,'What are you practising?').appendChild(P3.skill);
-  var s3=step(st3,3,'How should it look?'); s3.appendChild(P3.method); s3.appendChild(P3.rep); s3.appendChild(P3.repTxt);
-  var s4=step(st3,4,'Print or download'); s4.innerHTML='<div class="row"><button type="button" class="btn" id="introPrint">Practice pages ▸</button><button type="button" class="btn alt" id="introSlides">Slides ▸</button></div>';
-  $('introPrint').addEventListener('click',function(){ go('sheets'); });
-  $('introSlides').addEventListener('click',function(){ go('slides'); });
+  /* home: number range → skill → method → representation → format */
+  var P1=picker(false), st=$('introSteps');
+  step(st,1,'Numbers').appendChild(P1.range);
+  step(st,2,'Skill').appendChild(P1.skill);
+  step(st,3,'Method').appendChild(P1.method);
+  var s4=step(st,4,'Show with'); s4.appendChild(P1.rep); s4.appendChild(P1.repTxt);
+  var s5=step(st,5,'Format');
+  s5.innerHTML='<div class="ifmt"><button type="button" class="fbtn" data-job="teach" style="background:#1F3A5F">Lesson presentation</button><button type="button" class="fbtn" data-job="present" style="background:#355E3B">Practice presentation</button><button type="button" class="fbtn" data-job="sheets" style="background:#8E4F3A">Practice pages</button><button type="button" class="fbtn" data-job="centers" style="background:#6E4E63">Center activities</button></div>';
+  [].forEach.call(s5.querySelectorAll('.fbtn'),function(b){ b.addEventListener('click',function(){ go(b.dataset.job); }); });
   $('introHow').addEventListener('click',function(){ var h=$('howBtn'); if(h) h.click(); });
   refreshAll();
   function tchTitle(){ var t=$('tchTitle'), l=$('tchLesson'); if(t&&l) t.textContent='Teach: '+(l.value==='npt'? 'next & previous ten' : 'every number is built by ones'); }
