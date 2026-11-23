@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v101</title>
+<title>Numerics · Place Value Toolkit v102</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -278,7 +278,7 @@
   .tch2 .tq{position:absolute;left:50px;right:50px;top:34px}
   .tch2 .ta{position:absolute;left:0;right:0;top:100px}
   .tch2 .ttag{position:absolute;left:0;right:0;top:160px;margin:0}
-  .tch2 .treg{position:absolute;left:60px;top:200px;width:1160px;height:400px}
+  .tch2 .treg{position:absolute;left:60px;top:245px;width:1160px;height:360px}
   .tch2 .tpz,.kpic .tpz{position:absolute;box-sizing:border-box;transition:left .8s ease,top .8s ease,width .8s ease,height .8s ease,transform .8s ease,opacity .6s ease}
   .tch2 .tpl,.kpic .tpl{position:absolute;left:0;right:0;height:0}
   .tch2 .tfc,.kpic .tfc{position:absolute;box-sizing:border-box;background:#fff}
@@ -289,6 +289,9 @@
   .tch2 .teq{position:absolute;left:0;right:0;top:300px;margin:0}
   .tch2 .tknow{position:absolute;left:230px;top:112px;margin:0}
   #tchLiveBtn,#tchWatchBtn{display:none!important}
+  .tch2 .tqa{position:absolute;left:50px;right:50px;top:30px;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .tch2 .tqa .tq,.tch2 .tqa .ta{position:static;margin:0;line-height:1.2}
+  .tch2 .tqa .ta{font-size:34px}
   .tch2 .tgoal{position:absolute;left:120px;right:120px;top:320px;font-size:48px;color:#1F3A5F;line-height:1.3}
   .tch2 .tsec{position:absolute;left:0;right:0;top:300px;font-size:64px;font-weight:bold;color:#355E3B}
   .tch2 .tbig.solo{right:0;left:0;top:250px}
@@ -3748,7 +3751,7 @@ function tKeyScenes(n, pre){
   return S;
 }
 function tExtent(scs){ let W=0,H=0; scs.forEach(sc=>sc&&sc.parts.forEach(p=>{ const w=p.t==='frame'?2:p.t==='rod'?1:(p.s||1), h=p.t==='frame'?5:p.t==='rod'?10:(p.s||1); W=Math.max(W,p.x+w); H=Math.max(H,p.y+h); })); return {W:W,H:H}; }
-const TREG={x:60,y:200,w:1160,h:400};
+const TREG={x:60,y:245,w:1160,h:360};
 function tPieceHTML(p,u,ox,oy){
   const sc=SCHEMES[S.scheme], L=ox+p.x*u, T=oy+p.y*u, k=p.k;
   if(p.t==='cube'){ const sz=(p.s||1)*u, cf= p.col==='blue'? '#BFE3F5' : p.col==='gone'? '#F6DAD7' : sc.one.fill, ce= p.col==='blue'? '#4A90B8' : p.col==='gone'? '#C2483D' : sc.one.edge; return '<div class="tpz" data-k="'+k+'" data-z="'+p.z+'" style="left:'+L+'px;top:'+T+'px;width:'+sz+'px;height:'+sz+'px;z-index:'+p.z+';background:'+cf+';border:'+Math.max(1.2,u*.06)+'px '+(p.col==='gone'?'dashed':'solid')+' '+ce+';transform:rotate('+(p.r||0)+'deg)" data-r="'+(p.r||0)+'">'+(p.col==='gone'? '<span style="position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;color:#C2483D;font:bold '+(sz*.72)+'px sans-serif;line-height:1">✕</span>' : '')+'</div>'; }
@@ -3763,7 +3766,7 @@ function tPieceHTML(p,u,ox,oy){
 function tSceneHTML(sc){
   if(!sc) return '<div class="treg"></div>';
   const EW=sc.W||TU.W, EH=sc.H||TU.H, u=Math.min(TREG.w/EW, TREG.h/EH, 64); let ox=(TREG.w-EW*u)/2, oy=(TREG.h-EH*u)/2;
-  if(sc.parts.length && sc.parts.every(p=>p.t==='cube' && (p.s||1)===1 && p.r)){ let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; sc.parts.forEach(p=>{ x0=Math.min(x0,p.x); x1=Math.max(x1,p.x+1); y0=Math.min(y0,p.y); y1=Math.max(y1,p.y+1); }); ox=(TREG.w-(x1-x0)*u)/2-x0*u; oy=(TREG.h-(y1-y0)*u)/2-y0*u; }   // v100: a pile of loose items sits in the middle
+  if(sc.parts.length){ let x0=1e9,x1=-1e9,y0=1e9,y1=-1e9; sc.parts.forEach(p=>{ if(p.t==='txt') return; const pw=p.t==='frame'?2:p.t==='rod'?1:p.t==='box'?p.w:(p.s||1), ph=p.t==='frame'?5:p.t==='rod'?10:p.t==='box'?p.h:(p.s||1); x0=Math.min(x0,p.x); x1=Math.max(x1,p.x+pw); y0=Math.min(y0,p.y); y1=Math.max(y1,p.y+ph); }); ox=(TREG.w-(x1-x0)*u)/2-x0*u; oy=(TREG.h-(y1-y0)*u)/2-y0*u; }   // v101: every picture sits in the middle of the screen
   return '<div class="treg">'+sc.parts.map(p=>kPieceHTML(p,u,ox,oy)).join('')+'</div>';
 }
 function tPair(a,b){   // two scenes side by side, each with its own keys
@@ -3771,6 +3774,7 @@ function tPair(a,b){   // two scenes side by side, each with its own keys
   return {parts:a.parts.concat(b.parts.map(p=>Object.assign({},p,{x:p.x+ea.W+gap}))), W:ea.W+gap+eb.W, H:Math.max(ea.H,eb.H)};
 }
 
+function tLines(s){ return String(s).replace(/([a-z])-([a-z])/g,'$1\u2011$2').replace(/([.?!:])\s+(?=[A-Z0-9\u201c"(])/g,'$1<br>'); }
 function teachHTML(st,n){
   if(st.num) n=st.num;
   const t=Math.floor(n/10), o=n%10, sym=S.astyle==='sym';
@@ -3778,16 +3782,17 @@ function teachHTML(st,n){
   if(st.know){
     const L= st.lesson==='cmp'? [['A ten is','10','ones.'],['We always bundle at','ten'],['The structure name tells how many tens and how many','ones'],['4 tens is','more','than 3 tens.'],['The numeral tells us the','structure','name.']]
       : st.lesson==='npt'? [['A ten frame holds','10','ones.'],['We always bundle at','ten'],['10 ones make','1 ten'],['The structure name tells how many tens and how many','ones'],['When we take away, there are','fewer','items left.']]
-      : [['When we count, we say one number for each','item'],['The last number we say tells us','how many'],['A ten frame holds','10','items.'],['5 and 5 make','10'],['The counting name tells','how many']];
+      : [['When we count, we say one number for each','item'],['The last number we say tells us','how many'],['A ten frame holds','10','items.'],['5 and 5 make','10'],['We can count ones to find the','whole']];
     const kn= st.kn===undefined? (st.show?5:0) : st.kn;
     return h+'<div class="tq">What do we know?</div><div class="tknow">'+L.map((l,i)=>'<div>'+l[0]+' <span class="tblank'+(i<kn?' on':'')+'"><span>'+l[1]+'</span></span>'+(l[2]?' '+l[2]:'.')+'</div>').join('')+'</div>'+tSceneHTML(null)+'</div>';
   }
   if(st.sec) return h+'<div class="tsec">'+st.sec+'</div>'+tSceneHTML(null)+'</div>';
-  if(st.goal) return h+'<div class="tsec" style="top:190px">Today</div><div class="tgoal">'+st.goal+'</div>'+tSceneHTML(null)+'</div>';
-  h+='<div class="tq">'+st.q+'</div>';
-  if(st.a) h+='<div class="ta'+(st.show?' on':'')+'"><span>'+st.a+'</span></div>';
+  if(st.goal) return h+'<div class="tsec" style="top:190px">Today</div><div class="tgoal">'+tLines(st.goal)+'</div>'+tSceneHTML(null)+'</div>';
+  const nl=s=>s? String(tLines(s)).split('<br>').reduce((k,l)=>k+Math.max(1,Math.ceil(l.length/44)),0) : 0, NL=nl(st.q)+(st.a? nl(st.a)+.4 : 0);
+  h+='<div class="tqa"><div class="tq">'+tLines(st.q)+'</div>'+(st.a? '<div class="ta'+(st.show?' on':'')+'"><span>'+tLines(st.a)+'</span></div>' : '')+'</div>';
+  TCH.tall= NL>2.5;
   if(st.tag && st.show) h+='<div class="ttag">'+st.tag+'</div>';
-  h+=tSceneHTML(st.sc||null);
+  h+=tSceneHTML(st.sc||null).replace('class="treg"','class="treg'+(TCH.tall?' tall':'')+'"');
   if(st.big) h+='<div class="tbigt">'+st.big+'</div>';
   if(st.line) h+='<div class="tline">'+nptLineSVG({A:st.lineN||n,lvl:'100'},st.line,1100)+'</div>';
   if(st.eq2){ const o=n%10, N=n-o+10, Pv=n-o, B=(v)=>'<span class="tbox'+(st.show?' on':'')+'"><span>'+v+'</span></span>';
@@ -3803,7 +3808,7 @@ function teachHTML(st,n){
     h+='<div class="teq">'+(sym? B(t*10)+'<span class="top">+</span>'+B(o)+'<span class="top">=</span>'+B(n,true)
                                  : B(t*10)+'<span class="top w">and</span>'+B(o)+'<span class="top w">make</span>'+B(n,true))+'</div>';
   }
-  if(st.note && st.show) h+='<div class="tnote">'+st.note+'</div>';
+  if(st.note && st.show) h+='<div class="tnote">'+tLines(st.note)+'</div>';
   return h+'</div>';
 }
 /* live view: keep each keyed piece and move it, so the change is seen (like Morph) */
@@ -3813,6 +3818,7 @@ function teachRender(){
   tmp.innerHTML=teachHTML(st,TCH.n);
   const newReg=tmp.querySelector('.treg'), oldReg=stage.querySelector('.treg');
   if(oldReg && newReg){
+    oldReg.className=newReg.className;
     const keep=new Map(); oldReg.querySelectorAll(':scope>.tpz').forEach(e=>keep.set(e.dataset.k||e.dataset.g,e));
     const seen=new Set();
     [...newReg.children].forEach(ne=>{ const key=ne.dataset.k||ne.dataset.g; seen.add(key); const oe=keep.get(key);
@@ -3926,17 +3932,6 @@ function teachSteps(n){
   say(sym? (t*10)+' + '+o+' = '+n+'.' : (t*10)+' and '+o+' make '+n+'.', {eq:true});
   if(t){ say('If I unbundle 1 ten, the number of items does not change.', {sc:K.unb[0], note:'There are still '+nm+' items. '+structName(n,t-1,o+10)+'.'}); }
   if(t && !o) say('The 0 tells us 0 ones. Every item has been bundled into tens.', {numeral:true, digits:true});
-  sec('We do · Build '+m);
-  say('How many items are there? Let us bundle to find out.', {sc:L.loose});
-  q('How many tens can we make?', 'We can make '+plural(tm,'ten')+'.', {sc:L.loose}, {sc:L.fin});
-  q('How many ones are left?', 'There '+(om===1?'is ':'are ')+plural(om,'one')+' left.', {sc:L.fin});
-  q('How many items are there?', countOn(tm,om)+'. There are '+mn+' items.', {sc:L.fin, note:'Count the tens, then the ones.'});
-  q('What is the structure name?', 'The structure name is '+structName(m)+'.', {sc:L.fin});
-  q('What numeral represents '+mn+'?', 'The numeral '+m+' represents '+mn+'.', {sc:L.fin}, {numeral:true, num:m});
-  q('What are the parts?', 'The parts are '+(tm*10)+' and '+om+'.', {sc:L.fin});
-  q(sym? 'What is '+(tm*10)+' + '+om+'?' : 'What do '+(tm*10)+' and '+om+' make?', '', {eq:true, num:m});
-  if(Y.length){ sec('You do');
-    Y.forEach((sc,i)=>q('Build '+youdo[i]+'. What is the structure name?', youdo[i]+' is '+structName(youdo[i])+'.', {numeral:true, num:youdo[i], solo:true}, {sc:sc})); }
   return T_.S_;
 }
 /* ---------- Next And Previous Ten ---------- */
@@ -3966,15 +3961,6 @@ function nptTeachSteps(n){
   say('Now there '+(t===1?'is ':'are ')+plural(t,'ten')+'. The previous ten is '+Pv+'.', {sc:K.tens, note:Pv+' is '+l+' less than '+n+'.'});
   say(n+' is between '+Pv+' and '+N+'.', {line:'both'});
   say(sym? n+' + '+mm+' = '+N+'.   '+n+' − '+l+' = '+Pv+'.' : n+' and '+mm+' make '+N+'. '+n+' take away '+l+' is '+Pv+'.', {eq2:true});
-  sec('We do · '+w);
-  q('How much more is the next ten?', NW+' is '+(NW-w)+' more than '+w+'.', {sc:L.base}, {sc:L.fill});
-  q('What is the next ten?', 'The next ten is '+NW+'. '+NW+' is '+plural(tw+1,'ten')+'.', {sc:L.fill}, {sc:L.bun});
-  q('How much less is the previous ten?', PW+' is '+ow+' less than '+w+'.', {sc:L.base}, {sc:L.gone});
-  q('What is the previous ten?', 'The previous ten is '+PW+'. '+PW+' is '+plural(tw,'ten')+'.', {sc:L.tens});
-  q('Where is '+w+' on the number line?', w+' is between '+PW+' and '+NW+'.', {line:'none', lineN:w}, {line:'both', lineN:w});
-  q('What goes in the boxes?', '', {eq2:true, num:w});
-  if(youdo.length){ sec('You do');
-    youdo.forEach(v=>{ const o2=v%10, N2=v-o2+10, P2=v-o2; q(v+': How much more? How much less?', N2+' is '+(N2-v)+' more than '+v+'. '+P2+' is '+o2+' less than '+v+'.', {numeral:true,num:v,solo:true}, {numeral:false, line:'both', lineN:v}); }); }
   return T_.S_;
 }
 /* ---------- Compare Numbers ---------- */
@@ -4022,19 +4008,6 @@ function cmpTeachSteps(n){
   say('When the tens are the same, I compare the ones.', {sc:P1o});
   say(plural(o,'one')+' and '+plural(o2,'one')+'. '+plural(Math.max(o,o2),'one')+' is more.', {sc:P1o});
   say(big(n,B2)+' is greater than '+small(n,B2)+'. '+n+' '+rel(n,B2)+' '+B2+'.', {sc:P1o, note:n+' '+relW(n,B2)+' '+B2+'.'});
-  sec('We do · '+W1a+' and '+W1b);
-  q('Which place do we compare first?', 'We compare the tens first.', {sc:Q1}, {sc:Q1t});
-  q('Compare the tens.', plural(Math.max(Math.floor(W1a/10),Math.floor(W1b/10)),'ten')+' is more than '+plural(Math.min(Math.floor(W1a/10),Math.floor(W1b/10)),'ten')+'.', {sc:Q1t});
-  q('Which number is greater?', big(W1a,W1b)+' is greater than '+small(W1a,W1b)+'.', {sc:Q1t});
-  q('Write it with a symbol: '+W1a+' ☐ '+W1b, W1a+' '+rel(W1a,W1b)+' '+W1b+'. '+W1a+' '+relW(W1a,W1b)+' '+W1b+'.', {sc:Q1t});
-  sec('We do · '+W2a+' and '+W2b);
-  q('Compare the tens.', plural(Math.floor(W2a/10),'ten')+' and '+plural(Math.floor(W2b/10),'ten')+' are the same.', {sc:Q2}, {sc:Q2t});
-  q('The tens are the same. What do we compare next?', 'Next we compare the ones.', {sc:Q2t}, {sc:Q2o});
-  q('Compare the ones.', plural(Math.max(W2a%10,W2b%10),'one')+' is more than '+plural(Math.min(W2a%10,W2b%10),'one')+'.', {sc:Q2o});
-  q('Write it with a symbol: '+W2a+' ☐ '+W2b, W2a+' '+rel(W2a,W2b)+' '+W2b+'. '+W2a+' '+relW(W2a,W2b)+' '+W2b+'.', {sc:Q2o});
-  if(Y.length){ sec('You do');
-    Y.forEach((sc,i)=>{ const a=you[i][0], b=you[i][1];
-      q('Compare '+a+' and '+b+'.', a+' '+rel(a,b)+' '+b+'. '+a+' '+relW(a,b)+' '+b+'.', {big:a+' ☐ '+b, solo:true}, {big:null, sc:sc}); }); }
   return T_.S_;
 }
 
