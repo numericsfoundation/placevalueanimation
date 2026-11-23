@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Generator v83</title>
+<title>Numerics · Place Value Generator v84</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -240,7 +240,7 @@
   .tch .tnote{font-size:30px;color:#24303f;margin-top:4px}
   .tch .tpic{display:flex;justify-content:center;align-items:center;flex:0 0 auto}
   .tch .tbig{font-size:150px;line-height:1;margin:4px 0}
-  .tch .tknow{font-size:42px;line-height:1.9;text-align:left;margin-top:40px}
+  .tch .tknow{font-size:40px;line-height:1.75;text-align:left;margin-top:24px}
   .tch .tblank{display:inline-block;min-width:150px;border-bottom:3px solid #111;text-align:center;line-height:1.1}
   .tch .tblank span{visibility:hidden}
   .tch .tblank.on span{visibility:visible;background:#DCEBD5;border-radius:8px;padding:0 10px;color:#355E3B;font-weight:bold}
@@ -381,7 +381,7 @@
     <label class="ck"><input type="checkbox" data-line="qty" checked>Quantities</label>
     <label class="ck"><input type="checkbox" data-line="val" checked>Values</label>
     <label class="ck"><input type="checkbox" data-line="struct" checked>Structure name</label>
-    <label class="ck"><input type="checkbox" data-line="name" checked>Number name</label>
+    <label class="ck"><input type="checkbox" data-line="name" checked>Counting name</label>
   </div>
   <div class="grp"><span class="t">Ten frame fill</span>
     <select id="fill">
@@ -969,7 +969,7 @@ function problemHTML(n, ctx){
     if(S.lines.val) h+='<div class="row'+cls('val',ctx)+'">'+cell(t*10,S.lines.qty?'':'tens','',G)+'<div class="'+oc+'">'+pl+'</div>'+cell(o,S.lines.qty?'':'ones')+'</div>';
   }
   if(!ctx.noNames && S.lines.struct) h+='<div class="row'+cls('struct',ctx)+'">'+cell(structName(n,t,o),'structure name',' wide')+'</div>';
-  if(!ctx.noNames && S.lines.name)   h+='<div class="row'+cls('name',ctx)+'">'+cell(words(n),'number name',' wide')+'</div>';
+  if(!ctx.noNames && S.lines.name)   h+='<div class="row'+cls('name',ctx)+'">'+cell(words(n),'counting name',' wide')+'</div>';
   return h+'</div>';
 }
 
@@ -1123,7 +1123,7 @@ function problemHTML3(n, ctx){
     if(S.lines.val) s+='<div class="row'+cls('val',ctx)+'">'+cell(h*100,L('hundreds'),'',Gh)+op+cell(t*10,L('tens'),'',Gt)+op+cell(o,L('ones'),'',Go)+'</div>';
   }
   if(!ctx.noNames && S.lines.struct) s+='<div class="row'+cls('struct',ctx)+'">'+cell(structName3(h,t,o),'structure name',' wide w3')+'</div>';
-  if(!ctx.noNames && S.lines.name)   s+='<div class="row'+cls('name',ctx)+'">'+cell(words3(n),'number name',' wide w3')+'</div>';
+  if(!ctx.noNames && S.lines.name)   s+='<div class="row'+cls('name',ctx)+'">'+cell(words3(n),'counting name',' wide w3')+'</div>';
   return s+'</div>';
 }
 /* non-canonical within 1000: trade 1 ten for 10 ones, or 1 hundred for 10 tens.
@@ -2698,7 +2698,7 @@ function notesFor(it,mode,st,si,ns,pno){
     if(k==='qty') return J(placeQ(a).concat(tail));
     if(k==='val') return J(worth(a).concat(tail));
     if(k==='struct') return J([T('Tell me the structure of the number.'),Sx(structWords(a)+'.')].concat(tail));
-    if(k==='name') return J([T('What is the number name?'),Sx(NW(it.n)+'.')].concat(tail));
+    if(k==='name') return J([T('What is the counting name?'),Sx(NW(it.n)+'.')].concat(tail));
     if(k==='num') return J([T('What is the numeral?'),Sx(it.n+'.')].concat(tail));
     return J([T('Check your page.')].concat(tail));
   }
@@ -3122,8 +3122,8 @@ buildSet();
 
 /* ================= v83: TEACH =================
    The Grade 1 instructional sequence for one number (within 100), one question per slide and the answer on the next:
-   what do we know -> built by ones (how many ones, number name) -> bundle at ten -> structure name ->
-   the numeral is a symbol for the number name -> the numeral tells the structure -> parts name -> equation ->
+   what do we know -> built by ones (how many ones, counting name = the whole) -> bundle every ten, step by step -> structure name ->
+   the counting name gets a numeral -> the numeral tells the structure -> parts name -> equation ->
    unbundle check (the whole stays the same) -> zero.  Shown live in the Teach panel and downloaded as a PowerPoint. */
 const TCH={ n:34, steps:[], i:0, timer:null };
 function onesScene(n){
@@ -3138,45 +3138,55 @@ function onesScene(n){
 function tightScene(sc){ let W=0; sc.parts.forEach(p=>{ const w= p.t==='frame'? 2 : p.t==='flat'? 10 : p.t==='cube'? (p.s||1) : 1; W=Math.max(W,p.x+w); }); return {parts:sc.parts, W:W, H:sc.H}; }
 function tScene(sc,maxW,maxH){ const u=Math.min(maxW/sc.W, maxH/sc.H, 64); return sceneSVG(sc.parts,sc.W,sc.H,u); }
 function teachSteps(n){
-  const t=Math.floor(n/10), o=n%10, nm=words(n), sym=S.astyle==='sym', S_=[];
-  const ones=onesScene(n), ub=t? unbundleSteps(n,'100') : null, bund=ub? tightScene(ub[0]) : ones, open1=ub&&ub[1];
+  const t=Math.floor(n/10), o=n%10, nm=words(n), Nm=nm.charAt(0).toUpperCase()+nm.slice(1), sym=S.astyle==='sym', S_=[];
+  const bs=bundleSteps(n,'100'), loose=bs[0], fin=bs[bs.length-1], ub=t? unbundleSteps(n,'100') : null;
   const q=(text,ans,o2)=>{ S_.push(Object.assign({q:text,a:ans,show:false},o2||{})); S_.push(Object.assign({q:text,a:ans,show:true},o2||{})); };
   const say=(text,o2)=>S_.push(Object.assign({q:text,a:null,show:true},o2||{}));
   // 1. what do we know?
   S_.push({know:true,show:false}); S_.push({know:true,show:true});
-  // 2. built by ones
-  q('How many ones?', n+(n===1?' one.':' ones.'), {pic:ones});
-  q('What is the number name?', nm.charAt(0).toUpperCase()+nm.slice(1)+'.', {pic:ones, note:'The number name tells how many ones.'});
-  // 3. bundle at ten
+  // 2. the whole set: every number is built by ones; the counting name tells the whole
+  q('How many ones?', Nm+(n===1?' one.':' ones.'), {pic:loose});
+  q('What is the counting name?', Nm+'.', {pic:loose, note:'The counting name tells us the whole.'});
+  // 3. bundle in: every 10 ones
   if(t){
-    q('Can we bundle?', 'Yes. We always bundle at ten.', {pic:ones});
-    say('10 ones make 1 ten.', {pic:bund, note:plural(t,'full ten frame')+' '+(t===1?'becomes':'become')+' '+plural(t,'ten')+'.'});
-  } else q('Can we bundle?', 'No. We bundle at ten. There are not 10 ones.', {pic:ones});
+    q('Can we bundle?', 'Yes. We always bundle at ten.', {pic:loose});
+    let k=0;
+    for(let j=1;j<bs.length;j++){ const st=bs[j];
+      if(st.fin) say(o? 'Put the '+o+' left over in a ten frame.' : 'Every one has been bundled.', {pic:st, note:structName(n)+'.', bundle:'in'});
+      else if(/^Fill/.test(st.cap)) say('Bundle 10 ones.', {pic:st, note:'Fill a ten frame with 10 ones.', bundle:'in'});
+      else { k++; say('10 ones make 1 ten.', {pic:st, note:plural(k,'ten')+' so far.', bundle:'in'}); }
+    }
+  } else q('Can we bundle?', 'No. We bundle at ten. There are not 10 ones.', {pic:loose});
   // 4. structure name
-  q('Tell me the structure of the number.', structName(n)+'.', {pic:bund, tag:'structure name'});
-  // 5. the numeral is a symbol for the number name
-  say('This is the numeral '+n+'.', {pic:bund, numeral:true, note:'It is a symbol for '+nm+'.'});
-  // 6. the numeral tells the structure
-  q('What does the numeral '+n+' tell us?', structName(n)+'.', {numeral:true, digits:true});
+  q('Tell me the structure of the number.', structName(n)+'.', {pic:fin, tag:'structure name'});
+  // 5. the counting name gets a numeral
+  say('The counting name '+nm+' gets a numeral: '+n+'.', {pic:fin, numeral:true, note:'The numeral is the symbol for the counting name.'});
+  // 6. the numeral tells the structure name
+  q('What does the numeral '+n+' tell us?', 'The structure name: '+structName(n)+'.', {numeral:true, digits:true});
   // 7. parts name
-  q('What are the parts?', (t*10)+' and '+o+'.', {pic:bund, tag:'parts name'});
+  q('What are the parts?', (t*10)+' and '+o+'.', {pic:fin, tag:'parts name'});
   // 8. equation
   q(sym? 'What is '+(t*10)+' + '+o+'?' : 'What do '+(t*10)+' and '+o+' make?', '', {eq:true});
-  // 9. unbundle check
-  if(open1){
-    q('Unbundle 1 ten. Did the whole change?', 'No. It is still '+n+'.', {pic:open1, W:ub[0].W, H:ub[0].H});
-    q('What changed?', 'The parts. '+structName(n,t-1,o+10)+'.', {pic:open1});
+  // 9. bundle out: unbundle every ten, the whole stays the same
+  if(ub){
+    q('Unbundle 1 ten. Did the whole change?', 'No. It is still '+n+'.', {pic:ub[1], bundle:'out'});
+    q('What changed?', 'The parts. '+structName(n,t-1,o+10)+'.', {pic:ub[1], bundle:'out'});
+    for(let k=2;k<=t;k++) say('Unbundle 1 more ten.', {pic:ub[k], note:structName(n,t-k,o+10*k)+'.', bundle:'out'});
+    say('Every ten is unbundled.', {pic:ub[t], note:'It is still '+nm+' ones. The whole did not change.', bundle:'out'});
   }
-  // 10. zero
-  if(t && o===0) q('What does the 0 tell us?', 'There are no ones.', {numeral:true, digits:true});
-  else if(t) { const d=t*10, dsc=tightScene(unbundleSteps(d,'100')[0]);
-    q('What about '+d+'? Tell me the structure of the number.', structName(d)+'. The 0 tells us there are no ones.', {pic:dsc}); }
+  // 10. zero: every one has been bundled
+  const zeroA='0 ones. Every one has been bundled into tens.';
+  if(t && o===0) q('What does the 0 tell us?', zeroA, {numeral:true, digits:true});
+  else if(t){ const d=t*10, dsc=bundleSteps(d,'100'); const dfin=dsc[dsc.length-1];
+    q('What about '+d+'? Tell me the structure of the number.', structName(d)+'.', {pic:dfin, num:d});
+    q('What does the 0 tell us?', zeroA, {numeral:true, digits:true, num:d}); }
   return S_;
 }
 function teachHTML(st,n){
+  if(st.num) n=st.num;
   const t=Math.floor(n/10), o=n%10, sym=S.astyle==='sym';
   if(st.know){
-    const L=[['Every number is built by','ones'],['We always bundle at','ten'],['A numeral is a','symbol','for a number.']];
+    const L=[['Every number is built by','ones'],['The counting name tells us the','whole'],['We always bundle at','ten'],['A numeral is a','symbol','for the counting name.'],['The numeral tells us the','structure','name.']];
     return '<div class="tch"><div class="tq">What do we know?</div><div class="tknow">'+L.map(l=>'<div>'+l[0]+' <span class="tblank'+(st.show?' on':'')+'"><span>'+l[1]+'</span></span>'+(l[2]?' '+l[2]:'.')+'</div>').join('')+'</div></div>';
   }
   let h='<div class="tch"><div class="tq">'+st.q+'</div>';
@@ -3305,7 +3315,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
 </script>
 <div id="teachWrap" class="hidden" role="dialog" aria-label="Teach">
   <div id="teachBox">
-    <div id="tchHead"><b>Teach: build the number by ones</b><button id="tchWatchBtn" type="button">Watch the teaching video ▶</button><button id="tchLiveBtn" type="button">Step through a number</button><button id="tchClose" type="button">Close ✕</button></div>
+    <div id="tchHead"><b>Teach: every number is built by ones</b><button id="tchWatchBtn" type="button">Watch the teaching video ▶</button><button id="tchLiveBtn" type="button">Step through a number</button><button id="tchClose" type="button">Close ✕</button></div>
     <div id="tchLive">
       <div id="tchBar">Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
         <button class="btn round" id="tchPrev" type="button" title="Previous">←</button><button class="btn alt" id="tchPlay" type="button">Play ▶</button><button class="btn round" id="tchNext" type="button" title="Next">→</button>
