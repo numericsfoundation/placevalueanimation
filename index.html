@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Generator v91</title>
+<title>Numerics · Place Value Generator v92</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -293,6 +293,26 @@
   #tchMsg{font-size:13px;color:#355E3B}
   #tchVid{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
   #tchVmsg{padding:10px 16px;font-size:14px;color:#555}
+  /* v92: intro page and simple view */
+  #intro{position:fixed;inset:0;z-index:8500;background:#F7F5F1;overflow:auto}
+  #intro.hidden{display:none}
+  #intro .ihead{background:var(--navy);color:#fff;padding:14px 26px;display:flex;gap:14px;align-items:baseline}
+  #intro .ihead b{font-size:22px}#intro .ihead span{opacity:.85}
+  #intro .ibody{max-width:1400px;margin:0 auto;padding:44px 40px}
+  #intro h1{margin:0;color:var(--navy);font-size:38px}#intro .ibody>p{margin:8px 0 0;color:#555;font-size:18px}
+  #intro .icards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin-top:34px}
+  @media(max-width:900px){#intro .icards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  #intro .icard{border-radius:14px;padding:26px 22px;color:#fff;min-height:230px;display:flex;flex-direction:column;gap:12px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease}
+  #intro .icard:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(0,0,0,.18)}
+  #intro .icard h2{margin:0;font-size:25px}#intro .icard p{margin:0;font-size:16px;line-height:1.45;opacity:.95}
+  #intro .igo{margin-top:auto;background:#fff;border-radius:18px;padding:8px 16px;align-self:flex-start;font-weight:bold}
+  #intro .iskip{margin-top:30px;display:flex;gap:22px;align-items:center;color:#555;font-size:15px}
+  #intro .iskip button{background:none;border:0;color:var(--green);font:inherit;font-size:16px;cursor:pointer;padding:0}
+  .lessonGrp select{font-size:15px;padding:5px 8px;border:2px solid var(--green);border-radius:6px;max-width:440px}
+  .drafttag{font-size:11px;background:#F3E3C0;color:#7a5a12;border-radius:8px;padding:2px 7px}
+  body.simple .bar > *:not(.keep):not(.lessonGrp){display:none!important}
+  body.simple .bar.shared{justify-content:flex-start}
+  body.simple #present .bar + .bar{display:none!important}
   /* v79: How to use button and video panel (v81: same size as the tabs, beige outline; version label removed from the page) */
   .howto{background:transparent;color:#EAE3D8;border:1px solid rgba(234,227,216,.55);border-radius:6px;padding:6px 14px;cursor:pointer;line-height:15px}
   .howto:hover{background:rgba(234,227,216,.15)}
@@ -348,6 +368,7 @@
 <header class="top">
   <div class="brand"><b>Numerics</b><span id="brandSub">Place Value within 100</span></div>
   <nav>
+    <button class="howto teachb" id="homeBtn" type="button" title="Back to the start page">⌂ Start</button>
     <button class="howto teachb" id="teachBtn" type="button">Teach ▶</button>
     <button class="tab on" data-view="present">Present</button>
     <button class="tab" data-view="sheets">Practice Problems</button>
@@ -358,6 +379,7 @@
 
 <!-- shared settings -->
 <div class="bar shared">
+  <div class="grp lessonGrp"><span class="t">Lesson</span><select id="lessonSel"><option value="">Choose a lesson…</option></select><span class="drafttag" title="This list is a draft for Laurie to check">draft</span><button class="btn ghost" id="moreBtn" type="button">More settings ⚙</button></div>
   <div class="grp"><span class="t">Topic</span>
     <div class="seg" id="topic"><button data-v="pv" class="on">Place Value</button><button data-v="as">Add &amp; Subtract</button><button data-v="cmp">Compare</button><button data-v="npt">Next &amp; Previous Ten</button></div>
   </div>
@@ -3610,6 +3632,19 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   apply();
 })();
 </script>
+<div id="intro" class="hidden">
+  <div class="ihead"><b>Numerics</b><span>Place Value Generator</span></div>
+  <div class="ibody">
+    <h1>What do you want to do?</h1><p>Choose one. Then pick your lesson, and everything is set for you. You can switch at any time.</p>
+    <div class="icards">
+      <div class="icard" data-job="teach" style="background:#1F3A5F"><h2>Teach a lesson</h2><p>Step through the I do, we do, you do sequence for a number, or watch the model lesson.</p><span class="igo" style="color:#1F3A5F">Start ▸</span></div>
+      <div class="icard" data-job="present" style="background:#355E3B"><h2>Show problems on the board</h2><p>One problem at a time. Reveal each answer when the class is ready.</p><span class="igo" style="color:#355E3B">Start ▸</span></div>
+      <div class="icard" data-job="sheets" style="background:#8E4F3A"><h2>Print practice pages</h2><p>Practice problems with an answer key, ready to print.</p><span class="igo" style="color:#8E4F3A">Start ▸</span></div>
+      <div class="icard" data-job="slides" style="background:#6E4E63"><h2>Make slides</h2><p>Download a PowerPoint with one question per slide.</p><span class="igo" style="color:#6E4E63">Start ▸</span></div>
+    </div>
+    <div class="iskip"><button type="button" id="introSkip">Skip to the full view ›</button> <label><input type="checkbox" id="introRemember"> Always open the full view</label></div>
+  </div>
+</div>
 <div id="teachWrap" class="hidden" role="dialog" aria-label="Teach">
   <div id="teachBox">
     <div id="tchHead"><b>Teach: every number is built by ones</b><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchClose" type="button">Close ✕</button></div>
@@ -3645,6 +3680,74 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   w.addEventListener('click',function(e){ if(e.target===w) close(); });
   w.addEventListener('keydown',function(e){ e.stopPropagation(); if(e.key==='Escape') close(); });
   document.addEventListener('keydown',function(e){ if(e.key==='Escape' && !w.classList.contains('hidden')) close(); },true);
+})();
+</script>
+<script>/* v92: intro page ("What do you want to do?"), lesson presets and the simple view (More settings shows everything) */
+(function(){
+  var $=function(id){ return document.getElementById(id); };
+  /* DRAFT lesson list: by grade and skill. Each sets the Starting point first, then the topic, range, C/P/S, build with, partition. */
+  var PRESETS=[
+    {g:'Grade 1', id:'g1-pv20c',  label:'Place value to 20 · concrete (ten frames)', grade:'g1', topic:'pv', range:'1-20', mode:'C', rep:'frames', canon:'canon'},
+    {g:'Grade 1', id:'g1-pv50c',  label:'Place value to 50 · concrete (rods)',       grade:'g1', topic:'pv', range:'1-50', mode:'C', rep:'rods',   canon:'canon'},
+    {g:'Grade 1', id:'g1-pv50p',  label:'Place value to 50 · pictorial',             grade:'g1', topic:'pv', range:'1-50', mode:'P', rep:'rods',   canon:'canon'},
+    {g:'Grade 1', id:'g1-pv50s',  label:'Place value to 50 · symbolic',              grade:'g1', topic:'pv', range:'1-50', mode:'A', rep:'rods',   canon:'canon', aform:'mix'},
+    {g:'Grade 1', id:'g1-non50',  label:'Bundle and unbundle to 50 (non-canonical)', grade:'g1', topic:'pv', range:'1-50', mode:'C', rep:'rods',   canon:'non'},
+    {g:'Grade 1', id:'g1-npt50',  label:'Next & previous ten to 50 · concrete',      grade:'g1', topic:'npt',range:'1-50', mode:'C', rep:'rods'},
+    {g:'Grade 2', id:'g2-pv100c', label:'Place value to 100 · concrete',             grade:'g2', topic:'pv', range:'1-100', mode:'C', rep:'rods', canon:'canon'},
+    {g:'Grade 2', id:'g2-pv100p', label:'Place value to 100 · pictorial',            grade:'g2', topic:'pv', range:'1-100', mode:'P', rep:'rods', canon:'canon'},
+    {g:'Grade 2', id:'g2-pv100s', label:'Place value to 100 · symbolic',             grade:'g2', topic:'pv', range:'1-100', mode:'A', rep:'rods', canon:'canon', aform:'mix'},
+    {g:'Grade 2', id:'g2-non100', label:'Bundle and unbundle to 100 (non-canonical)',grade:'g2', topic:'pv', range:'1-100', mode:'C', rep:'rods', canon:'non'},
+    {g:'Grade 2', id:'g2-nptc',   label:'Next & previous ten · concrete',            grade:'g2', topic:'npt',range:'1-100', mode:'C', rep:'rods'},
+    {g:'Grade 2', id:'g2-nptp',   label:'Next & previous ten · number line',         grade:'g2', topic:'npt',range:'1-100', mode:'P', rep:'rods'},
+    {g:'Grade 2', id:'g2-npts',   label:'Next & previous ten · symbolic',            grade:'g2', topic:'npt',range:'1-100', mode:'A', rep:'rods'},
+    {g:'Grade 2', id:'g2-cmp',    label:'Compare numbers to 100',                    grade:'g2', topic:'cmp',range:'1-100', mode:'C', rep:'rods'},
+    {g:'Grade 3', id:'g3-pvc',    label:'Place value to 1000 · concrete (disks)',    grade:'g3', topic:'pv', range:'100-1000', mode:'C', rep:'disks', canon:'canon'},
+    {g:'Grade 3', id:'g3-pvp',    label:'Place value to 1000 · pictorial',           grade:'g3', topic:'pv', range:'100-1000', mode:'P', rep:'disks', canon:'canon'},
+    {g:'Grade 3', id:'g3-pvs',    label:'Place value to 1000 · symbolic',            grade:'g3', topic:'pv', range:'100-1000', mode:'A', rep:'disks', canon:'canon', aform:'mix'},
+    {g:'Grade 3', id:'g3-non',    label:'Bundle and unbundle to 1000 (non-canonical)',grade:'g3', topic:'pv', range:'100-1000', mode:'C', rep:'disks', canon:'non'},
+    {g:'Grade 3', id:'g3-nptp',   label:'Next & previous hundred · number line',     grade:'g3', topic:'npt',range:'100-1000', mode:'P', rep:'disks'},
+    {g:'Grade 3', id:'g3-npts',   label:'Next & previous hundred · symbolic',        grade:'g3', topic:'npt',range:'100-1000', mode:'A', rep:'disks'},
+    {g:'Grade 3', id:'g3-cmp',    label:'Compare numbers to 1000',                   grade:'g3', topic:'cmp',range:'100-1000', mode:'C', rep:'disks'}
+  ];
+  var sel=$('lessonSel'); if(!sel) return;
+  var groups={}; PRESETS.forEach(function(p){ (groups[p.g]=groups[p.g]||[]).push(p); });
+  Object.keys(groups).forEach(function(g){ var og=document.createElement('optgroup'); og.label=g; groups[g].forEach(function(p){ var o=document.createElement('option'); o.value=p.id; o.textContent=g+' · '+p.label; og.appendChild(o); }); sel.appendChild(og); });
+  function fire(el,ev){ el.dispatchEvent(new Event(ev||'change',{bubbles:true})); }
+  function setSel(id,v){ var e=$(id); if(!e||v===undefined) return; if([].some.call(e.options,function(o){return o.value===v;})){ e.value=v; fire(e); } }
+  function clickSeg(id,v){ var e=$(id); if(!e||v===undefined) return; var b=e.querySelector('button[data-v="'+v+'"]'); if(b && !b.classList.contains('on')) b.click(); }
+  function apply(id){
+    var p=PRESETS.filter(function(x){ return x.id===id; })[0]; if(!p) return;
+    setSel('grade',p.grade);
+    clickSeg('topic',p.topic);
+    clickSeg('level', p.grade==='g3'? '1000' : '100');
+    setSel('range',p.range);
+    clickSeg('pMode',p.mode); setSel('wMode',p.mode); setSel('sKind','prob'); setSel('sMode',p.mode);
+    clickSeg('pRep',p.rep); setSel('wRep',p.rep); setSel('sRep',p.rep);
+    if(p.canon){ clickSeg('pCanon',p.canon); setSel('wCanon',p.canon); setSel('sCanon',p.canon); }
+    if(p.aform) setSel('aform',p.aform);
+    try{ localStorage.setItem('numerics-lesson',id); }catch(e){}
+    var np=$('newP'); if(np) np.click();
+  }
+  sel.addEventListener('change',function(){ if(sel.value) apply(sel.value); });
+  /* simple view: keep only what the job needs */
+  var KEEP=['lessonSel','moreBtn','pMode','hideAll','showAll','reveal','prev','next','newP','wMode','wPer','wPages','wKey','wNew','wPrint','sKind','sMode','sCount','sNew','sDown','sTitle'];
+  KEEP.forEach(function(id){ var e=$(id); if(!e) return; var g=e.closest('.grp')||e.closest('label')||e; g.classList.add('keep'); });
+  function simple(on){ document.body.classList.toggle('simple',on); var b=$('moreBtn'); if(b) b.textContent= on? 'More settings ⚙' : 'Fewer settings'; }
+  $('moreBtn').addEventListener('click',function(){ simple(!document.body.classList.contains('simple')); });
+  var intro=$('intro');
+  function showIntro(){ intro.classList.remove('hidden'); }
+  function go(job){
+    intro.classList.add('hidden'); simple(true);
+    var map={present:'present',sheets:'sheets',slides:'slides',teach:'present'};
+    var t=document.querySelector('button.tab[data-view="'+map[job]+'"]'); if(t) t.click();
+    if(job==='teach'){ var tb=$('teachBtn'); if(tb) setTimeout(function(){ tb.click(); },50); }
+  }
+  [].forEach.call(document.querySelectorAll('#intro .icard'),function(c){ c.addEventListener('click',function(){ go(c.dataset.job); }); });
+  $('introSkip').addEventListener('click',function(){ intro.classList.add('hidden'); simple(false); try{ localStorage.setItem('numerics-full',$('introRemember').checked?'1':'0'); }catch(e){} });
+  $('homeBtn').addEventListener('click',showIntro);
+  try{ var last=localStorage.getItem('numerics-lesson'); if(last && [].some.call(sel.options,function(o){return o.value===last;})) sel.value=last; }catch(e){}
+  var full=false; try{ full=localStorage.getItem('numerics-full')==='1'; }catch(e){}
+  if(full){ intro.classList.add('hidden'); simple(false); } else showIntro();
 })();
 </script>
 </body>
