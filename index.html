@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Generator v88</title>
+<title>Numerics · Place Value Generator v89</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -3320,7 +3320,7 @@ async function teachDownload(){
     const name='Numerics_Teach_'+n+'.pptx'; let saved=false;
     try{ const dl=await window.claude?.use?.('downloads'); if(dl){ await dl.save({filename:name,data:blob}); saved=true; } }catch(e){}
     if(!saved){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },2000); }
-    msg.textContent='Done: '+name+' ('+steps.length+' slides, Morph between slides).';
+    msg.textContent='';
   }catch(e){ msg.textContent='Could not make the PowerPoint ('+(e&&e.message||e)+').'; }
   finally{ btn.disabled=false; }
 }
