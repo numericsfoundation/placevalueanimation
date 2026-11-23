@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Generator v92</title>
+<title>Numerics · Place Value Generator v94</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -294,6 +294,7 @@
   #tchVid{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
   #tchVmsg{padding:10px 16px;font-size:14px;color:#555}
   /* v92: intro page and simple view */
+  #howWrap{z-index:9000!important}
   #intro{position:fixed;inset:0;z-index:8500;background:#F7F5F1;overflow:auto}
   #intro.hidden{display:none}
   #intro .ihead{background:var(--navy);color:#fff;padding:14px 26px;display:flex;gap:14px;align-items:baseline}
@@ -308,11 +309,61 @@
   #intro .igo{margin-top:auto;background:#fff;border-radius:18px;padding:8px 16px;align-self:flex-start;font-weight:bold}
   #intro .iskip{margin-top:30px;display:flex;gap:22px;align-items:center;color:#555;font-size:15px}
   #intro .iskip button{background:none;border:0;color:var(--green);font:inherit;font-size:16px;cursor:pointer;padding:0}
+  #intro .ibody{max-width:1300px;margin:0 auto;padding:22px 34px 40px}
+  #intro .ipanel{margin-bottom:26px}
+  #intro h3{margin:0;color:var(--navy);font-size:21px}
+  #intro .isub{margin:3px 0 10px;color:#666;font-size:14px}
+  #intro .iwin{background:#fff;border:1px solid #e3ded4;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+  #intro .iwin.pad{padding:18px 20px}
+  #intro .ibar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 18px;background:#faf8f4;border-bottom:1px solid #eee}
+  #intro .ibar select{font-size:15px;padding:5px 8px;border:2px solid var(--green);border-radius:6px;max-width:420px}
+  #intro .ibar .spacer{flex:1}
+  #intro .itip{margin:12px 18px;display:inline-block;background:var(--green);color:#fff;border-radius:6px;padding:6px 12px;font-size:13px}
+  #intro .icards{margin-top:0;gap:16px}
+  #intro .icard{min-height:190px;padding:20px 18px}
+  #intro .icard h2{font-size:21px}#intro .icard p{font-size:14px}
+  #intro .iskip{margin-top:14px}
+  #intro .isteps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+  @media(max-width:1000px){#intro .isteps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  #intro .istep{border:1px solid #e3ded4;border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:9px}
+  #intro .istep .gt{font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px;font-size:15px}
+  #intro .istep .gn{background:var(--navy);color:#fff;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+  #intro .istep .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-start}
+  #intro .istep .seg{align-self:flex-start;display:flex;flex-wrap:wrap}
+  #intro #introLook button{padding:5px 8px;font-size:13px}
+  #intro .istep select{font-size:14px;padding:4px 6px;max-width:100%}
+  #intro .ihow{margin-left:auto;background:none;border:1px solid #EAE3D8;color:#EAE3D8;border-radius:6px;padding:4px 12px;font:inherit;font-size:14px;cursor:pointer}
   .lessonGrp select{font-size:15px;padding:5px 8px;border:2px solid var(--green);border-radius:6px;max-width:440px}
   .drafttag{font-size:11px;background:#F3E3C0;color:#7a5a12;border-radius:8px;padding:2px 7px}
-  body.simple .bar > *:not(.keep):not(.lessonGrp){display:none!important}
-  body.simple .bar.shared{justify-content:flex-start}
-  body.simple #present .bar + .bar{display:none!important}
+  body:not(.simple) #moreBtn{display:none}
+  body.simple .bar.shared, body.simple section > .bar{display:none!important}
+  #guide{display:none}
+  body.simple #guide{display:flex}
+  #guide.strip{flex-wrap:wrap;align-items:center;gap:8px 18px;padding:10px 20px;border-bottom:1px solid #e3e3e3;background:#faf8f4}
+  #guide .gi{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  #guide .spacer{flex:1}
+  #guide.steps{flex-wrap:wrap;align-items:stretch;gap:14px;padding:14px 20px;border-bottom:1px solid #e3e3e3;background:#faf8f4}
+  #guide .gstep{background:#fff;border:1px solid #e3ded4;border-radius:10px;padding:10px 14px;flex:1 1 220px;display:flex;flex-direction:column;gap:8px}
+  #guide .gt{font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px;font-size:15px}
+  #guide .gn{background:var(--navy);color:#fff;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+  #guide .gc{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  #guide .gc select{font-size:14px;padding:4px 6px;max-width:100%}
+  #guide .gstep:first-child .gc{flex-wrap:nowrap}
+  #guide .gstep:first-child select{min-width:0;flex:1}
+  #guide.strip .gi select{max-width:330px}
+  #guide .gmore{flex-basis:100%;display:flex}
+  #guide.steps #moreBtn{background:none;border:0;color:var(--green);padding:0;font-size:14px;cursor:pointer}
+  #moreBtn.on{background:var(--navy);color:#fff}
+  #drawer{display:none}
+  body.more #drawer{display:flex;flex-direction:column;position:fixed;right:0;top:0;bottom:0;width:390px;max-width:92vw;background:#fff;box-shadow:-6px 0 18px rgba(0,0,0,.16);z-index:7000}
+  #drawer .dhead{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;background:var(--navy);color:#fff;font-size:17px}
+  #drawer .dx{background:none;border:0;color:#fff;font-size:18px;cursor:pointer}
+  #drawer .dbody{flex:1;overflow:auto;padding:12px 18px;display:flex;flex-direction:column;gap:14px}
+  #drawer .dbody > .grp{flex-direction:column;align-items:flex-start;gap:5px}
+  #drawer .dbody > .grp > .t{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#777}
+  #drawer .dbody > .grp label.ck{display:inline-flex;margin-right:8px}
+  #drawer .dbody .hidden{display:none!important}
+  #drawer .dfoot{padding:12px 18px;border-top:1px solid #eee;font-size:13px;color:#666;display:flex;flex-direction:column;gap:8px;align-items:flex-start}
   /* v79: How to use button and video panel (v81: same size as the tabs, beige outline; version label removed from the page) */
   .howto{background:transparent;color:#EAE3D8;border:1px solid rgba(234,227,216,.55);border-radius:6px;padding:6px 14px;cursor:pointer;line-height:15px}
   .howto:hover{background:rgba(234,227,216,.15)}
@@ -3633,21 +3684,43 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
 })();
 </script>
 <div id="intro" class="hidden">
-  <div class="ihead"><b>Numerics</b><span>Place Value Generator</span></div>
+  <div class="ihead"><b>Numerics</b><span>Place Value Generator</span><button type="button" id="introHow" class="ihow">How to use ▶</button></div>
   <div class="ibody">
-    <h1>What do you want to do?</h1><p>Choose one. Then pick your lesson, and everything is set for you. You can switch at any time.</p>
-    <div class="icards">
-      <div class="icard" data-job="teach" style="background:#1F3A5F"><h2>Teach a lesson</h2><p>Step through the I do, we do, you do sequence for a number, or watch the model lesson.</p><span class="igo" style="color:#1F3A5F">Start ▸</span></div>
-      <div class="icard" data-job="present" style="background:#355E3B"><h2>Show problems on the board</h2><p>One problem at a time. Reveal each answer when the class is ready.</p><span class="igo" style="color:#355E3B">Start ▸</span></div>
-      <div class="icard" data-job="sheets" style="background:#8E4F3A"><h2>Print practice pages</h2><p>Practice problems with an answer key, ready to print.</p><span class="igo" style="color:#8E4F3A">Start ▸</span></div>
-      <div class="icard" data-job="slides" style="background:#6E4E63"><h2>Make slides</h2><p>Download a PowerPoint with one question per slide.</p><span class="igo" style="color:#6E4E63">Start ▸</span></div>
-    </div>
-    <div class="iskip"><button type="button" id="introSkip">Skip to the full view ›</button> <label><input type="checkbox" id="introRemember"> Always open the full view</label></div>
+    <section class="ipanel">
+      <h3>Lesson presets with a simple bar</h3><p class="isub">One list sets the lesson. Only the essentials show; everything else is in More settings.</p>
+      <div class="iwin"><div class="ibar">
+        <span class="t">Lesson</span><select id="introLesson"><option value="">Choose a lesson…</option></select><span class="drafttag">draft</span>
+        <span class="t">Show</span><div class="seg" id="introShow"><button type="button" data-v="" class="on" title="As the lesson sets it">Lesson</button><button type="button" data-v="C">C</button><button type="button" data-v="P">P</button><button type="button" data-v="A">S</button></div>
+        <button type="button" class="btn alt" id="introBoard">Show on the board ▸</button>
+        <span class="spacer"></span><button type="button" class="btn ghost" id="introMore">More settings ⚙</button>
+      </div><div class="itip">Pick the lesson; everything else is set to match it.</div></div>
+    </section>
+    <section class="ipanel">
+      <h3>What do you want to do?</h3><p class="isub">Four jobs. Each opens a simple screen with only the steps that job needs. You can switch at any time.</p>
+      <div class="iwin pad">
+      <div class="icards">
+        <div class="icard" data-job="teach" style="background:#1F3A5F"><h2>Teach a lesson</h2><p>Step through the I do, we do, you do sequence for a number, or watch the model lesson.</p><span class="igo" style="color:#1F3A5F">Start ▸</span></div>
+        <div class="icard" data-job="present" style="background:#355E3B"><h2>Show problems on the board</h2><p>One problem at a time. Reveal each answer when the class is ready.</p><span class="igo" style="color:#355E3B">Start ▸</span></div>
+        <div class="icard" data-job="sheets" style="background:#8E4F3A"><h2>Print practice pages</h2><p>Practice problems with an answer key, ready to print.</p><span class="igo" style="color:#8E4F3A">Start ▸</span></div>
+        <div class="icard" data-job="slides" style="background:#6E4E63"><h2>Make slides</h2><p>Download a PowerPoint with one question per slide.</p><span class="igo" style="color:#6E4E63">Start ▸</span></div>
+      </div>
+      <div class="iskip"><button type="button" id="introSkip">Skip to the full view ›</button> <label><input type="checkbox" id="introRemember"> Always open the full view</label></div>
+      </div>
+    </section>
+    <section class="ipanel">
+      <h3>Practice pages or slides, step by step</h3><p class="isub">Four steps, then print or download.</p>
+      <div class="iwin pad"><div class="isteps">
+        <div class="istep"><div class="gt"><span class="gn">1</span>What are you practising?</div><select id="introLesson2"><option value="">Choose a lesson…</option></select></div>
+        <div class="istep"><div class="gt"><span class="gn">2</span>Which numbers?</div><div class="row"><div class="seg" id="introLevel"><button type="button" data-v="100" class="on">Within 100</button><button type="button" data-v="1000">Within 1000</button></div><select id="introRange"></select></div></div>
+        <div class="istep"><div class="gt"><span class="gn">3</span>How should it look?</div><div class="seg" id="introLook"><button type="button" data-v="C" class="on">Concrete</button><button type="button" data-v="P">Pictorial</button><button type="button" data-v="A">Symbolic</button><button type="button" data-v="CPA">Mixed</button></div></div>
+        <div class="istep"><div class="gt"><span class="gn">4</span>Print or download</div><div class="row"><button type="button" class="btn" id="introPrint">Practice pages ▸</button><button type="button" class="btn alt" id="introSlides">Slides ▸</button></div></div>
+      </div><div class="iskip"><button type="button" id="introMore2">More choices ⚙</button></div></div>
+    </section>
   </div>
 </div>
 <div id="teachWrap" class="hidden" role="dialog" aria-label="Teach">
   <div id="teachBox">
-    <div id="tchHead"><b>Teach: every number is built by ones</b><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchClose" type="button">Close ✕</button></div>
+    <div id="tchHead"><b>Teach: every number is built by ones</b><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchHome" type="button" title="Back to the start page">⌂ Start</button> <button id="tchClose" type="button">Close ✕</button></div>
     <div id="tchLive">
       <div id="tchBar"><select id="tchLesson" title="Lesson"><option value="build">Every number is built by ones</option><option value="npt">Next &amp; previous ten</option></select> Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
         <button class="btn round" id="tchPrev" type="button" title="Previous">←</button><button class="btn alt" id="tchPlay" type="button">Play ▶</button><button class="btn round" id="tchNext" type="button" title="Next">→</button>
@@ -3729,23 +3802,114 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     var np=$('newP'); if(np) np.click();
   }
   sel.addEventListener('change',function(){ if(sel.value) apply(sel.value); });
-  /* simple view: keep only what the job needs */
-  var KEEP=['lessonSel','moreBtn','pMode','hideAll','showAll','reveal','prev','next','newP','wMode','wPer','wPages','wKey','wNew','wPrint','sKind','sMode','sCount','sNew','sDown','sTitle'];
-  KEEP.forEach(function(id){ var e=$(id); if(!e) return; var g=e.closest('.grp')||e.closest('label')||e; g.classList.add('keep'); });
-  function simple(on){ document.body.classList.toggle('simple',on); var b=$('moreBtn'); if(b) b.textContent= on? 'More settings ⚙' : 'Fewer settings'; }
-  $('moreBtn').addEventListener('click',function(){ simple(!document.body.classList.contains('simple')); });
+  /* simple view: a guide strip with only what the job needs; More settings opens a side panel */
+  var guide=document.createElement('div'); guide.id='guide'; document.querySelector('header.top').after(guide);
+  var drawer=document.createElement('aside'); drawer.id='drawer';
+  drawer.innerHTML='<div class="dhead"><b>More settings</b><button type="button" class="dx" id="drawerX" title="Close">✕</button></div><div class="dbody" id="drawerBody"></div><div class="dfoot">Set by the lesson. Change only if needed.<br><button type="button" class="btn ghost" id="drawerBack">Back to lesson settings</button></div>';
+  document.body.appendChild(drawer);
+  var parkedG=[], parkedD=[];
+  function park(el,dest,list){ if(!el) return; var ph=document.createComment('p'); el.parentNode.insertBefore(ph,el); list.push([el,ph]); dest.appendChild(el); }
+  function unpark(list){ while(list.length){ var x=list.pop(); x[1].parentNode.insertBefore(x[0],x[1]); x[1].remove(); } }
+  function mk(tag,cls,html){ var e=document.createElement(tag); if(cls) e.className=cls; if(html) e.innerHTML=html; return e; }
+  function step(n,title){ var c=mk('div','gstep','<div class="gt"><span class="gn">'+n+'</span>'+title+'</div><div class="gc"></div>'); guide.appendChild(c); return c.querySelector('.gc'); }
+  function closeDrawer(){ unpark(parkedD); document.body.classList.remove('more'); var b=$('moreBtn'); if(b) b.classList.remove('on'); }
+  function openDrawer(){
+    closeDrawer(); var body=$('drawerBody'); var view=document.querySelector('section:not(.hidden)');
+    var bars=[document.querySelector('.bar.shared')]; if(view){ var vb=view.querySelector(':scope > .bar'); if(vb) bars.push(vb); }
+    bars.forEach(function(bar){ [].slice.call(bar.children).forEach(function(c){
+      if(c.classList.contains('spacer')||c.classList.contains('lessonGrp')) return;
+      if(!c.querySelector('select,input,button') && !/^(SELECT|INPUT|BUTTON)$/.test(c.tagName)) return;
+      park(c,body,parkedD); }); });
+    document.body.classList.add('more'); $('moreBtn').classList.add('on');
+  }
+  function buildGuide(job){
+    closeDrawer(); unpark(parkedG); guide.innerHTML='';
+    var more=$('moreBtn'); more.textContent='More settings ⚙';
+    if(job==='sheets'||job==='slides'){
+      guide.className='steps';
+      var c1=step(1,'What are you practising?'); park($('lessonSel'),c1,parkedG); park(document.querySelector('.lessonGrp .drafttag'),c1,parkedG);
+      var c2=step(2,'Which numbers?'); park($('level'),c2,parkedG); park($('range'),c2,parkedG); park($('customBox'),c2,parkedG);
+      var c3=step(3,'How should it look?');
+      if(job==='sheets'){
+        park($('wMode'),c3,parkedG);
+        var c4=step(4,'Print'); park($('wPer').closest('.grp'),c4,parkedG); park($('wPages').closest('.grp'),c4,parkedG); park($('wKey').closest('label'),c4,parkedG); park($('wNew'),c4,parkedG); park($('wPrint'),c4,parkedG);
+      } else {
+        park($('sMode'),c3,parkedG);
+        var c4b=step(4,'Download'); park($('sCount').closest('.grp'),c4b,parkedG); park($('sTitle').closest('label'),c4b,parkedG); park($('sNew'),c4b,parkedG); park($('sDown'),c4b,parkedG);
+      }
+      var m=mk('div','gmore'); guide.appendChild(m); park(more,m,parkedG); more.textContent='More choices ⚙';
+    } else {
+      guide.className='strip';
+      var l=mk('div','gi','<span class="t">Lesson</span>'); guide.appendChild(l); park($('lessonSel'),l,parkedG); park(document.querySelector('.lessonGrp .drafttag'),l,parkedG);
+      var sh=mk('div','gi','<span class="t">Show</span>'); guide.appendChild(sh); park($('pMode'),sh,parkedG);
+      var bt=mk('div','gi'); guide.appendChild(bt);
+      ['hideAll','showAll','reveal','prev','next','newP','animOpen','animOpenUn','animOpenEst'].forEach(function(id){ park($(id),bt,parkedG); });
+      guide.appendChild(mk('div','spacer')); park(more,guide,parkedG);
+    }
+  }
+  function simple(on,job){
+    if(on){ document.body.classList.add('simple'); buildGuide(job||'present'); }
+    else { closeDrawer(); unpark(parkedG); guide.innerHTML=''; document.body.classList.remove('simple'); }
+  }
+  $('moreBtn').addEventListener('click',function(){ if(document.body.classList.contains('more')) closeDrawer(); else openDrawer(); });
+  $('drawerX').addEventListener('click',closeDrawer);
+  $('drawerBack').addEventListener('click',function(){ if(sel.value) apply(sel.value); });
   var intro=$('intro');
   function showIntro(){ intro.classList.remove('hidden'); }
   function go(job){
-    intro.classList.add('hidden'); simple(true);
+    intro.classList.add('hidden');
     var map={present:'present',sheets:'sheets',slides:'slides',teach:'present'};
     var t=document.querySelector('button.tab[data-view="'+map[job]+'"]'); if(t) t.click();
+    simple(true,job);
     if(job==='teach'){ var tb=$('teachBtn'); if(tb) setTimeout(function(){ tb.click(); },50); }
   }
   [].forEach.call(document.querySelectorAll('#intro .icard'),function(c){ c.addEventListener('click',function(){ go(c.dataset.job); }); });
   $('introSkip').addEventListener('click',function(){ intro.classList.add('hidden'); simple(false); try{ localStorage.setItem('numerics-full',$('introRemember').checked?'1':'0'); }catch(e){} });
-  $('homeBtn').addEventListener('click',showIntro);
+  function goHome(){
+    var tw=$('teachWrap'); if(tw && !tw.classList.contains('hidden')){ var c=$('tchClose'); if(c) c.click(); }
+    var hw=$('howWrap'); if(hw && !hw.classList.contains('hidden')){ var h=$('howClose'); if(h) h.click(); }
+    var aw=$('animWrap'); if(aw && !aw.classList.contains('hidden')){ var ac=$('animClose'); if(ac) ac.click(); }
+    closeDrawer(); showIntro(); window.scrollTo(0,0);
+  }
+  $('homeBtn').addEventListener('click',goHome);
+  if($('tchHome')) $('tchHome').addEventListener('click',goHome);
+  document.addEventListener('keydown',function(e){ if(!intro.classList.contains('hidden')) e.stopImmediatePropagation(); },true);
   try{ var last=localStorage.getItem('numerics-lesson'); if(last && [].some.call(sel.options,function(o){return o.value===last;})) sel.value=last; }catch(e){}
+  /* entry page: three panels */
+  var iL=$('introLesson'), iL2=$('introLesson2');
+  [iL,iL2].forEach(function(s){ [].slice.call(sel.children).forEach(function(c){ if(c.tagName==='OPTGROUP') s.appendChild(c.cloneNode(true)); }); });
+  function segOn(id,v){ [].forEach.call($(id).querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.v===v); }); }
+  function segVal(id){ var b=$(id).querySelector('button.on'); return b? b.dataset.v : ''; }
+  ['introShow','introLevel','introLook'].forEach(function(id){ $(id).addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; segOn(id,b.dataset.v); if(id==='introLevel') syncRange(); }); });
+  function syncRange(keep){
+    clickSeg('level',segVal('introLevel'));
+    var r=$('range'), ir=$('introRange'); ir.innerHTML='';
+    [].forEach.call(r.options,function(o){ if(o.value==='custom') return; var n=document.createElement('option'); n.value=o.value; n.textContent=o.textContent; ir.appendChild(n); });
+    ir.value= keep && [].some.call(ir.options,function(o){return o.value===keep;}) ? keep : r.value;
+  }
+  function lessonPicked(v){
+    iL.value=v; iL2.value=v; sel.value=v;
+    var p=PRESETS.filter(function(x){ return x.id===v; })[0]; if(!p) return;
+    segOn('introLevel', p.grade==='g3'? '1000':'100'); syncRange(p.range); segOn('introLook', p.mode);
+  }
+  iL.addEventListener('change',function(){ lessonPicked(iL.value); });
+  iL2.addEventListener('change',function(){ lessonPicked(iL2.value); });
+  function useLesson(){ var v=iL.value; if(v){ sel.value=v; apply(v); } }
+  [].forEach.call(document.querySelectorAll('#intro .icard'),function(c){ c.addEventListener('click',function(){ setTimeout(useLesson,0); }); });
+  $('introBoard').addEventListener('click',function(){ go('present'); useLesson(); var m=segVal('introShow'); if(m){ clickSeg('pMode',m); } });
+  function openFull(view){ intro.classList.add('hidden'); simple(false); var t=document.querySelector('button.tab[data-view="'+view+'"]'); if(t) t.click(); useLesson(); }
+  $('introMore').addEventListener('click',function(){ openFull('present'); });
+  $('introMore2').addEventListener('click',function(){ openFull('sheets'); });
+  function stepGo(job){
+    go(job); useLesson();
+    clickSeg('level',segVal('introLevel')); setSel('range',$('introRange').value);
+    var m=segVal('introLook'); if(job==='sheets'){ setSel('wMode',m); var n=$('wNew'); if(n) n.click(); } else { setSel('sKind','prob'); setSel('sMode',m); var s=$('sNew'); if(s) s.click(); }
+  }
+  $('introPrint').addEventListener('click',function(){ stepGo('sheets'); });
+  $('introSlides').addEventListener('click',function(){ stepGo('slides'); });
+  $('introHow').addEventListener('click',function(){ var h=$('howBtn'); if(h) h.click(); });
+  syncRange();
+  try{ var lastL=localStorage.getItem('numerics-lesson'); if(lastL) lessonPicked(lastL); }catch(e){}
   var full=false; try{ full=localStorage.getItem('numerics-full')==='1'; }catch(e){}
   if(full){ intro.classList.add('hidden'); simple(false); } else showIntro();
 })();
