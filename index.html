@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Generator v94</title>
+<title>Numerics · Place Value Toolkit v96</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -12,7 +12,7 @@
   *{box-sizing:border-box}
   body{margin:0;font-family:"Century Gothic","URW Gothic","Avant Garde",Futura,"Trebuchet MS",sans-serif;color:var(--ink);background:#fff}
   button,select,input{font-family:inherit;font-size:13px}
-  header.top{display:flex;align-items:center;gap:18px;padding:10px 20px;background:var(--navy);color:#fff}
+  header.top{display:flex;align-items:center;gap:18px;padding:10px 20px;background:var(--navy);color:#fff;position:relative;z-index:9400}
   header.top .brand b{font-size:20px;letter-spacing:.5px}
   header.top .brand span{opacity:.85;margin-left:8px}
   header.top nav{display:flex;gap:6px;margin-left:auto}
@@ -294,8 +294,9 @@
   #tchVid{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
   #tchVmsg{padding:10px 16px;font-size:14px;color:#555}
   /* v92: intro page and simple view */
-  #howWrap{z-index:9000!important}
-  #intro{position:fixed;inset:0;z-index:8500;background:#F7F5F1;overflow:auto}
+  #howWrap{z-index:9600!important}
+  body.teachonly #teachWrap{background:#F7F5F1}
+  #intro{position:fixed;inset:0;z-index:9500;background:#F7F5F1;overflow:auto}
   #intro.hidden{display:none}
   #intro .ihead{background:var(--navy);color:#fff;padding:14px 26px;display:flex;gap:14px;align-items:baseline}
   #intro .ihead b{font-size:22px}#intro .ihead span{opacity:.85}
@@ -330,7 +331,10 @@
   #intro .istep .gn{background:var(--navy);color:#fff;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
   #intro .istep .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:flex-start}
   #intro .istep .seg{align-self:flex-start;display:flex;flex-wrap:wrap}
-  #intro #introLook button{padding:5px 8px;font-size:13px}
+  #intro #introLook{display:grid;grid-template-columns:1fr 1fr;width:100%;max-width:280px;border:1px solid #c9c3b8;border-radius:6px;overflow:hidden;gap:0}
+  #intro #introLook button{padding:6px 8px;font-size:14px;border:0;border-radius:0;margin:0;white-space:nowrap}
+  #intro #introLook button:nth-child(odd){border-right:1px solid #c9c3b8}
+  #intro #introLook button:nth-child(-n+2){border-bottom:1px solid #c9c3b8}
   #intro .istep select{font-size:14px;padding:4px 6px;max-width:100%}
   #intro .ihow{margin-left:auto;background:none;border:1px solid #EAE3D8;color:#EAE3D8;border-radius:6px;padding:4px 12px;font:inherit;font-size:14px;cursor:pointer}
   .lessonGrp select{font-size:15px;padding:5px 8px;border:2px solid var(--green);border-radius:6px;max-width:440px}
@@ -603,7 +607,7 @@
     <div class="grp tp-pv"><span class="t">Day</span><input type="number" id="sDay" min="1" max="200" style="width:52px"></div>
     <div class="grp sk-count"><span class="t">Problems</span><input type="number" id="sCount" min="1" max="30" value="5"></div>
     <div class="grp tp-pv"><span class="t">Choose numbers</span><input type="text" id="sList" placeholder="e.g. 12, 15, 18 (blank = random)" style="width:200px"></div>
-    <div class="grp tp-pv sk-seq"><span class="t">Review</span><input type="text" id="sRev" placeholder="blank = the generator picks" style="width:160px" title="Advanced: review questions as JSON"></div>
+    <div class="grp tp-pv sk-seq"><span class="t">Review</span><input type="text" id="sRev" placeholder="blank = the toolkit picks" style="width:160px" title="Advanced: review questions as JSON"></div>
     <label class="ck"><input type="checkbox" id="sTitle">Title slide</label>
     <button class="btn alt" id="sNew">New set</button>
     <button class="btn" id="sDown">Download PowerPoint</button>
@@ -1884,7 +1888,7 @@ function asLines(p,mode){
     } else {
       const v= sub? takeV : 'Add';
       L.push({k:'s0',q:v+' how many to make '+Tn+'?',t:cellN(x)});
-      L.push({k:'s1',q:v+' how many more?',t:cellN(y)});
+      L.push({k:'s1',q:p.B+' is '+x+' and how many?',t:cellN(y)});
       L.push({k:'s2',q: sub?'How much is left?':'How much altogether?',t:cellN(p.R)});
     }
     return L;
@@ -3684,13 +3688,12 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
 })();
 </script>
 <div id="intro" class="hidden">
-  <div class="ihead"><b>Numerics</b><span>Place Value Generator</span><button type="button" id="introHow" class="ihow">How to use ▶</button></div>
+  <div class="ihead"><b>Numerics</b><span>Place Value Toolkit</span><button type="button" id="introHow" class="ihow">How to use ▶</button></div>
   <div class="ibody">
     <section class="ipanel">
-      <h3>Lesson presets with a simple bar</h3><p class="isub">One list sets the lesson. Only the essentials show; everything else is in More settings.</p>
+      <h3>Preset Lessons</h3><p class="isub">One list sets the lesson. Only the essentials show; everything else is in More settings.</p>
       <div class="iwin"><div class="ibar">
         <span class="t">Lesson</span><select id="introLesson"><option value="">Choose a lesson…</option></select><span class="drafttag">draft</span>
-        <span class="t">Show</span><div class="seg" id="introShow"><button type="button" data-v="" class="on" title="As the lesson sets it">Lesson</button><button type="button" data-v="C">C</button><button type="button" data-v="P">P</button><button type="button" data-v="A">S</button></div>
         <button type="button" class="btn alt" id="introBoard">Show on the board ▸</button>
         <span class="spacer"></span><button type="button" class="btn ghost" id="introMore">More settings ⚙</button>
       </div><div class="itip">Pick the lesson; everything else is set to match it.</div></div>
@@ -3720,7 +3723,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
 </div>
 <div id="teachWrap" class="hidden" role="dialog" aria-label="Teach">
   <div id="teachBox">
-    <div id="tchHead"><b>Teach: every number is built by ones</b><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchHome" type="button" title="Back to the start page">⌂ Start</button> <button id="tchClose" type="button">Close ✕</button></div>
+    <div id="tchHead"><b id="tchTitle">Teach: every number is built by ones</b><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchHome" type="button" title="Back to the start page">⌂ Start</button> <button id="tchClose" type="button">Close ✕</button></div>
     <div id="tchLive">
       <div id="tchBar"><select id="tchLesson" title="Lesson"><option value="build">Every number is built by ones</option><option value="npt">Next &amp; previous ten</option></select> Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
         <button class="btn round" id="tchPrev" type="button" title="Previous">←</button><button class="btn alt" id="tchPlay" type="button">Play ▶</button><button class="btn round" id="tchNext" type="button" title="Next">→</button>
@@ -3730,9 +3733,9 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     <div id="tchWatch" class="hidden"><video id="tchVid" controls preload="none" playsinline></video><div id="tchVmsg">A 6-minute model lesson for 34 (review, I do, we do, you do) with the bundling moving in and out. The captions give the teacher wording; turn them off with the CC button to show the video to the class. Use Step through a number to teach any number to 100.</div></div>
   </div>
 </div>
-<div id="howWrap" class="hidden" role="dialog" aria-label="How to use the Place Value Generator">
+<div id="howWrap" class="hidden" role="dialog" aria-label="How to use the Place Value Toolkit">
   <div id="howBox">
-    <div id="howHead"><b>How to use the Place Value Generator</b><button id="howClose" type="button">Close ✕</button></div>
+    <div id="howHead"><b>How to use the Place Value Toolkit</b><button id="howClose" type="button">Close ✕</button></div>
     <video id="howVid" controls preload="none" playsinline></video>
     <div id="howMsg">A 3½-minute video with captions and no sound. Press Close or Esc to go back to the generator.</div>
   </div>
@@ -3789,7 +3792,8 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   function setSel(id,v){ var e=$(id); if(!e||v===undefined) return; if([].some.call(e.options,function(o){return o.value===v;})){ e.value=v; fire(e); } }
   function clickSeg(id,v){ var e=$(id); if(!e||v===undefined) return; var b=e.querySelector('button[data-v="'+v+'"]'); if(b && !b.classList.contains('on')) b.click(); }
   function apply(id){
-    var p=PRESETS.filter(function(x){ return x.id===id; })[0]; if(!p) return;
+    var p=PRESETS.filter(function(x){ return x.id===id; })[0]; if(!p) return; applying=true; try{ applyP(p,id); } finally{ applying=false; } }
+  function applyP(p,id){
     setSel('grade',p.grade);
     clickSeg('topic',p.topic);
     clickSeg('level', p.grade==='g3'? '1000' : '100');
@@ -3802,6 +3806,10 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     var np=$('newP'); if(np) np.click();
   }
   sel.addEventListener('change',function(){ if(sel.value) apply(sel.value); });
+  var applying=false, own=document.createElement('option'); own.value='own'; own.textContent='Your own settings'; own.hidden=true; sel.insertBefore(own,sel.options[0].nextSibling);
+  function markOwn(e){ if(applying || !document.getElementById('intro').classList.contains('hidden')) return; var t=e.target; if(!t||t===sel||t.closest('#lessonSel')) return;
+    if(e.type==='click'? !t.closest('.seg button') : !t.closest('select,input')) return; own.hidden=false; sel.value='own'; }
+  ['change','click'].forEach(function(ev){ document.addEventListener(ev,function(e){ if(e.target.closest && (e.target.closest('.bar')||e.target.closest('#drawer')||e.target.closest('#guide'))) markOwn(e); },true); });
   /* simple view: a guide strip with only what the job needs; More settings opens a side panel */
   var guide=document.createElement('div'); guide.id='guide'; document.querySelector('header.top').after(guide);
   var drawer=document.createElement('aside'); drawer.id='drawer';
@@ -3820,6 +3828,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
       if(c.classList.contains('spacer')||c.classList.contains('lessonGrp')) return;
       if(!c.querySelector('select,input,button') && !/^(SELECT|INPUT|BUTTON)$/.test(c.tagName)) return;
       park(c,body,parkedD); }); });
+    var hd=document.querySelector('header.top'); drawer.style.top=(hd? hd.getBoundingClientRect().bottom:0)+'px';
     document.body.classList.add('more'); $('moreBtn').classList.add('on');
   }
   function buildGuide(job){
@@ -3861,6 +3870,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     var map={present:'present',sheets:'sheets',slides:'slides',teach:'present'};
     var t=document.querySelector('button.tab[data-view="'+map[job]+'"]'); if(t) t.click();
     simple(true,job);
+    document.body.classList.toggle('teachonly',job==='teach');
     if(job==='teach'){ var tb=$('teachBtn'); if(tb) setTimeout(function(){ tb.click(); },50); }
   }
   [].forEach.call(document.querySelectorAll('#intro .icard'),function(c){ c.addEventListener('click',function(){ go(c.dataset.job); }); });
@@ -3872,6 +3882,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     closeDrawer(); showIntro(); window.scrollTo(0,0);
   }
   $('homeBtn').addEventListener('click',goHome);
+  $('tchClose').addEventListener('click',function(){ if(document.body.classList.contains('teachonly')){ document.body.classList.remove('teachonly'); showIntro(); } });
   if($('tchHome')) $('tchHome').addEventListener('click',goHome);
   document.addEventListener('keydown',function(e){ if(!intro.classList.contains('hidden')) e.stopImmediatePropagation(); },true);
   try{ var last=localStorage.getItem('numerics-lesson'); if(last && [].some.call(sel.options,function(o){return o.value===last;})) sel.value=last; }catch(e){}
@@ -3880,7 +3891,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   [iL,iL2].forEach(function(s){ [].slice.call(sel.children).forEach(function(c){ if(c.tagName==='OPTGROUP') s.appendChild(c.cloneNode(true)); }); });
   function segOn(id,v){ [].forEach.call($(id).querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.v===v); }); }
   function segVal(id){ var b=$(id).querySelector('button.on'); return b? b.dataset.v : ''; }
-  ['introShow','introLevel','introLook'].forEach(function(id){ $(id).addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; segOn(id,b.dataset.v); if(id==='introLevel') syncRange(); }); });
+  ['introLevel','introLook'].forEach(function(id){ $(id).addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; segOn(id,b.dataset.v); if(id==='introLevel') syncRange(); }); });
   function syncRange(keep){
     clickSeg('level',segVal('introLevel'));
     var r=$('range'), ir=$('introRange'); ir.innerHTML='';
@@ -3896,7 +3907,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   iL2.addEventListener('change',function(){ lessonPicked(iL2.value); });
   function useLesson(){ var v=iL.value; if(v){ sel.value=v; apply(v); } }
   [].forEach.call(document.querySelectorAll('#intro .icard'),function(c){ c.addEventListener('click',function(){ setTimeout(useLesson,0); }); });
-  $('introBoard').addEventListener('click',function(){ go('present'); useLesson(); var m=segVal('introShow'); if(m){ clickSeg('pMode',m); } });
+  $('introBoard').addEventListener('click',function(){ go('present'); useLesson(); });
   function openFull(view){ intro.classList.add('hidden'); simple(false); var t=document.querySelector('button.tab[data-view="'+view+'"]'); if(t) t.click(); useLesson(); }
   $('introMore').addEventListener('click',function(){ openFull('present'); });
   $('introMore2').addEventListener('click',function(){ openFull('sheets'); });
@@ -3910,6 +3921,8 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   $('introHow').addEventListener('click',function(){ var h=$('howBtn'); if(h) h.click(); });
   syncRange();
   try{ var lastL=localStorage.getItem('numerics-lesson'); if(lastL) lessonPicked(lastL); }catch(e){}
+  function tchTitle(){ var t=$('tchTitle'), l=$('tchLesson'); if(t&&l) t.textContent='Teach: '+(l.value==='npt'? 'next & previous ten' : 'every number is built by ones'); }
+  if($('tchLesson')){ $('tchLesson').addEventListener('change',tchTitle); new MutationObserver(tchTitle).observe($('teachWrap'),{attributes:true,attributeFilter:['class']}); }
   var full=false; try{ full=localStorage.getItem('numerics-full')==='1'; }catch(e){}
   if(full){ intro.classList.add('hidden'); simple(false); } else showIntro();
 })();
