@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Generator v90</title>
+<title>Numerics · Place Value Generator v91</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -230,6 +230,10 @@
   .lrow.qrow .line.abox{min-width:1.3em;height:.95em}
   .lrow.qrow .line.abox .f{font-size:.8em}
   .mdoff{display:none!important}
+  /* v91: next & previous ten */
+  .nptp .nsent{font-size:.55em;align-self:center;margin-left:.4em}
+  .nptp .nsent .f{white-space:nowrap}
+  .nptp .nline{margin:.2em 0 .4em}
   /* v83: Teach */
   .tch{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:14px;font-family:"Century Gothic","URW Gothic","Avant Garde",Futura,"Trebuchet MS",sans-serif;color:#111;text-align:center}
   .tch .tq{font-size:44px;font-weight:bold;color:#1F3A5F;line-height:1.2;max-width:1100px}
@@ -281,6 +285,10 @@
   .tch2 .tsec{position:absolute;left:0;right:0;top:300px;font-size:64px;font-weight:bold;color:#355E3B}
   .tch2 .tbig.solo{right:0;left:0;top:250px}
   .tch2 .tbigt{position:absolute;left:0;right:0;top:300px;font-size:110px}
+  .tch2 .tline{position:absolute;left:0;right:0;top:260px;display:flex;justify-content:center}
+  .tch2 .teq2{position:absolute;left:0;right:0;top:230px;font-size:84px;line-height:1.6}
+  .tch2 .teq2>div{display:flex;justify-content:center;align-items:center;gap:22px}
+  .tch2 .teq2 .tbox{height:100px;min-width:130px}
   #tchPos{font-size:13px;color:#666;min-width:60px}
   #tchMsg{font-size:13px;color:#355E3B}
   #tchVid{display:block;width:100%;height:auto;aspect-ratio:16/9;background:#000}
@@ -351,7 +359,7 @@
 <!-- shared settings -->
 <div class="bar shared">
   <div class="grp"><span class="t">Topic</span>
-    <div class="seg" id="topic"><button data-v="pv" class="on">Place Value</button><button data-v="as">Add &amp; Subtract</button><button data-v="cmp">Compare</button></div>
+    <div class="seg" id="topic"><button data-v="pv" class="on">Place Value</button><button data-v="as">Add &amp; Subtract</button><button data-v="cmp">Compare</button><button data-v="npt">Next &amp; Previous Ten</button></div>
   </div>
   <div class="grp tp-as"><span class="t">Operation</span>
     <select id="asOp"><option value="add">Add</option><option value="sub">Subtract</option><option value="mix">Mixed</option></select>
@@ -1504,7 +1512,7 @@ function xMark(x,y,w,h,sw){
          '<line x1="'+(x+w-p)+'" y1="'+(y+p)+'" x2="'+(x+p)+'" y2="'+(y+h-p)+'" stroke="'+XCOL+'" stroke-width="'+sw+'" stroke-linecap="round"/>';
 }
 function rint(a,b){ return a+Math.floor(Math.random()*(b-a+1)); }
-function topicName(){ return S.topic==='as'? 'Add & Subtract' : S.topic==='cmp'? 'Compare Numbers' : 'Place Value'; }
+function topicName(){ return S.topic==='as'? 'Add & Subtract' : S.topic==='cmp'? 'Compare Numbers' : S.topic==='npt'? (S.level==='1000'? 'Next & Previous Hundred' : 'Next & Previous Ten') : 'Place Value'; }
 /* places for the current level: [name, value] */
 function PLACES(L){ return L==='1000'? [['hundreds',100],['tens',10],['ones',1]] : [['tens',10],['ones',1]]; }
 function dg(n,L){ return L==='1000'? [Math.floor(n/100), Math.floor(n/10)%10, n%10] : [Math.floor(n/10), n%10]; }
@@ -1598,7 +1606,7 @@ function genCMP(idx){
   }
   return {kind:'cmp',lvl:L,A:lo,B:hi};   // fallback stays in the range
 }
-function genT(i){ return S.topic==='as'? genAS() : genCMP(i); }
+function genT(i){ return S.topic==='as'? genAS() : S.topic==='npt'? genNPT(i) : genCMP(i); }
 function pkey(p){ return p.kind+p.A+(p.op||'')+p.B; }
 
 /* ---------- small markup pieces ---------- */
@@ -1788,7 +1796,7 @@ function cmpPic(p,rep,u){
   const L=p.lvl, r= (L==='1000'&&rep==='frames')? 'rods' : rep;
   return compose([buildD(r,d3(p.A,L),L,u,null,true), buildD(r,d3(p.B,L),L,u,null,true)], u, '|');
 }
-function topicPic(p,rep,u){ return p.kind==='as'? asPic(p,rep,u) : cmpPic(p,rep,u); }
+function topicPic(p,rep,u){ return p.kind==='as'? asPic(p,rep,u) : p.kind==='npt'? (p.lvl==='1000'? svgWrap(10,10,'') : nptPic(p,u,'none')) : cmpPic(p,rep,u); }
 
 /* ---------- add & subtract ---------- */
 function asLines(p,mode){
@@ -1875,14 +1883,145 @@ function cmpHTML(p,ctx){
   return h+'</div>';
 }
 
+
+/* ================= v91: NEXT & PREVIOUS TEN (within 1000: hundred) =================
+   Next first, then previous. "How much more is the next ten? 7 more. 30 is 7 more than 23."
+   "How much less is the previous ten? 3 less. 20 is 3 less than 23."
+   C (within 100): the ten frame fills with light-blue ones, then bundles into a ten; the ones taken away are marked with a red X.
+   P: a number line from the previous ten to the next ten; straight bars show the whole distance (no curved jumps).
+   Within 1000 the next hundred is made in two steps (next ten, then the hundred); going back, the ones go, then the tens.
+   S: equations with answer boxes (symbols or words). */
+function nptVals(p){
+  const n=p.A, big=p.lvl==='1000', b=big?100:10, Pv=n-n%b, N=Pv+b;
+  const a= big? (10-n%10)%10 : 0;           // to the next ten first (hundreds only)
+  const back1= big? n%10 : 0;               // take away the ones first (hundreds only)
+  return {n:n,b:b,big:big,Pv:Pv,N:N,m:N-n,l:n-Pv,a:a,a2:N-n-a,r1:back1,r2:n-Pv-back1,unit:big?'hundred':'ten'};
+}
+function nptStruct(v,big){ return big? plural(Math.floor(v/100),'hundred') : plural(Math.floor(v/10),'ten'); }
+function genNPT(i){
+  const big=S.level==='1000', b=big?100:10;
+  let cand=pool().filter(v=>v%b!==0 && v>b);
+  if(!cand.length) cand=pool().filter(v=>v%b!==0);
+  if(!cand.length) cand=[big?127:23];
+  return {kind:'npt', A:cand[Math.floor(Math.random()*cand.length)], B:'', lvl:S.level};
+}
+function nptOrder(p,mode){ return mode==='A'? ['nx','pv'] : ['nx','nt','pv','pt']; }
+function wtxt(v,w){ return '<div class="cell"><div class="line" style="width:'+w+'em"><span class="f">'+v+'</span></div></div>'; }
+function nptLines(p,mode){
+  const V=nptVals(p), sym=!WS(), u=V.unit, L=[];
+  const sent=(t)=>'<div class="cell nsent"><span class="f">'+t+'</span></div>';
+  if(mode==='A'){
+    L.push({k:'nx', q:'How much more is the next '+u+'?', t:gn(V.n)+opDiv('+')+cellN(V.m)+opDiv('=','+')+gn(V.N)});
+    L.push({k:'pv', q:'How much less is the previous '+u+'?', t:gn(V.n)+opDiv('-')+cellN(V.l)+opDiv('=','-')+gn(V.Pv)});
+    return L;
+  }
+  L.push({k:'nx', q:'How much more is the next '+u+'?', t:cellN(V.m)+'<div class="op word">more</div>'+sent(V.N+' is '+V.m+' more than '+V.n+'.')});
+  L.push({k:'nt', q:'What is the next '+u+'?', t:cellN(V.N)+wtxt(nptStruct(V.N,V.big),5.2)});
+  L.push({k:'pv', q:'How much less is the previous '+u+'?', t:cellN(V.l)+'<div class="op word">less</div>'+sent(V.Pv+' is '+V.l+' less than '+V.n+'.')});
+  L.push({k:'pt', q:'What is the previous '+u+'?', t:cellN(V.Pv)+wtxt(nptStruct(V.Pv,V.big),5.2)});
+  return L;
+}
+/* picture state = the last step shown */
+function nptState(p,ctx){ if(ctx.key) return 'none'; const ord=['nx','nt','pv','pt']; let s='none'; ord.forEach(k=>{ if(ctx.shown.has(k)) s=k; }); return s; }
+function nptPic(p,u,state){
+  const V=nptVals(p), sc=SCHEMES[S.scheme], sw=Math.max(1.2,u*.07), fsw=Math.max(1,u*.035);
+  const t=Math.floor(V.n/10), o=V.n%10, W=(t+1)*1.5+2.2, H=10; let s='';
+  const X=x=>x*u+sw, Y=y=>y*u+sw;
+  const rods= state==='nt'? t+1 : t;
+  for(let r=0;r<rods;r++) s+=rod(X(r*1.5),Y(0),u,10,sc.ten,sw);
+  if(state!=='nt' && state!=='pt'){
+    const fx=t*1.5, fy=5; s+=emptyFrame(X(fx),Y(fy),u,fsw);
+    for(let j=0;j<10;j++){ const q=fillPos(j), x=X(fx+q.col+.1), y=Y(fy+q.row+.1), z=u*.8;
+      if(j<o){ if(state==='pv'){ s+='<rect x="'+x+'" y="'+y+'" width="'+z+'" height="'+z+'" fill="#F6DAD7" stroke="#C2483D" stroke-width="'+sw+'" stroke-dasharray="'+(u*.12)+' '+(u*.08)+'"/><path d="M'+(x+z*.22)+' '+(y+z*.22)+'L'+(x+z*.78)+' '+(y+z*.78)+'M'+(x+z*.78)+' '+(y+z*.22)+'L'+(x+z*.22)+' '+(y+z*.78)+'" stroke="#C2483D" stroke-width="'+Math.max(1.5,u*.09)+'"/>'; }
+               else s+=cubeSVG(x,y,z,0,sc.one,sw); }
+      else if(state==='nx') s+=cubeSVG(x,y,z,0,{fill:'#BFE3F5',edge:'#4A90B8'},sw);
+    }
+  }
+  return svgWrap(W*u+2*sw,H*u+2*sw,s);
+}
+function nptLineSVG(p,state,Wpx){
+  const V=nptVals(p), W=Wpx||900, L=60, Hh=p.lvl==='1000'? 236 : 190, y=p.lvl==='1000'? 174 : 128, step=(W-2*L)/(V.N-V.Pv), X=v=>L+(v-V.Pv)*step;
+  const showN= state==='nx'||state==='nt'||state==='both', showP= state==='pv'||state==='pt'||state==='both';
+  let s='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+Hh+'" viewBox="0 0 '+W+' '+Hh+'" style="font-family:Century Gothic,Questrial,sans-serif;max-width:100%">';
+  s+='<line x1="'+(L-24)+'" y1="'+y+'" x2="'+(W-L+24)+'" y2="'+y+'" stroke="#111" stroke-width="3"/>';
+  const tk= V.big? 10 : 1;
+  for(let v=V.Pv; v<=V.N; v+=tk){ const end=(v===V.Pv||v===V.N); s+='<line x1="'+X(v)+'" y1="'+(y-(end?17:10))+'" x2="'+X(v)+'" y2="'+(y+(end?17:10))+'" stroke="#111" stroke-width="'+(end?3:1.6)+'"/>';
+    if(end) s+='<text x="'+X(v)+'" y="'+(y+46)+'" text-anchor="middle" font-size="28">'+v+'</text>'; }
+  s+='<line x1="'+X(V.n)+'" y1="'+(y-12)+'" x2="'+X(V.n)+'" y2="'+(y+12)+'" stroke="#1F3A5F" stroke-width="3"/><text x="'+X(V.n)+'" y="'+(y+46)+'" text-anchor="middle" font-size="28" font-weight="bold" fill="#1F3A5F">'+V.n+'</text>';
+  const bar=(a,b,col,lab,row,lift)=>{ const x1=Math.min(X(a),X(b)), w=Math.abs(X(b)-X(a)), yy=y-44-row*46; return '<rect x="'+x1+'" y="'+yy+'" width="'+Math.max(2,w)+'" height="16" rx="3" fill="'+col+'"/><text x="'+(x1+w/2)+'" y="'+(yy-12-(lift||0))+'" text-anchor="middle" font-size="24" font-weight="bold" fill="'+col+'">'+lab+'</text>'; };
+  const pr= (V.big && showN && showP)? 1 : 0;   // hundreds: the previous bars go on a second row so the labels never overlap
+  if(showN){ if(V.big && V.a){ s+=bar(V.n,V.n+V.a,'#355E3B',V.a+' more',0,0)+bar(V.n+V.a,V.N,'#4F7F56',V.a2+' more',0,0); } else s+=bar(V.n,V.N,'#355E3B',V.m+' more',0); }
+  if(showP){ if(V.big && V.r1 && V.r2){ s+=bar(V.n-V.r1,V.n,'#C2483D',V.r1+' less',pr,0)+bar(V.Pv,V.n-V.r1,'#D9776E',V.r2+' less',pr,0); } else s+=bar(V.Pv,V.n,'#C2483D',V.l+' less',pr); }
+  return s+'</svg>';
+}
+function nptHTML(p,ctx){
+  const mode=ctx.mode, V=nptVals(p), st=nptState(p,ctx);
+  let h='<div class="prob nptp'+(ctx.key?' key':'')+'"><div class="bignum">'+V.n+'</div>';
+  if(mode==='C' && !V.big){ const K=nptKeyScenes(V.n), sc={none:K.base,nx:K.fill,nt:K.bun,pv:K.gone,pt:K.tens}[st]; h+='<div class="pic">'+keyedPicHTML(sc,K.W,K.H,ctx.u||24)+'</div>'; }
+  else if(mode!=='A') h+='<div class="pic nline">'+nptLineSVG(p, ctx.key? 'none' : (st==='none'?'none':(ctx.shown.has('pv')? (ctx.shown.has('nx')?'both':'pv') : 'nx')), ctx.lineW||900)+'</div>';
+  h+=linesHTML(nptLines(p,mode),ctx);
+  return h+'</div>';
+}
+
+/* ---------- Teach: next & previous ten (within 100) ---------- */
+function nptKeyScenes(n,pre){
+  pre=pre||'';
+  const t=Math.floor(n/10), o=n%10, m=10-o, fx=t*1.5, fy=5;
+  const rodXY=r=>({x:r*1.5,y:0});
+  const rodParts=k=>{ const a=[]; for(let r=0;r<k;r++){ const p=rodXY(r); for(let j=0;j<10;j++) a.push({k:pre+'o'+(10*r+j),t:'cube',x:p.x,y:p.y+9-j,s:1,r:0,z:2}); a.push({k:pre+'t'+r,t:'rod',x:p.x,y:p.y,z:3}); } return a; };
+  const inF=j=>{ const q=fillPos(j); return {x:fx+q.col+.1,y:fy+q.row+.1}; };
+  const base=rodParts(t).concat([{k:pre+'fo',t:'frame',x:fx,y:fy,z:1}]); for(let j=0;j<o;j++){ const q=inF(j); base.push({k:pre+'o'+(10*t+j),t:'cube',x:q.x,y:q.y,s:.8,r:0,z:4}); }
+  const fill=base.slice(); for(let j=o;j<10;j++){ const q=inF(j); fill.push({k:pre+'b'+j,t:'cube',x:q.x,y:q.y,s:.8,r:0,z:4,col:'blue'}); }
+  const bun=rodParts(t); { const p=rodXY(t); for(let j=0;j<10;j++) bun.push({k:pre+(j<o? 'o'+(10*t+j) : 'b'+j),t:'cube',x:p.x,y:p.y+9-j,s:1,r:0,z:2,col:j<o?null:'blue'}); bun.push({k:pre+'t'+t,t:'rod',x:p.x,y:p.y,z:3}); }
+  const gone=rodParts(t).concat([{k:pre+'fo',t:'frame',x:fx,y:fy,z:1}]); for(let j=0;j<o;j++){ const q=inF(j); gone.push({k:pre+'o'+(10*t+j),t:'cube',x:q.x,y:q.y,s:.8,r:0,z:4,col:'gone'}); }
+  const tens=rodParts(t);
+  return {base:{parts:base},fill:{parts:fill},bun:{parts:bun},gone:{parts:gone},tens:{parts:tens},W:(t+1)*1.5+2.2,H:10};
+}
+function nptTeachSteps(n){
+  const t=Math.floor(n/10), o=n%10, N=n-o+10, Pv=n-o, m=N-n, l=n-Pv, sym=S.astyle==='sym', S_=[];
+  const K=nptKeyScenes(n); TU.W=K.W; TU.H=K.H;
+  const okN=v=>v>10 && v<100 && v%10 && v!==n;
+  const pick=list=>{ const out=[]; list.forEach(v=>{ if(okN(v)&&out.indexOf(v)<0) out.push(v); }); return out; };
+  const review=pick([n+10, n-10, 10*(1+(n%8))+((n+3)%9)+1, 47]).slice(0,3);
+  const youdo=pick([n+21, n-12, n+7, n-5, 58]).slice(0,3);
+  const R=review.map((v,i)=>{ const s=tKeyScenes(v,'r'+i).fin; const e=tExtent([s]); s.W=Math.max(TU.W,e.W); s.H=Math.max(TU.H,e.H); return s; });
+  const q=(text,ans,o2,o3)=>{ S_.push(Object.assign({q:text,a:ans,show:false},o2||{})); S_.push(Object.assign({q:text,a:ans,show:true},o2||{},o3||{})); };
+  const say=(text,o2)=>S_.push(Object.assign({q:text,a:null,show:true},o2||{}));
+  const sec=label=>S_.push({sec:label,show:true});
+  for(let i=0;i<=5;i++) S_.push({know:true,kn:i,show:i>0,lesson:'npt'});
+  if(R.length){ sec('Review'); R.forEach((sc,i)=>q('Tell me the structure of the number.', review[i]+'. '+structName(review[i])+'.', {sc:sc})); }
+  sec('I do · '+n);
+  q('Tell me the structure of the number.', structName(n)+'.', {sc:K.base});
+  q('How much more is the next ten?', m+' more. '+N+' is '+m+' more than '+n+'.', {sc:K.base}, {sc:K.fill, note:'Fill the ten frame.'});
+  say('10 ones make 1 ten.', {sc:K.bun, note:plural(t+1,'ten')+'.'});
+  q('What is the next ten?', N+'. '+plural(t+1,'ten')+'.', {sc:K.bun});
+  say('Back to '+n+'.', {sc:K.base, note:structName(n)+'.'});
+  q('How much less is the previous ten?', l+' less. '+Pv+' is '+l+' less than '+n+'.', {sc:K.base}, {sc:K.gone, note:'Take away the ones.'});
+  q('What is the previous ten?', Pv+'. '+plural(t,'ten')+'.', {sc:K.tens});
+  q('Where is '+n+' on the number line?', 'Between '+Pv+' and '+N+'.', {line:'none'});
+  say(N+' is '+m+' more than '+n+'.', {line:'nx'});
+  say(Pv+' is '+l+' less than '+n+'.', {line:'both'});
+  q('What goes in the boxes?', '', {eq2:true});
+  sec('We do');
+  q('Is '+N+' the next ten after '+n+'?', 'Yes. '+N+' is '+m+' more than '+n+'.', {line:'none'}, {line:'nx'});
+  q('Is '+(n+10)+' the next ten after '+n+'?', 'No. '+(n+10)+' is not a ten. It has '+plural(o,'one')+'.', {line:'none'});
+  if(N+10<=100) q('Is '+(N+10)+' the next ten after '+n+'?', 'No. '+N+' comes first.', {line:'none'});
+  if(Pv>=10) q('Is '+(Pv-10)+' the previous ten?', 'No. '+Pv+' comes first.', {line:'none'});
+  if(youdo.length){ sec('You do');
+    youdo.forEach(v=>{ const o2=v%10, N2=v-o2+10, P2=v-o2; q(v+': How much more? How much less?', (N2-v)+' more to '+N2+'. '+o2+' less to '+P2+'.', {numeral:true,num:v,solo:true}, {numeral:false, line:'both', lineN:v}); }); }
+  return S_;
+}
+
 /* ---------- shared ---------- */
 function topicOrder(p,mode){
   if(!p) return [];
+  if(p.kind==='npt') return nptOrder(p,mode);
   if(p.kind==='cmp'){ const o= mode==='A'? ['res'] : (cmpPlaces(p).dec>=0? ['q','dec','res'] : ['q','res']); return S.cmpDiff? o.concat(['dif']) : o; }
   return (mode==='P' && p.strat!=='ten'? ['sp'] : []).concat(asLines(p,mode).map(l=>l.k));
 }
-function topicHTML(p,ctx){ return p.kind==='as'? asHTML(p,ctx) : cmpHTML(p,ctx); }
+function topicHTML(p,ctx){ return p.kind==='as'? asHTML(p,ctx) : p.kind==='npt'? nptHTML(p,ctx) : cmpHTML(p,ctx); }
 function overheadT(fs,lab,p,mode){
+  if(p.kind==='npt') return fs*1.35 + nptOrder(p,mode).length*(fs*.8*1.15+lab*1.6) + ((mode==='P'||p.lvl==='1000')? 200 : 0) + fs*.5;
   if(p.kind==='cmp') return fs*1.3 + fs*.5 + (mode!=='A'? fs*1.15+lab*1.6 : 0) + (S.cmpDiff? fs*.8*1.15+lab*1.6 : 0) + (mode==='P'? fs*1.6 : 0) + fs*.4;
   const n=topicOrder(p,mode).filter(k=>k!=='sp'&&k!=='res').length;
   return fs*1.35 + n*(fs*.8*1.15+lab*1.6) + (mode==='P'? fs*1.9 : 0) + fs*.5;
@@ -1928,7 +2067,7 @@ function renderTopic(){
     u=Math.max(3,Math.min(32*z, 10*availW/m.w, 10*availH/m.h));
     u=shrinkFit(u,uu=>svgInner(topicPic(p,S.pRep,uu)),availW,availH);
   }
-  stage.innerHTML=topicHTML(p,{mode:mode,rep:S.pRep,u:u,shown:P.shown,hl:P.hl});
+  stage.innerHTML=topicHTML(p,{mode:mode,rep:S.pRep,u:u,shown:P.shown,hl:P.hl,lineW:Math.min(1100,Math.max(500,stage.clientWidth-80))});
 }
 function tTag(){ return [S.topic,S.level,S.range,S.cmin,S.cmax,S.asOp,S.asStrat,S.cmpT,S.wPer,S.wPages].join('|'); }
 function buildTopicSet(){
@@ -1969,7 +2108,7 @@ function renderTopicSheets(){
   $('pages').innerHTML=html;
 }
 function applyTopic(){
-  ['pv','as','cmp'].forEach(t=>document.querySelectorAll('.tp-'+t).forEach(e=>e.classList.toggle('hidden',S.topic!==t)));
+  ['pv','as','cmp','npt'].forEach(t=>document.querySelectorAll('.tp-'+t).forEach(e=>e.classList.toggle('hidden',S.topic!==t)));
   document.querySelectorAll('.tp-pvas').forEach(e=>e.classList.toggle('hidden',S.topic==='cmp'));
   $('brandSub').textContent=topicName()+' within '+lvlMax();
   if(A.on && S.topic!=='pv') closeAnim();
@@ -3207,7 +3346,7 @@ function tExtent(scs){ let W=0,H=0; scs.forEach(sc=>sc&&sc.parts.forEach(p=>{ co
 const TREG={x:60,y:200,w:1160,h:400};
 function tPieceHTML(p,u,ox,oy){
   const sc=SCHEMES[S.scheme], L=ox+p.x*u, T=oy+p.y*u, k=p.k;
-  if(p.t==='cube'){ const sz=(p.s||1)*u; return '<div class="tpz" data-k="'+k+'" data-z="'+p.z+'" style="left:'+L+'px;top:'+T+'px;width:'+sz+'px;height:'+sz+'px;z-index:'+p.z+';background:'+sc.one.fill+';border:'+Math.max(1.2,u*.06)+'px solid '+sc.one.edge+';transform:rotate('+(p.r||0)+'deg)" data-r="'+(p.r||0)+'"></div>'; }
+  if(p.t==='cube'){ const sz=(p.s||1)*u, cf= p.col==='blue'? '#BFE3F5' : p.col==='gone'? '#F6DAD7' : sc.one.fill, ce= p.col==='blue'? '#4A90B8' : p.col==='gone'? '#C2483D' : sc.one.edge; return '<div class="tpz" data-k="'+k+'" data-z="'+p.z+'" style="left:'+L+'px;top:'+T+'px;width:'+sz+'px;height:'+sz+'px;z-index:'+p.z+';background:'+cf+';border:'+Math.max(1.2,u*.06)+'px '+(p.col==='gone'?'dashed':'solid')+' '+ce+';transform:rotate('+(p.r||0)+'deg)" data-r="'+(p.r||0)+'">'+(p.col==='gone'? '<span style="position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;color:#C2483D;font:bold '+(sz*.72)+'px sans-serif;line-height:1">✕</span>' : '')+'</div>'; }
   if(p.t==='rod'){ let h='<div class="tpz" data-k="'+k+'" data-z="'+p.z+'" style="left:'+L+'px;top:'+T+'px;width:'+u+'px;height:'+(10*u)+'px;z-index:'+p.z+';background:'+sc.ten.fill+';border:'+Math.max(1.2,u*.06)+'px solid '+sc.ten.edge+'">';
     for(let j=1;j<10;j++) h+='<div class="tpl" data-k="'+k+'l'+j+'" data-z="'+(p.z+.5)+'" data-sh="line" style="top:'+(j*u-1)+'px;border-top:'+Math.max(1,u*.05)+'px solid '+sc.ten.line+'"></div>';
     return h+'</div>'; }
@@ -3308,7 +3447,8 @@ function teachHTML(st,n){
   const t=Math.floor(n/10), o=n%10, sym=S.astyle==='sym';
   let h='<div class="tch tch2">';
   if(st.know){
-    const L=[['Every number is built by','ones'],['The counting name tells us the','whole'],['We always bundle at','ten'],['A numeral is a','symbol','for the counting name.'],['The numeral tells us the','structure','name.']];
+    const L= st.lesson==='npt'? [['A ten frame holds','10','ones.'],['We always bundle at','ten'],['To make the next ten, we fill the','ten frame'],['To make the previous ten, we take away the','ones'],['A ten has','0','ones.']]
+      : [['Every number is built by','ones'],['The counting name tells us the','whole'],['We always bundle at','ten'],['A numeral is a','symbol','for the counting name.'],['The numeral tells us the','structure','name.']];
     const kn= st.kn===undefined? (st.show?5:0) : st.kn;
     return h+'<div class="tq">What do we know?</div><div class="tknow">'+L.map((l,i)=>'<div>'+l[0]+' <span class="tblank'+(i<kn?' on':'')+'"><span>'+l[1]+'</span></span>'+(l[2]?' '+l[2]:'.')+'</div>').join('')+'</div>'+tSceneHTML(null)+'</div>';
   }
@@ -3318,6 +3458,9 @@ function teachHTML(st,n){
   if(st.tag && st.show) h+='<div class="ttag">'+st.tag+'</div>';
   h+=tSceneHTML(st.sc||null);
   if(st.big) h+='<div class="tbigt">'+st.big+'</div>';
+  if(st.line) h+='<div class="tline">'+nptLineSVG({A:st.lineN||n,lvl:'100'},st.line,1100)+'</div>';
+  if(st.eq2){ const o=n%10, N=n-o+10, Pv=n-o, B=(v)=>'<span class="tbox'+(st.show?' on':'')+'"><span>'+v+'</span></span>';
+    h+='<div class="teq2"><div>'+(sym? n+' <span class="top">+</span> '+B(N-n)+' <span class="top">=</span> '+N : n+' <span class="top w">and</span> '+B(N-n)+' <span class="top w">make</span> '+N)+'</div><div>'+(sym? n+' <span class="top">−</span> '+B(o)+' <span class="top">=</span> '+Pv : n+' <span class="top w">take away</span> '+B(o)+' <span class="top w">is</span> '+Pv)+'</div></div>'; }
   if(st.numeral){
     if(st.digits){
       h+='<div class="tdig">'+(t? '<div class="tdc"><div class="tdn">'+t+'</div><div class="tdl'+(st.show?' on':'')+'">'+plural(t,'ten')+'</div></div>' : '')+
@@ -3368,7 +3511,7 @@ async function teachDownload(){
   if(typeof PptxGenJS==='undefined'){ msg.textContent='The PowerPoint maker did not load.'; return; }
   btn.disabled=true;
   try{
-    const n=TCH.n, steps=teachSteps(n), pptx=new PptxGenJS(); pptx.layout='LAYOUT_WIDE'; pptx.title='Numerics · Teach '+n; pptx.company='Numerics';
+    const n=TCH.n, steps=lessonSteps(n), pptx=new PptxGenJS(); pptx.layout='LAYOUT_WIDE'; pptx.title='Numerics · Teach '+n; pptx.company='Numerics';
     const stage=$('slideStage'), keepPad=stage.style.padding;
     stage.style.padding='0';
     for(let k=0;k<steps.length;k++){
@@ -3383,7 +3526,7 @@ async function teachDownload(){
     stage.firstElementChild.innerHTML=''; stage.style.padding=keepPad;
     msg.textContent='Adding Morph…';
     const blob=await addMorph(await pptx.write({outputType:'blob'}));
-    const name='Numerics_Teach_'+n+'.pptx'; let saved=false;
+    const name='Numerics_Teach_'+(tLesson()==='npt'?'NextPrevTen_':'')+n+'.pptx'; let saved=false;
     try{ const dl=await window.claude?.use?.('downloads'); if(dl){ await dl.save({filename:name,data:blob}); saved=true; } }catch(e){}
     if(!saved){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },2000); }
     msg.textContent='';
@@ -3393,7 +3536,9 @@ async function teachDownload(){
 
 function teachNum(){ const v=Math.round(+String($('tchNum').value).replace(/[^0-9]/g,'')); return (v>=1&&v<=100)? v : null; }
 function teachFit(){ const box=$('tchView'), sc=Math.max(.2, Math.min(box.clientWidth/1280, (window.innerHeight-130)/720)); $('tchStage').style.transform='scale('+sc+')'; $('tchView').style.height=(720*sc)+'px'; }
-function teachLoad(n){ TCH.n=n; TCH.steps=teachSteps(n); TCH.i=0; teachStop(); teachRender(); $('tchMsg').textContent=''; }
+function tLesson(){ const e=$('tchLesson'); return e? e.value : 'build'; }
+function lessonSteps(n){ return tLesson()==='npt'? nptTeachSteps(n) : teachSteps(n); }
+function teachLoad(n){ TCH.n=n; TCH.steps=lessonSteps(n); TCH.i=0; teachStop(); teachRender(); $('tchMsg').textContent=''; }
 function teachStop(){ if(TCH.timer){ clearInterval(TCH.timer); TCH.timer=null; } $('tchPlay').textContent='Play ▶'; }
 function teachPlay(){
   if(TCH.timer){ teachStop(); return; }
@@ -3403,7 +3548,7 @@ function teachPlay(){
 }
 function bindTeach(){
   const w=$('teachWrap'); if(!w) return;
-  const open=()=>{ const cur=P.hist[P.idx]; $('tchNum').value= (cur&&cur<=100)? cur : TCH.n; w.classList.remove('hidden'); $('tchLive').classList.remove('hidden'); $('tchWatch').classList.add('hidden'); tchTabs('live'); teachLoad(teachNum()||34); };
+  const open=()=>{ const cur=P.hist[P.idx]; $('tchLesson').value= S.topic==='npt'? 'npt' : 'build'; $('tchNum').value= S.topic==='npt'? ((T.hist[T.idx]&&T.hist[T.idx].A<100&&T.hist[T.idx].A%10)? T.hist[T.idx].A : 23) : ((cur&&cur<=100)? cur : TCH.n); w.classList.remove('hidden'); $('tchLive').classList.remove('hidden'); $('tchWatch').classList.add('hidden'); tchTabs('live'); teachLoad(teachNum()||34); };
   const tchTabs=k=>{ $('tchLiveBtn').classList.toggle('on',k==='live'); $('tchWatchBtn').classList.toggle('on',k==='watch'); };
   const close=()=>{ teachStop(); try{ $('tchVid').pause(); }catch(e){} w.classList.add('hidden'); };
   $('teachBtn').addEventListener('click',open);
@@ -3412,7 +3557,8 @@ function bindTeach(){
   w.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Escape') close();
     if(e.target.tagName!=='INPUT'){ if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); $('tchNext').click(); } if(e.key==='ArrowLeft'){ e.preventDefault(); $('tchPrev').click(); } } });
   document.addEventListener('keydown',e=>{ if(!w.classList.contains('hidden')){ if(e.key==='Escape') close(); e.stopPropagation(); if(e.target.tagName!=='INPUT' && (e.key==='ArrowRight'||e.key===' '||e.key==='ArrowLeft')){ e.preventDefault(); (e.key==='ArrowLeft'? $('tchPrev') : $('tchNext')).click(); } } },true);
-  $('tchGo').addEventListener('click',()=>{ const n=teachNum(); if(!n){ $('tchMsg').textContent='Type a number from 1 to 100.'; return; } teachLoad(n); });
+  $('tchGo').addEventListener('click',()=>{ const n=teachNum(); if(!n){ $('tchMsg').textContent='Type a number from 1 to 100.'; return; } if(tLesson()==='npt' && (n%10===0 || n<11 || n>99)){ $('tchMsg').textContent='Pick a number between 11 and 99 that is not a ten (like 23).'; return; } teachLoad(n); });
+  $('tchLesson').addEventListener('change',()=>{ let n=teachNum()||34; if(tLesson()==='npt' && (n%10===0||n<11||n>99)){ n=23; $('tchNum').value=n; } teachLoad(n); });
   $('tchNum').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('tchGo').click(); } });
   $('tchPrev').addEventListener('click',()=>{ teachStop(); if(TCH.i>0){ TCH.i--; teachRender(); } });
   $('tchNext').addEventListener('click',()=>{ teachStop(); if(TCH.i<TCH.steps.length-1){ TCH.i++; teachRender(); } });
@@ -3468,7 +3614,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   <div id="teachBox">
     <div id="tchHead"><b>Teach: every number is built by ones</b><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchClose" type="button">Close ✕</button></div>
     <div id="tchLive">
-      <div id="tchBar">Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
+      <div id="tchBar"><select id="tchLesson" title="Lesson"><option value="build">Every number is built by ones</option><option value="npt">Next &amp; previous ten</option></select> Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
         <button class="btn round" id="tchPrev" type="button" title="Previous">←</button><button class="btn alt" id="tchPlay" type="button">Play ▶</button><button class="btn round" id="tchNext" type="button" title="Next">→</button>
         <span id="tchPos"></span><button class="btn" id="tchDown" type="button">Download PowerPoint</button><span id="tchMsg"></span></div>
       <div id="tchView"><div id="tchStage"></div></div>
