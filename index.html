@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v113</title>
+<title>Numerics · Place Value Toolkit v115</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -203,7 +203,7 @@
   .xsmats{margin-top:14px}.xccard.xsmat{min-height:250px;border:3px solid #1F3A5F!important;border-radius:14px;margin:8px}.xsmt{font-size:56px;font-weight:700;color:#1F3A5F}.xsms{font-size:14px;color:#666}
   .xccard.xctask{border:3px solid #1F3A5F!important;border-radius:14px;margin:6px;padding-top:44px;padding-bottom:40px}
   .xctask .xcq{display:none}
-  .xctask .xtband{position:absolute;left:0;right:0;top:0;background:#1F3A5F;color:#fff;font-weight:700;font-size:17px;padding:7px 12px;border-radius:10px 10px 0 0;text-align:left}
+  .xctask .xtband{position:absolute;left:0;right:0;top:0;background:#1F3A5F;color:#fff;font-weight:700;font-size:15px;padding-right:40px!important;padding:7px 12px;border-radius:10px 10px 0 0;text-align:left}
   .xctask .xtans{position:absolute;left:18px;right:18px;bottom:12px;font-size:17px;color:#1F3A5F;display:flex;gap:8px;align-items:flex-end}
   .xctask .xtans span{flex:1;border-bottom:2px solid #111;height:1.1em}
   .xccard.xcm{background:#F7F5F1;border:2px dashed #8a6d3b!important;border-radius:16px;margin:6px}
@@ -257,7 +257,11 @@
   .rans .f{font-size:1em}
   .rbox{display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.15em;line-height:1;border:max(2px,.04em) solid #111;border-radius:.14em;vertical-align:middle;margin:0 .25em}
   .rbox.cw{width:auto;min-width:6.6em;font-size:.6em;height:1.9em;white-space:nowrap}
+  #ptoast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#1F3A5F;color:#fff;padding:12px 20px;border-radius:12px;font-size:15px;z-index:99999;opacity:0;pointer-events:none;transition:opacity .3s;max-width:640px;text-align:center}
+  #ptoast.on{opacity:1}
+  #tchMsg.warn{color:#B3261E;font-weight:700}
   @media print{
+    #ptoast{display:none!important}
     @page{size:letter;margin:0}
     body{background:#fff}
     header.top,.bar,#present,#slides,#slideStage{display:none!important}
@@ -3898,8 +3902,24 @@ $('wList').onchange=()=>{ S.wList=$('wList').value; save(); buildSet(); };
 function pickShow(){ const v=Math.round(+String($('pick').value).replace(/[^0-9]/g,'')); if(!(v>=1&&v<=lvlMax())){ $('pick').focus(); return; } pushProblem(v); if(A.on && A.est) $('pick').value=''; }
 $('pickGo').onclick=pickShow;
 $('pick').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); pickShow(); } });
-$('wPrint').onclick=()=>window.print();
-$('cPrint').onclick=()=>window.print();
+/* v114: Print. In a normal browser tab this opens the print dialog. Inside the Claude viewer printing is blocked,
+   so the pages are saved as a file that opens the print dialog by itself when you open it. */
+function inFrame(){ try{ return window.self!==window.top; }catch(e){ return true; } }
+function toast(msg){ let t=document.getElementById('ptoast'); if(!t){ t=document.createElement('div'); t.id='ptoast'; document.body.appendChild(t); }
+  t.textContent=msg; t.className='on'; clearTimeout(t._h); t._h=setTimeout(()=>{ t.className=''; },7000); }
+function printPages(which){
+  if(!inFrame()){ window.print(); return; }
+  const host=document.getElementById(which==='c'? 'centers' : 'sheets');
+  const css=[...document.querySelectorAll('style')].map(s=>'<style>'+s.textContent+'</style>').join('');
+  const extra='<style>@media screen{body{background:#e8e6e1;margin:0} .pfbar{position:sticky;top:0;z-index:9;background:#1F3A5F;color:#fff;padding:10px 16px;font:16px Century Gothic,Arial,sans-serif;display:flex;gap:14px;align-items:center} .pfbar button{font:inherit;padding:6px 18px;border-radius:20px;border:0;background:#fff;color:#1F3A5F;cursor:pointer}} @media print{.pfbar{display:none!important}} #centers>.bar,#sheets>.bar,.cnote,.bar{display:none!important} #centers,#sheets{display:block!important}</style>';
+  const title='Numerics '+(which==='c'? 'Center Activities' : 'Practice Pages');
+  const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+title+'</title>'+css+extra+'</head><body class="'+(which==='c'?'pc ':'')+'printfile"><div class="pfbar"><b>'+title+'</b><button onclick="print()">Print</button><span>Choose letter size and no margins.</span></div>'+host.outerHTML+'<script>addEventListener("load",function(){ setTimeout(function(){ print(); },500); });<\/script></body></html>';
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([html],{type:'text/html'})); a.download=title.replace(/ /g,'_')+'.html';
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },2000);
+  toast('Printing is blocked in this viewer, so your pages were saved as a file. Open the file and it prints.');
+}
+$('wPrint').onclick=()=>printPages('w');
+$('cPrint').onclick=()=>printPages('c');
 const cNotes={task:'Print double-sided and flip on the long edge: each answer prints on the back of its card. Or use the backs as an answer key.',match:'Cut the cards apart and shuffle. Students match each set of three. The last page is the answer key.',mat:'Students build the number on the mat with rods, ten frames or disks, then record.'};
 const cSetNote=()=>{ $('cNote').textContent=cNotes[CT.kind]; };
 $('cKind').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; CT.kind=b.dataset.v; $('cKind').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); cSetNote(); renderCenters(); });
@@ -4302,13 +4322,14 @@ function pvWords(T_,n,kind){
     word('equal to ( <b>=</b> )','Equal to means '+B('the same')+'. '+B('=')+' means '+B('is equal to')+'.', {big:'='});
   }
 }
-function g1BuildSteps(){
+function g1BuildSteps(n){
+  n=(n>=10&&n<=50)? n : 30;   // v114: the second part builds the number the teacher typed
   const T_=tSteps(), {q,say,sec,goal}=T_;
-  const A=tKeyScenes(10,'a'), B=tKeyScenes(30,'b');
+  const A=tKeyScenes(10,'a'), B= n>10? tKeyScenes(n,'b') : null;
   const fitSet=arr=>{ const e=tExtent(arr); arr.forEach(sc=>{ sc.W=Math.max(e.W,4); sc.H=Math.max(e.H,5); }); return e; };
-  const eA=fitSet([A.loose,A.fin].concat(A.fill,A.rod)); fitSet([B.loose,B.fin].concat(B.fill,B.rod)); TU.W=Math.max(eA.W,4); TU.H=Math.max(eA.H,5);
+  const eA=fitSet([A.loose,A.fin].concat(A.fill,A.rod)); if(B) fitSet([B.loose,B.fin].concat(B.fill,B.rod)); TU.W=Math.max(eA.W,4); TU.H=Math.max(eA.H,5);
   T_.know('g1');
-  goal('Today we will bundle 10 ones into 1 ten, and build tens.');
+  goal(n>10? 'Today we will bundle 10 ones into 1 ten, and build '+n+'.' : 'Today we will bundle 10 ones into 1 ten.');
   pvWords(T_,10,'g1');
   sec('Build 10');
   q('How can we find out if we have 10 ones?', 'We can move the ones onto the ten frame.', {sc:A.loose});
@@ -4325,23 +4346,20 @@ function g1BuildSteps(){
   q('0 ones, so this is just 1. Do we agree?', 'No. The 1 tells us 1 ten. The 0 tells us 0 ones.', {numeral:true, digits:true, num:10});
   q('Even when there are 0 ones, what is still there?', 'The ten is still there.', {sc:A.fin});
   q('What number did I build?', 'I built 10.', {sc:A.fin});
-  if(TCH.short) return T_.S_;   // v113: the short lesson builds 10 only
-  sec('Build More Tens');
-  say('Let us build more tens.', {sc:B.loose});
+  if(TCH.short || !B) return T_.S_;   // the short lesson builds 10 only
+  const t=Math.floor(n/10), o=n%10;
+  sec('Build '+n);
+  say('Let us build '+n+'.', {sc:B.loose});
   q('Do we need to count every item we put into the frame?', 'No. A full ten frame shows 10 ones.', {sc:B.fill[0]});
-  q('What did we make?', 'We made 1 ten.', {sc:B.rod[0]});
-  say('Let us fill the ten frame again.', {sc:B.fill[1]});
-  q('Now I have 1 ten and a full ten frame. How can I make 2 tens?', 'Bundle the 10 ones into 1 ten.', {sc:B.fill[1]}, {sc:B.rod[1]});
-  q('How many tens do I have now?', 'I have 2 tens.', {sc:B.rod[1]});
-  q('2 tens make what number?', '2 tens make 20.', {numeral:true, num:20});
-  q('What does the numeral 20 show us?', '20 is 2 tens 0 ones.', {numeral:true, digits:true, num:20});
-  say('Let us build one more ten.', {sc:B.fill[2]});
-  q('Can I say I have 3 tens yet?', 'No. I have 2 tens and 10 ones.', {sc:B.fill[2]});
-  q('Why not?', 'The 10 ones are not bundled yet.', {sc:B.fill[2]});
-  q('How can I make 3 tens?', 'Bundle the 10 ones into 1 ten.', {sc:B.fill[2]}, {sc:B.rod[2]});
-  q('What do I have now?', 'I have 3 tens.', {sc:B.rod[2]});
-  q('Are there any loose ones?', 'No. There are 0 loose ones.', {sc:B.rod[2]});
-  q('What number did I build?', 'I built 30.', {sc:B.rod[2]});
+  for(let k=1;k<=t;k++){
+    q(k===1? 'The ten frame is full. How can I make 1 ten?' : 'I have '+pvTen(k-1)+' and a full ten frame. How can I make '+pvTen(k)+'?', 'Bundle the 10 ones into 1 ten.', {sc:B.fill[k-1]}, {sc:B.rod[k-1]});
+    q('How many tens do I have now?', 'I have '+pvTen(k)+'.', {sc:B.rod[k-1]});
+  }
+  q('Are there any loose ones?', o? 'Yes. There '+(o===1?'is ':'are ')+pvOne(o)+' left.' : 'No. There are 0 loose ones.', {sc:B.fin});
+  if(o) q('Can we bundle again?', 'No. We need 10 ones to bundle. There '+(o===1?'is':'are')+' only '+o+'.', {sc:B.fin});
+  q('What number did I build?', 'I built '+n+'.', {sc:B.fin});
+  q('What does the numeral '+n+' show us?', n+' is '+pvTen(t)+' '+pvOne(o)+'.', {numeral:true, digits:true, num:n});
+  q('Tell me the counting name.', 'The counting name is '+words(n)+'.', {sc:B.fin});
   return T_.S_;
 }
 /* concrete, pictorial and symbolic for one structure (canonical or not) */
@@ -4474,7 +4492,7 @@ function pvPairPic(a,b,L){ const rep=pvRep(); const one=v=>cfit(u=>buildD(rep,d3
   return '<div class="tpair"><div><div class="tpn">'+a+'</div>'+one(a)+'</div><div><div class="tpn">'+b+'</div>'+one(b)+'</div></div>'; }
 
 function g1Range(){ return S.level==='100' && /^(1-20|1-50|20-50)$/.test(S.range); }
-function lessonSteps(n){ const l=tLesson(); if(l==='build') return (g1Range()&&n<=50)? g1BuildSteps() : pvBuildSteps(n); if(l==='non') return pvUnbundleSteps(n); if(l==='npt') return pvLineSteps(n); if(l==='cmp') return pvCompareSteps(n); return pvBuildSteps(n); }
+function lessonSteps(n){ const l=tLesson(); if(l==='build') return (g1Range()&&n<=50)? g1BuildSteps(n) : pvBuildSteps(n); if(l==='non') return pvUnbundleSteps(n); if(l==='npt') return pvLineSteps(n); if(l==='cmp') return pvCompareSteps(n); return pvBuildSteps(n); }
 document.addEventListener('change',e=>{ if(e.target && e.target.id==='tchLen'){ TCH.short= e.target.value==='short'; if(TCH.n && TCH.steps && TCH.steps.length) teachLoad(TCH.n); } });
 function teachLoad(n){ TCH.n=n; TCH.steps=lessonSteps(n); TCH.i=0; teachStop(); teachRender(); $('tchMsg').textContent=''; }
 function teachStop(){ if(TCH.timer){ clearInterval(TCH.timer); TCH.timer=null; } $('tchPlay').textContent='Play ▶'; }
@@ -4495,7 +4513,7 @@ function bindTeach(){
   w.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Escape') close();
     if(e.target.tagName!=='INPUT'){ if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); $('tchNext').click(); } if(e.key==='ArrowLeft'){ e.preventDefault(); $('tchPrev').click(); } } });
   document.addEventListener('keydown',e=>{ if(!w.classList.contains('hidden')){ if(e.key==='Escape') close(); e.stopPropagation(); if(e.target.tagName!=='INPUT' && (e.key==='ArrowRight'||e.key===' '||e.key==='ArrowLeft')){ e.preventDefault(); (e.key==='ArrowLeft'? $('tchPrev') : $('tchNext')).click(); } } },true);
-  $('tchGo').addEventListener('click',()=>{ const n=teachNum(), l=tLesson(); if(!n || n<11){ $('tchMsg').textContent='Type a number from 11 to 999.'; return; } if(l==='npt' && n%10===0){ $('tchMsg').textContent='Pick a number that is not a ten (like 23 or 347).'; return; } if((l==='non'||l==='build') && n>=100 && Math.floor(n/10)%10===0 && l==='non'){ $('tchMsg').textContent='Pick a number with at least 1 ten (like 156).'; return; } if(l==='non' && n<100 && n<20){ $('tchMsg').textContent='Pick a number with at least 2 tens (like 91).'; return; } teachLoad(n); });
+  $('tchGo').addEventListener('click',()=>{ const n=teachNum(), l=tLesson(), lo=(l==='build'&&g1Range())? 10 : 11; if(!n || n<lo){ $('tchMsg').textContent= (n&&n<10)? 'Place value lessons start at 10. Type a number from '+lo+(g1Range()?' to 50.':' to 999.') : 'Type a number from '+lo+' to 999.'; $('tchMsg').classList.add('warn'); return; } $('tchMsg').classList.remove('warn'); if(l==='npt' && n%10===0){ $('tchMsg').textContent='Pick a number that is not a ten (like 23 or 347).'; return; } if((l==='non'||l==='build') && n>=100 && Math.floor(n/10)%10===0 && l==='non'){ $('tchMsg').textContent='Pick a number with at least 1 ten (like 156).'; return; } if(l==='non' && n<100 && n<20){ $('tchMsg').textContent='Pick a number with at least 2 tens (like 91).'; return; } teachLoad(n); });
   $('tchLesson').addEventListener('change',()=>{ let n=teachNum()||34; if(tLesson()==='npt' && n%10===0){ n=n>=100? 347 : 23; $('tchNum').value=n; } teachLoad(n); });
   $('tchNum').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('tchGo').click(); } });
   $('tchPrev').addEventListener('click',()=>{ teachStop(); if(TCH.i>0){ TCH.i--; teachRender(); } });
@@ -4824,3 +4842,5 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
 })();</script>
 </body>
 </html>
+
+  
