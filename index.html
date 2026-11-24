@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v102</title>
+<title>Numerics · Place Value Toolkit v103</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -172,8 +172,10 @@
   .cbond{width:2.3em;height:.45em;display:block;margin:0 auto .05em}
   .cbond.bond3{width:3.6em}
   .line.cbox{width:1.25em;height:1.1em;border:max(2px,.04em) solid #111;border-radius:.14em;margin-top:.02em}
-  .line.cbox.cw{width:4.3em}
-  .line.cw .f{font-size:.36em;line-height:3}
+  .line.cbox.cw{width:6.6em}
+  .line.cbox{align-items:center}
+  .line.cbox:not(.cw) .f{font-size:.95em;line-height:1;font-weight:600}
+  .line.cw .f{font-size:.6em;line-height:1.8;white-space:nowrap}
   .line.rel{width:1.3em}
   .hlc .line{background:#DCEBD5}
   .grid.one .wcell{border-right:0}
@@ -212,7 +214,7 @@
   .rans .line{width:auto;min-width:2.4em;padding:0 .3em;height:1.25em}
   .rans .f{font-size:1em}
   .rbox{display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.15em;line-height:1;border:max(2px,.04em) solid #111;border-radius:.14em;vertical-align:middle;margin:0 .25em}
-  .rbox.cw{width:auto;min-width:4.3em;font-size:.36em;height:3.2em}
+  .rbox.cw{width:auto;min-width:6.6em;font-size:.6em;height:1.9em;white-space:nowrap}
   @media print{
     @page{size:letter;margin:0}
     body{background:#fff}
@@ -292,6 +294,8 @@
   .tch2 .tqa{position:absolute;left:50px;right:50px;top:30px;display:flex;flex-direction:column;align-items:center;gap:10px}
   .tch2 .tqa .tq,.tch2 .tqa .ta{position:static;margin:0;line-height:1.2}
   .tch2 .tqa .ta{font-size:34px}
+  .tch2 .tpicw{display:flex;align-items:center;justify-content:center}
+  .tch2 .tpicin svg{display:block;max-width:1160px;max-height:360px}
   .tch2 .tgoal{position:absolute;left:120px;right:120px;top:320px;font-size:48px;color:#1F3A5F;line-height:1.3}
   .tch2 .tsec{position:absolute;left:0;right:0;top:300px;font-size:64px;font-weight:bold;color:#355E3B}
   .tch2 .tbig.solo{right:0;left:0;top:250px}
@@ -2423,11 +2427,11 @@ function overheadT(fs,lab,p,mode){
 function cmpFit(probs,repOf,fs,availW,availH,maxU){
   let fsC=fs, u=maxU;
   probs.forEach((p,i)=>{
-    const n=PLACES(p.lvl).length, qtyEm=n*1.6+(n-1)*.5, boxEm=S.cmpW==='words'?4.3:1.3;
+    const n=PLACES(p.lvl).length, qtyEm=n*1.6+(n-1)*.5, boxEm=S.cmpW==='words'?6.6:1.3;
     fsC=Math.min(fsC, availW/(2*qtyEm+boxEm+1.3));
   });
   probs.forEach((p,i)=>{
-    const boxEm=S.cmpW==='words'?4.3:1.3, rep=repOf(i), L=p.lvl, r=(L==='1000'&&rep==='frames')?'rods':rep;
+    const boxEm=S.cmpW==='words'?6.6:1.3, rep=repOf(i), L=p.lvl, r=(L==='1000'&&rep==='frames')?'rods':rep;
     const a=svgInner(buildD(r,d3(p.A,L),L,10,null,true)), b=svgInner(buildD(r,d3(p.B,L),L,10,null,true));
     const picMax=(availW-(boxEm+1.3)*fsC)/2, ah=availH(p,fsC);
     u=Math.min(u, 10*picMax/Math.max(a.w,b.w), 10*ah/Math.max(a.h,b.h));
@@ -3774,13 +3778,23 @@ function tPair(a,b){   // two scenes side by side, each with its own keys
   return {parts:a.parts.concat(b.parts.map(p=>Object.assign({},p,{x:p.x+ea.W+gap}))), W:ea.W+gap+eb.W, H:Math.max(ea.H,eb.H)};
 }
 
+function tBondHTML(b){ const k=b.parts.length, W=900, H=300, px=i=>W/2+(i-(k-1)/2)*(k===3?300:360);
+  let s='<svg width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'">';
+  b.parts.forEach((v,i)=>{ s+='<line x1="'+(W/2)+'" y1="105" x2="'+px(i)+'" y2="195" stroke="#111" stroke-width="4"/>'; });
+  const box=(x,y,v)=>'<rect x="'+(x-75)+'" y="'+(y-45)+'" width="150" height="90" rx="14" fill="#fff" stroke="#1F3A5F" stroke-width="4"/><text x="'+x+'" y="'+(y+20)+'" text-anchor="middle" font-family="Century Gothic,Arial" font-size="56" fill="#111">'+v+'</text>';
+  s+=box(W/2,60,b.whole); b.parts.forEach((v,i)=>{ s+=box(px(i),240,v); });
+  return s+'</svg>'; }
 function tLines(s){ return String(s).replace(/([a-z])-([a-z])/g,'$1\u2011$2').replace(/([.?!:])\s+(?=[A-Z0-9\u201c"(])/g,'$1<br>'); }
 function teachHTML(st,n){
   if(st.num) n=st.num;
   const t=Math.floor(n/10), o=n%10, sym=S.astyle==='sym';
   let h='<div class="tch tch2">';
   if(st.know){
-    const L= st.lesson==='cmp'? [['A ten is','10','ones.'],['We always bundle at','ten'],['The structure name tells how many tens and how many','ones'],['4 tens is','more','than 3 tens.'],['The numeral tells us the','structure','name.']]
+    const L= st.lesson==='g1'? [['When we count, we say one number for each','item'],['The last number we say tells us','how many'],['A ten frame holds','10','items.'],['5 and 5 make','10'],['We can count ones to find the','whole']]
+      : st.lesson==='pv2'? [['A ten frame holds','10','ones.'],['We always bundle at','ten'],['10 ones make','1 ten'],['The structure name tells how many tens and how many','ones'],['The counting name tells','how many']]
+      : st.lesson==='pv3'? [['We always bundle at','ten'],['10 ones make','1 ten'],['10 tens make','1 hundred'],['The structure name tells how many hundreds, tens and','ones'],['The counting name tells','how many']]
+      : st.lesson==='cmp'? [['A ten is','10','ones.'],['We always bundle at','ten'],['The structure name tells how many tens and how many','ones'],['4 tens is','more','than 3 tens.'],['The numeral tells us the','structure','name.']]
+      : st.lesson==='npt3'? [['We always bundle at','ten'],['10 ones make','1 ten'],['10 tens make','1 hundred'],['The structure name tells how many hundreds, tens and','ones'],['When we take away, there are','fewer','items left.']]
       : st.lesson==='npt'? [['A ten frame holds','10','ones.'],['We always bundle at','ten'],['10 ones make','1 ten'],['The structure name tells how many tens and how many','ones'],['When we take away, there are','fewer','items left.']]
       : [['When we count, we say one number for each','item'],['The last number we say tells us','how many'],['A ten frame holds','10','items.'],['5 and 5 make','10'],['We can count ones to find the','whole']];
     const kn= st.kn===undefined? (st.show?5:0) : st.kn;
@@ -3792,14 +3806,17 @@ function teachHTML(st,n){
   h+='<div class="tqa"><div class="tq">'+tLines(st.q)+'</div>'+(st.a? '<div class="ta'+(st.show?' on':'')+'"><span>'+tLines(st.a)+'</span></div>' : '')+'</div>';
   TCH.tall= NL>2.5;
   if(st.tag && st.show) h+='<div class="ttag">'+st.tag+'</div>';
-  h+=tSceneHTML(st.sc||null).replace('class="treg"','class="treg'+(TCH.tall?' tall':'')+'"');
+  if(st.pic) h+='<div class="treg tpicw"><div class="tpicin">'+st.pic+'</div></div>';
+  else if(st.bond) h+='<div class="treg tpicw"><div class="tpicin">'+tBondHTML(st.bond)+'</div></div>';
+  else h+=tSceneHTML(st.sc||null);
   if(st.big) h+='<div class="tbigt">'+st.big+'</div>';
-  if(st.line) h+='<div class="tline">'+nptLineSVG({A:st.lineN||n,lvl:'100'},st.line,1100)+'</div>';
+  if(st.line) h+='<div class="tline">'+nptLineSVG({A:st.lineN||n,lvl:st.lvl||'100'},st.line,1100)+'</div>';
   if(st.eq2){ const o=n%10, N=n-o+10, Pv=n-o, B=(v)=>'<span class="tbox'+(st.show?' on':'')+'"><span>'+v+'</span></span>';
     h+='<div class="teq2"><div>'+(sym? n+' <span class="top">+</span> '+B(N-n)+' <span class="top">=</span> '+N : n+' <span class="top w">and</span> '+B(N-n)+' <span class="top w">make</span> '+N)+'</div><div>'+(sym? n+' <span class="top">−</span> '+B(o)+' <span class="top">=</span> '+Pv : n+' <span class="top w">take away</span> '+B(o)+' <span class="top w">is</span> '+Pv)+'</div></div>'; }
   if(st.numeral){
     if(st.digits){
-      h+='<div class="tdig">'+(t? '<div class="tdc"><div class="tdn">'+t+'</div><div class="tdl'+(st.show?' on':'')+'">'+plural(t,'ten')+'</div></div>' : '')+
+      const hh=Math.floor(n/100), tt=n>=100? t%10 : t, cell=(d,u)=>'<div class="tdc"><div class="tdn">'+d+'</div><div class="tdl'+(st.show?' on':'')+'">'+plural(d,u)+'</div></div>';
+      h+='<div class="tdig">'+(hh? cell(hh,'hundred') : '')+((hh||tt)? cell(tt,'ten') : '')+
          '<div class="tdc"><div class="tdn">'+o+'</div><div class="tdl'+(st.show?' on':'')+'">'+plural(o,'one')+'</div></div></div>';
     } else h+='<div class="tbig'+(st.sc? '' : ' solo')+'">'+n+'</div>';
   }
@@ -3817,7 +3834,7 @@ function teachRender(){
   const stage=$('tchStage'), tmp=document.createElement('div');
   tmp.innerHTML=teachHTML(st,TCH.n);
   const newReg=tmp.querySelector('.treg'), oldReg=stage.querySelector('.treg');
-  if(oldReg && newReg){
+  if(oldReg && newReg && !oldReg.classList.contains('tpicw') && !newReg.classList.contains('tpicw')){
     oldReg.className=newReg.className;
     const keep=new Map(); oldReg.querySelectorAll(':scope>.tpz').forEach(e=>keep.set(e.dataset.k||e.dataset.g,e));
     const seen=new Set();
@@ -3871,7 +3888,7 @@ async function teachDownload(){
   finally{ btn.disabled=false; }
 }
 
-function teachNum(){ const v=Math.round(+String($('tchNum').value).replace(/[^0-9]/g,'')); return (v>=1&&v<=100)? v : null; }
+function teachNum(){ const v=Math.round(+String($('tchNum').value).replace(/[^0-9]/g,'')); return (v>=1&&v<=999)? v : null; }
 function teachFit(){ const box=$('tchView'), sc=Math.max(.2, Math.min(box.clientWidth/1280, (window.innerHeight-130)/720)); $('tchStage').style.transform='scale('+sc+')'; $('tchView').style.height=(720*sc)+'px'; }
 function tLesson(){ const e=$('tchLesson'); return e? e.value : 'build'; }
 /* ---------- Teach: compare numbers (within 100) ----------
@@ -4011,7 +4028,185 @@ function cmpTeachSteps(n){
   return T_.S_;
 }
 
-function lessonSteps(n){ return tLesson()==='npt'? nptTeachSteps(n) : tLesson()==='cmp'? cmpTeachSteps(n) : teachSteps(n); }
+/* ================= v103: lesson presentations built from Laurie's own lessons =================
+   Build And Name Numbers, 1–50: Grade 1 Place Value Week 1, Day 1 Focus and Day 3 Focus (Western study set).
+   Every other lesson: the 4-week place value sequence (Days 1–20 teacher scripts):
+   Build And Name = Build And Bundle + Canonical (concrete, pictorial, symbolic);
+   Bundle And Unbundle = Trade + Non-Canonical; Next And Previous Ten = Number Line; Compare = Compare.
+   Current wording rules: counting name (not number name); "Did the whole change?" "No." "What changed?" "The parts.";
+   "How much less is the previous ten?"; answers are complete sentences; no We do or You do. */
+function words3(n){ if(n<100) return words(n); if(n===1000) return 'one thousand'; const h=Math.floor(n/100), r=n%100; return ONES[h]+' hundred'+(r? ' '+words(r) : ''); }
+function cap1(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function pvTen(k){ return plural(k,'ten'); } function pvOne(k){ return plural(k,'one'); } function pvHun(k){ return plural(k,'hundred'); }
+function pvStruct(h,t,o,big){ return (big? pvHun(h)+' ' : '')+pvTen(t)+' '+pvOne(o); }
+function pvRep(){ return S.pRep==='frames'? 'frames' : S.pRep==='disks'? 'disks' : 'rods'; }
+function pvPic(d,L){ const rep=pvRep(); return cfit(u=>buildD(rep,d,L,u,null),1080,330,42); }
+function pvKnow(lesson){ return lesson; }
+/* ---------- Build And Name Numbers, 1–50 (Grade 1 Week 1) ---------- */
+function g1BuildSteps(){
+  const T_=tSteps(), {q,say,sec,goal}=T_;
+  const A=tKeyScenes(10,'a'), B=tKeyScenes(30,'b');
+  const fitSet=arr=>{ const e=tExtent(arr); arr.forEach(sc=>{ sc.W=Math.max(e.W,4); sc.H=Math.max(e.H,5); }); return e; };
+  const eA=fitSet([A.loose,A.fin].concat(A.fill,A.rod)); fitSet([B.loose,B.fin].concat(B.fill,B.rod)); TU.W=Math.max(eA.W,4); TU.H=Math.max(eA.H,5);
+  T_.know('g1');
+  goal('Today we will bundle 10 ones into 1 ten, and build tens.');
+  sec('Build 10');
+  q('How can we find out if we have 10 ones?', 'We can move the ones onto the ten frame.', {sc:A.loose});
+  say('We can move the ones onto the ten frame.', {sc:A.fill[0]});
+  q('How does the ten frame tell us we have 10 ones?', 'The ten frame is full. A full ten frame shows 10 ones.', {sc:A.fill[0]});
+  q('Did we need to count? Why or why not?', 'No. We did not need to count. The full ten frame shows 10 ones.', {sc:A.fill[0]});
+  q('Can we bundle these 10 ones?', 'Yes. We can bundle these 10 ones.', {sc:A.fill[0]}, {sc:A.rod[0]});
+  q('What do we call a bundle of 10 ones?', 'A bundle of 10 ones is 1 ten.', {sc:A.rod[0]});
+  q('Did the whole change when we bundled?', 'No. The whole stayed the same. The parts changed.', {sc:A.rod[0]});
+  say('We write numerals with the digits 0 1 2 3 4 5 6 7 8 9.', {big:'0 1 2 3 4 5 6 7 8 9'});
+  say('After 9 comes 10.', {big:'10'});
+  say('The numeral 10 has two digits.', {numeral:true, digits:true, num:10});
+  q('Tell me the structure of the number.', '10 is 1 ten 0 ones.', {sc:A.fin, numeral:true, num:10});
+  q('0 ones, so this is just 1. Do we agree?', 'No. The 1 tells us 1 ten. The 0 tells us 0 ones.', {numeral:true, digits:true, num:10});
+  q('Even when there are 0 ones, what is still there?', 'The ten is still there.', {sc:A.fin});
+  q('What number did I build?', 'I built 10.', {sc:A.fin});
+  sec('Build More Tens');
+  say('Let us build more tens.', {sc:B.loose});
+  q('Do we need to count every item we put into the frame?', 'No. A full ten frame shows 10 ones.', {sc:B.fill[0]});
+  q('What did we make?', 'We made 1 ten.', {sc:B.rod[0]});
+  say('Let us fill the ten frame again.', {sc:B.fill[1]});
+  q('Now I have 1 ten and a full ten frame. How can I make 2 tens?', 'Bundle the 10 ones into 1 ten.', {sc:B.fill[1]}, {sc:B.rod[1]});
+  q('How many tens do I have now?', 'I have 2 tens.', {sc:B.rod[1]});
+  q('2 tens make what number?', '2 tens make 20.', {numeral:true, num:20});
+  q('What does the numeral 20 show us?', '20 is 2 tens 0 ones.', {numeral:true, digits:true, num:20});
+  say('Let us build one more ten.', {sc:B.fill[2]});
+  q('Can I say I have 3 tens yet?', 'No. I have 2 tens and 10 ones.', {sc:B.fill[2]});
+  q('Why not?', 'The 10 ones are not bundled yet.', {sc:B.fill[2]});
+  q('How can I make 3 tens?', 'Bundle the 10 ones into 1 ten.', {sc:B.fill[2]}, {sc:B.rod[2]});
+  q('What do I have now?', 'I have 3 tens.', {sc:B.rod[2]});
+  q('Are there any loose ones?', 'No. There are 0 loose ones.', {sc:B.rod[2]});
+  q('What number did I build?', 'I built 30.', {sc:B.rod[2]});
+  return T_.S_;
+}
+/* concrete, pictorial and symbolic for one structure (canonical or not) */
+function pvCPS(T_,n,h,t,o,big,scC,picC){
+  const {q,say,sec}=T_, nm=words3(n), parts=(big? [h*100] : []).concat([t*10,o]);
+  const C=scC? {sc:scC} : {pic:picC};
+  const worth=(o2)=>{ if(big) q(pvHun(h)+(h===1?' is':' are')+' worth…', pvHun(h)+(h===1?' is':' are')+' worth '+(h*100)+'.', o2);
+    q(pvTen(t)+(t===1?' is':' are')+' worth…', pvTen(t)+(t===1?' is':' are')+' worth '+(t*10)+'.', o2);
+    q(pvOne(o)+(o===1?' is':' are')+' worth…', pvOne(o)+(o===1?' is':' are')+' worth '+o+'.', o2);
+    say(parts.join(' plus ')+'.', o2); };
+  const counts=(o2)=>{ if(big) q('How many hundreds?', 'There '+(h===1?'is ':'are ')+pvHun(h)+'.', o2);
+    q('How many tens?', 'There '+(t===1?'is ':'are ')+pvTen(t)+'.', o2);
+    q('How many ones?', 'There '+(o===1?'is ':'are ')+pvOne(o)+'.', o2); };
+  sec('Concrete');
+  counts(C); worth(C);
+  const canon=(n===h*100+t*10+o)&&t<10&&o<10;
+  if(canon){ q('What is the numeral?', 'The numeral is '+n+'.', {numeral:true, num:n});
+    q('The numeral shows the structure. Tell me the structure name.', n+' is '+pvStruct(h,t,o,big)+'.', {numeral:true, digits:true, num:n}); }
+  else q('Tell me the structure name.', n+' is '+pvStruct(h,t,o,big)+'.', C);
+  q('Tell me the counting name.', 'The counting name is '+nm+'.', C);
+  sec('Pictorial');
+  q('What are the parts?', 'The parts are '+parts.join(' and ')+'.', {bond:{whole:n, parts:parts}});
+  q('What is the whole?', 'The whole is '+n+'.', {bond:{whole:n, parts:parts}});
+  sec('Symbolic');
+  q('Read the equation.', n+' = '+parts.join(' + ')+'.', {big:n+' = '+parts.join(' + ')});
+}
+/* ---------- Build And Name Numbers (Build And Bundle, Canonical) ---------- */
+function pvBuildSteps(n){
+  const T_=tSteps(), {q,say,sec,goal}=T_, big=n>=100, d=d3(n,big?'1000':'100'), h=d[0], t=d[1], o=d[2];
+  T_.know(big?'pv3':'pv2');
+  goal('Today we will build '+n+', bundle it and name its structure.');
+  sec('Build And Bundle');
+  if(!big){
+    const K=tKeyScenes(n); tFit([K.loose,K.fin].concat(K.fill,K.rod));
+    say('Build '+n+' with ones.', {sc:K.loose});
+    q('How many ones altogether?', 'There are '+n+' ones altogether.', {sc:K.loose});
+    for(let k=1;k<=t;k++) q('Bundle 10 ones. What are the parts?', pvTen(k)+' and '+pvOne(n-10*k)+'.', {sc:K.fill[k-1]}, {sc:K.rod[k-1]});
+    q('Can we bundle again?', 'No. There '+(o===1?'is ':'are ')+'only '+pvOne(o)+' left.', {sc:K.fin});
+    pvCPS(T_,n,0,t,o,false,K.fin,null);
+  } else {
+    const L='1000', tens=Math.floor(n/10)%100;
+    say('Build '+n+' with tens and ones.', {pic:pvPic([0,Math.floor(n/10),o],'100')});
+    q('How many tens and ones?', 'There are '+pvTen(Math.floor(n/10))+' and '+pvOne(o)+'.', {pic:pvPic([0,Math.floor(n/10),o],'100')});
+    q('Bundle 10 tens. What are the parts?', pvHun(h)+', '+pvTen(t)+' and '+pvOne(o)+'.', {pic:pvPic([0,Math.floor(n/10),o],'100')}, {pic:pvPic([h,t,o],L)});
+    q('Can we bundle again?', 'No. There are not 10 tens or 10 ones.', {pic:pvPic([h,t,o],L)});
+    pvCPS(T_,n,h,t,o,true,null,pvPic([h,t,o],L));
+  }
+  return T_.S_;
+}
+/* ---------- Bundle And Unbundle (Trade, Non-Canonical) ---------- */
+function pvUnbundleSteps(n){
+  const T_=tSteps(), {q,say,sec,goal}=T_, big=n>=100, d=d3(n,big?'1000':'100'), h=d[0], t=d[1], o=d[2];
+  T_.know(big?'pv3':'pv2');
+  goal('Today we will unbundle 1 ten and name the new structure.');
+  sec('Unbundle');
+  if(!big){
+    const K=tKeyScenes(n); tFit([K.fin,K.unb[0]]);
+    say('Build '+n+'.', {sc:K.fin, note:n+' is '+pvStruct(0,t,o,false)+'.'});
+    say('Unbundle 1 ten.', {sc:K.unb[0]});
+    q('How many tens?', 'There '+(t-1===1?'is ':'are ')+pvTen(t-1)+'.', {sc:K.unb[0]});
+    q('How many ones?', 'There are '+pvOne(o+10)+'.', {sc:K.unb[0]});
+    q('Did the whole change?', 'No. It is still '+n+'.', {sc:K.unb[0]});
+    q('What changed?', 'The parts. The structure is '+pvStruct(0,t-1,o+10,false)+'.', {sc:K.unb[0]});
+    say('This is the same number with a new structure.', {sc:K.unb[0]});
+    pvCPS(T_,n,0,t-1,o+10,false,K.unb[0],null);
+  } else {
+    const L='1000', P0=pvPic([h,t,o],L), P1=pvPic([h,t-1,o+10],L);
+    say('Build '+n+'.', {pic:P0, note:n+' is '+pvStruct(h,t,o,true)+'.'});
+    say('Unbundle 1 ten.', {pic:P1});
+    q('How many tens?', 'There '+(t-1===1?'is ':'are ')+pvTen(t-1)+'.', {pic:P1});
+    q('How many ones?', 'There are '+pvOne(o+10)+'.', {pic:P1});
+    q('Did the whole change?', 'No. It is still '+n+'.', {pic:P1});
+    q('What changed?', 'The parts. The structure is '+pvStruct(h,t-1,o+10,true)+'.', {pic:P1});
+    say('This is the same number with a new structure.', {pic:P1});
+    pvCPS(T_,n,h,t-1,o+10,true,null,P1);
+  }
+  return T_.S_;
+}
+/* ---------- Next And Previous Ten / Hundred (Number Line) ---------- */
+function pvLineSteps(n){
+  const T_=tSteps(), {q,say,sec,goal}=T_, big=n>=100, L=big?'1000':'100', V=nptVals({A:n,lvl:L}), u=V.unit;
+  T_.know(big?'npt3':'npt');
+  goal('Today we will find the next '+u+' and the previous '+u+'.');
+  sec('Number Line');
+  const d=d3(n,L);
+  say('This is '+n+'. '+n+' is '+pvStruct(d[0],d[1],d[2],big)+'.', {line:'none', lineN:n, lvl:L});
+  q('How many more to the next '+u+'?', V.N+' is '+V.m+' more than '+n+'.', {line:'none', lineN:n, lvl:L}, {line:'nx', lineN:n, lvl:L});
+  q('How much less is the previous '+u+'?', V.Pv+' is '+V.l+' less than '+n+'.', {line:'nx', lineN:n, lvl:L}, {line:'both', lineN:n, lvl:L});
+  say(n+' is between '+V.Pv+' and '+V.N+'.', {line:'both', lineN:n, lvl:L});
+  return T_.S_;
+}
+/* ---------- Compare Numbers ---------- */
+function pvCompareSteps(n){
+  const T_=tSteps(), {q,say,sec,goal}=T_, big=n>=100, L=big?'1000':'100';
+  const ok=v=> big? (v>=100&&v<=999) : (v>=11&&v<=99);
+  const d=d3(n,L);
+  // pair 1: the biggest place is the same; pair 2: the biggest place differs
+  let A1=n, B1= big? d[0]*100+((d[1]+2)%10)*10+d[2] : d[1]*10+((d[2]+2)%10); if(!ok(B1)||B1===A1) B1= big? n+10 : n+1;
+  let A2=n, B2= big? (d[0]>1? n-100 : n+100) : (d[1]>1? n-10 : n+10);
+  const rel=(a,b)=> a<b? 'less than' : a>b? 'greater than' : 'equal to';
+  T_.know('cmp');
+  goal('Today we will compare two numbers.');
+  const one=(a,b,label)=>{
+    const da=d3(a,L), db=d3(b,L), P=pvPairPic(a,b,L);
+    sec('Compare '+a+' and '+b);
+    say('Which is greater, '+a+' or '+b+'? Look at both.', {pic:P});
+    say(a+' is '+pvStruct(da[0],da[1],da[2],big)+'.<br>'+b+' is '+pvStruct(db[0],db[1],db[2],big)+'.', {pic:P});
+    q('Which place do we compare first?', 'We compare the '+(big?'hundreds':'tens')+' first.', {pic:P});
+    const places= big? [['hundreds',pvHun],['tens',pvTen],['ones',pvOne]] : [['tens',pvTen],['ones',pvOne]];
+    for(let i=0;i<places.length;i++){
+      const ia=(big?da[i]:da[i+1]), ib=(big?db[i]:db[i+1]), nmf=places[i][1];
+      if(i>0) say('Then compare the '+places[i][0]+'.', {pic:P});
+      if(ia===ib){ q(nmf(ia)+' and '+nmf(ib)+'. Which is greater?', 'Neither. '+nmf(ia)+' and '+nmf(ib)+' are the same.', {pic:P}); continue; }
+      q(nmf(ia)+' and '+nmf(ib)+'. Which is greater?', nmf(Math.max(ia,ib))+' is greater than '+nmf(Math.min(ia,ib))+'.', {pic:P});
+      break;
+    }
+    say('So '+a+' is '+rel(a,b)+' '+b+'.<br>'+a+' '+(a<b?'<':a>b?'>':'=')+' '+b, {pic:P});
+    q('What is the difference?', 'The difference is '+Math.abs(a-b)+'.', {pic:P});
+  };
+  one(A1,B1); one(A2,B2);
+  return T_.S_;
+}
+function pvPairPic(a,b,L){ const rep=pvRep(); return cfit(u=>compose([buildD(rep,d3(a,L),L,u,null,true),buildD(rep,d3(b,L),L,u,null,true)],u,'|'),1080,330,40); }
+
+function g1Range(){ return S.level==='100' && /^(1-20|1-50|20-50)$/.test(S.range); }
+function lessonSteps(n){ const l=tLesson(); if(l==='build') return (g1Range()&&n<=50)? g1BuildSteps() : pvBuildSteps(n); if(l==='non') return pvUnbundleSteps(n); if(l==='npt') return pvLineSteps(n); if(l==='cmp') return pvCompareSteps(n); return pvBuildSteps(n); }
 function teachLoad(n){ TCH.n=n; TCH.steps=lessonSteps(n); TCH.i=0; teachStop(); teachRender(); $('tchMsg').textContent=''; }
 function teachStop(){ if(TCH.timer){ clearInterval(TCH.timer); TCH.timer=null; } $('tchPlay').textContent='Play ▶'; }
 function teachPlay(){
@@ -4022,7 +4217,7 @@ function teachPlay(){
 }
 function bindTeach(){
   const w=$('teachWrap'); if(!w) return;
-  const open=()=>{ const cur=P.hist[P.idx]; $('tchLesson').value= S.topic==='npt'? 'npt' : S.topic==='cmp'? 'cmp' : 'build'; $('tchNum').value= S.topic==='cmp'? ((T.hist[T.idx]&&T.hist[T.idx].A<100&&T.hist[T.idx].A>10)? T.hist[T.idx].A : 34) : S.topic==='npt'? ((T.hist[T.idx]&&T.hist[T.idx].A<100&&T.hist[T.idx].A%10)? T.hist[T.idx].A : 23) : ((cur&&cur<=100)? cur : TCH.n); w.classList.remove('hidden'); $('tchLive').classList.remove('hidden'); $('tchWatch').classList.add('hidden'); tchTabs('live'); teachLoad(teachNum()||34); };
+  const open=()=>{ const cur=P.hist[P.idx]; $('tchLesson').value= S.topic==='npt'? 'npt' : S.topic==='cmp'? 'cmp' : (S.topic==='pv' && S.pCanon==='non')? 'non' : 'build'; { const big=S.level==='1000', th=T.hist[T.idx], ta=th&&th.A, okT=v=>v&&(big? v>=101&&v<=999 : v>=11&&v<=99); $('tchNum').value= S.topic==='npt'? ((okT(ta)&&ta%10)? ta : (big?347:23)) : S.topic==='cmp'? (okT(ta)? ta : (big?166:34)) : (okT(cur)&&(!big||cur%10)? cur : (big?129:34)); } w.classList.remove('hidden'); $('tchLive').classList.remove('hidden'); $('tchWatch').classList.add('hidden'); tchTabs('live'); teachLoad(teachNum()||34); };
   const tchTabs=k=>{ $('tchLiveBtn').classList.toggle('on',k==='live'); $('tchWatchBtn').classList.toggle('on',k==='watch'); };
   const close=()=>{ teachStop(); try{ $('tchVid').pause(); }catch(e){} w.classList.add('hidden'); };
   $('teachBtn').addEventListener('click',open);
@@ -4031,8 +4226,8 @@ function bindTeach(){
   w.addEventListener('keydown',e=>{ e.stopPropagation(); if(e.key==='Escape') close();
     if(e.target.tagName!=='INPUT'){ if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); $('tchNext').click(); } if(e.key==='ArrowLeft'){ e.preventDefault(); $('tchPrev').click(); } } });
   document.addEventListener('keydown',e=>{ if(!w.classList.contains('hidden')){ if(e.key==='Escape') close(); e.stopPropagation(); if(e.target.tagName!=='INPUT' && (e.key==='ArrowRight'||e.key===' '||e.key==='ArrowLeft')){ e.preventDefault(); (e.key==='ArrowLeft'? $('tchPrev') : $('tchNext')).click(); } } },true);
-  $('tchGo').addEventListener('click',()=>{ const n=teachNum(); if(!n){ $('tchMsg').textContent='Type a number from 1 to 100.'; return; } if(tLesson()==='cmp' && (n<11 || n>99)){ $('tchMsg').textContent='Pick a number between 11 and 99 (like 34).'; return; } if(tLesson()==='npt' && (n%10===0 || n<11 || n>99)){ $('tchMsg').textContent='Pick a number between 11 and 99 that is not a ten (like 23).'; return; } teachLoad(n); });
-  $('tchLesson').addEventListener('change',()=>{ let n=teachNum()||34; if(tLesson()==='npt' && (n%10===0||n<11||n>99)){ n=23; $('tchNum').value=n; } if(tLesson()==='cmp' && (n<11||n>99)){ n=34; $('tchNum').value=n; } teachLoad(n); });
+  $('tchGo').addEventListener('click',()=>{ const n=teachNum(), l=tLesson(); if(!n || n<11){ $('tchMsg').textContent='Type a number from 11 to 999.'; return; } if(l==='npt' && n%10===0){ $('tchMsg').textContent='Pick a number that is not a ten (like 23 or 347).'; return; } if((l==='non'||l==='build') && n>=100 && Math.floor(n/10)%10===0 && l==='non'){ $('tchMsg').textContent='Pick a number with at least 1 ten (like 156).'; return; } if(l==='non' && n<100 && n<20){ $('tchMsg').textContent='Pick a number with at least 2 tens (like 91).'; return; } teachLoad(n); });
+  $('tchLesson').addEventListener('change',()=>{ let n=teachNum()||34; if(tLesson()==='npt' && n%10===0){ n=n>=100? 347 : 23; $('tchNum').value=n; } teachLoad(n); });
   $('tchNum').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); $('tchGo').click(); } });
   $('tchPrev').addEventListener('click',()=>{ teachStop(); if(TCH.i>0){ TCH.i--; teachRender(); } });
   $('tchNext').addEventListener('click',()=>{ teachStop(); if(TCH.i<TCH.steps.length-1){ TCH.i++; teachRender(); } });
@@ -4097,7 +4292,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   <div id="teachBox">
     <div id="tchHead"><b id="tchTitle">Lesson: Build And Name Numbers</b><span class="tchnote" id="tchNote"></span><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchHome" type="button" title="Back to Home">⌂ Home</button> <button id="tchClose" type="button">Close ✕</button></div>
     <div id="tchLive">
-      <div id="tchBar"><select id="tchLesson" title="Lesson"><option value="build">Build And Name Numbers</option><option value="npt">Next And Previous Ten</option><option value="cmp">Compare Numbers</option></select> Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
+      <div id="tchBar"><select id="tchLesson" title="Lesson"><option value="build">Build And Name Numbers</option><option value="non">Bundle And Unbundle</option><option value="npt">Next And Previous Ten</option><option value="cmp">Compare Numbers</option></select> Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
         <button class="btn round" id="tchPrev" type="button" title="Previous">←</button><button class="btn alt" id="tchPlay" type="button">Play ▶</button><button class="btn round" id="tchNext" type="button" title="Next">→</button>
         <span id="tchPos"></span><button class="btn" id="tchDown" type="button">Download PowerPoint</button><span id="tchMsg"></span></div>
       <div id="tchView"><div id="tchStage"></div></div>
@@ -4166,7 +4361,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
       return [{id:'bond',label:'Number bond'},{id:'bar',label:'Bar model'},{id:'expanded',label:'Expanded form'}];
     }
     if(s==='npt'||s==='as') return [{id:'eq',label:'Equation'}];
-    if(s==='cmp') return [{id:'sym',label:'Symbols ( <  >  = )'}];
+    if(s==='cmp') return [{id:'sym',label:'Symbols ( <  >  = )'},{id:'words',label:'Words (is greater than)'}];
     return [{id:'parts',label:'Expression (30 + 4  ☐)'},{id:'whole',label:'Equation: Find The Parts (34 = ☐ + ☐)'},{id:'miss',label:'Equation: Find A Missing Part (34 = 30 + ☐)'},{id:'mix',label:'Mixed'}];
   }
   function curRep(){ var m=LS.method==='CPA'?'C':LS.method, L=reps(m), r=LS.rep[m]; if(!L.some(function(x){return x.id===r;})) r=L[0].id; LS.rep[m]=r; return r; }
@@ -4233,6 +4428,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
       if(ar && ['parts','whole','miss','mix'].indexOf(ar)>=0) setSel('aform',ar);
       setSel('awhole', LS.side==='left'? 'left' : 'right');
     }
+    if(s==='cmp'){ var cw= (pm==='A'||pm==='S')? (LS.rep[pm]==='words'? 'words' : 'sym') : (R.grade==='g3'||R.grade==='g2'? 'sym' : 'words'); setSel('cmpW',cw); }
     if(s==='as'){ setSel('asStrat','ten'); setSel('asOp','mix'); }
     var view=document.querySelector('section:not(.hidden)'), vid=view? view.id : 'present';
     var nb= vid==='sheets'? $('wNew') : vid==='slides'? $('sNew') : vid==='centers'? $('cNew') : $('newP'); if(nb) nb.click();
@@ -4341,7 +4537,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   [].forEach.call(s5.querySelectorAll('.fbtn'),function(b){ b.addEventListener('click',function(){ go(b.dataset.job); }); });
   $('introHow').addEventListener('click',function(){ var h=$('howBtn'); if(h) h.click(); });
   refreshAll();
-  function tchTitle(){ var t=$('tchTitle'), l=$('tchLesson'); if(t&&l) t.textContent='Lesson: '+(l.value==='npt'? 'Next And Previous Ten' : l.value==='cmp'? 'Compare Numbers' : 'Build And Name Numbers'); }
+  function tchTitle(){ var t=$('tchTitle'), l=$('tchLesson'); if(t&&l) t.textContent='Lesson: '+(l.value==='npt'? 'Next And Previous Ten' : l.value==='cmp'? 'Compare Numbers' : l.value==='non'? 'Bundle And Unbundle' : 'Build And Name Numbers'); }
   if($('tchLesson')){ $('tchLesson').addEventListener('change',tchTitle); new MutationObserver(tchTitle).observe($('teachWrap'),{attributes:true,attributeFilter:['class']}); }
   var full=false; try{ full=localStorage.getItem('numerics-full')==='1'; }catch(e){}
   if(full){ intro.classList.add('hidden'); simple(false); apply(); } else showIntro();
