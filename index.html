@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v104</title>
+<title>Numerics · Place Value Toolkit v106</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -174,6 +174,14 @@
   .line.cbox{width:1.25em;height:1.1em;border:max(2px,.04em) solid #111;border-radius:.14em;margin-top:.02em}
   .line.cbox.cw{width:6.6em}
   .line.cbox{align-items:center}
+  .xcbar{width:78%;margin:8px auto;font-size:26px;text-align:center;border:2px solid #111}
+  .xcbar .xbw{background:#EFE8DE;border-bottom:2px solid #111;padding:6px 0}
+  .xcbar .xbp{display:flex}
+  .xcbar .xbp>div{padding:6px 0}
+  .xcbar .xbp>div+div{border-left:2px solid #111}
+  .row.errk .line{outline:3px solid #C0392B;outline-offset:2px;border-radius:4px}
+  .errhead{font-size:15px;font-weight:700;color:#1F3A5F;text-align:center;margin:2px 0 6px}
+  .fixrow .f{font-size:.5em;white-space:nowrap}
   .line.cbox:not(.cw) .f{font-size:.95em;line-height:1;font-weight:600}
   .line.cw .f{font-size:.6em;line-height:1.8;white-space:nowrap}
   .line.rel{width:1.3em}
@@ -295,6 +303,9 @@
   .tch2 .tqa .tq,.tch2 .tqa .ta{position:static;margin:0;line-height:1.2}
   .tch2 .tqa .ta{font-size:34px}
   .tch2 .tpicw{display:flex;align-items:center;justify-content:center}
+  .tch2 .tpair{display:flex;gap:90px;align-items:flex-end;justify-content:center}
+  .tch2 .tpair>div{display:flex;flex-direction:column;align-items:center}
+  .tch2 .tpn{font-size:52px;font-weight:700;color:#1F3A5F;margin-bottom:8px}
   .tch2 .tpicin svg{display:block;max-width:1160px;max-height:360px}
   .tch2 .tgoal{position:absolute;left:120px;right:120px;top:320px;font-size:48px;color:#1F3A5F;line-height:1.3}
   .tch2 .tsec{position:absolute;left:0;right:0;top:300px;font-size:64px;font-weight:bold;color:#355E3B}
@@ -428,6 +439,7 @@
   #guide{display:none}
   body.simple #guide{display:flex}
   #guide.strip{flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 20px;border-bottom:1px solid #e3e3e3;background:#faf8f4}
+  #guide.strip{justify-content:center} #guide.strip>.spacer{display:none} #guide.strip>.gi{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px}
   #guide .gi{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
   #guide .spacer{flex:1}
   #guide.steps{flex-wrap:wrap;align-items:stretch;gap:14px;padding:14px 20px;border-bottom:1px solid #e3e3e3;background:#faf8f4}
@@ -647,9 +659,9 @@
     <button class="btn round" id="prev" title="Previous">←</button>
     <button class="btn round" id="next" title="Next">→</button>
     <button class="btn" id="newP">New Problem</button>
-    <button class="btn alt tp-pv" id="animOpen" title="Watch the ones bundle into tens">Bundle ▶</button>
-    <button class="btn alt tp-pv" id="animOpenUn" title="Watch the tens unbundle into ones">Unbundle ▶</button>
-    <button class="btn alt tp-pv" id="animOpenEst" title="The amount is hidden: students estimate, then bundling reveals it">Estimate ▶</button>
+    <button class="btn alt tp-pv" id="animOpen" title="Watch the ones bundle into tens or the tens unbundle into ones. Estimate is inside.">Bundle And Unbundle ▶</button>
+    <button class="btn alt" id="animOpenUn" style="display:none!important"></button>
+    <button class="btn alt" id="animOpenEst" style="display:none!important"></button>
   </div>
   <div class="bar" style="padding:4px 20px;background:#fff"><span class="hint">Keys: Space = reveal next · A = show all · H = hide · N = new problem · ← → = previous / next</span></div>
   <div id="stage"></div>
@@ -696,7 +708,7 @@
       <select id="sCanon"><option value="canon">Canonical</option><option value="non">Non-canonical</option><option value="mix">Mixed</option></select>
     </div>
     <div class="grp tp-pv sk-prob"><span class="t">Number</span>
-      <select id="sNum"><option value="shown">Shown</option><option value="hidden">Revealed last</option></select>
+      <select id="sNum"><option value="shown">Shown</option><option value="hidden">Revealed after the values</option></select>
     </div>
     <div class="grp tp-pv"><span class="t">Week</span><input type="number" id="sWeek" min="1" max="40" style="width:52px"></div>
     <div class="grp tp-pv"><span class="t">Day</span><input type="number" id="sDay" min="1" max="200" style="width:52px"></div>
@@ -732,6 +744,9 @@
         <option value="alt">Alternate rods &amp; ten frames</option>
         <option value="alt3">Rotate rods, ten frames &amp; disks</option>
       </select>
+    </div>
+    <div class="grp tp-pv"><span class="t">Practice</span>
+      <select id="wKind"><option value="do">Complete The Problems</option><option value="err">Find The Mistake</option></select>
     </div>
     <div class="grp tp-pv"><span class="t">Partition</span>
       <select id="wCanon">
@@ -872,8 +887,8 @@ const S = {
   range:'1-20', cmin:10, cmax:30,
   lines:{val:true,qty:true,struct:true,name:true},
   scheme:'by', fill:'five', astyle:'sym', awhole:'left', aform:'mix', level:'100', pform:'bond', grade:'g1',
-  pMode:'C', pRep:'rods', pNum:'shown', zoom:1,
-  wMode:'C', wRep:'rods', wNum:'shown', wPer:4, wPages:2, wTitle:'Place Value', wKey:true, wList:'', wCanon:'canon', pCanon:'canon',
+  pMode:'C', pRep:'rods', pNum:'hidden', zoom:1,
+  wKind:'do', wMode:'C', wRep:'rods', wNum:'shown', wPer:4, wPages:2, wTitle:'Place Value', wKey:true, wList:'', wCanon:'canon', pCanon:'canon',
   topic:'pv', asOp:'add', asStrat:'ten', cmpT:'mix', cmpW:'words', cmpDiff:true,
   sMode:'C', sRep:'rods', sCanon:'canon', sNum:'shown', sCount:5, sList:'', sTitle:true, sKind:'prob', sWeek:'', sDay:'', sRev:''
 };
@@ -1104,7 +1119,7 @@ function pictorialHTML(vals,labels,ctx){
     : '<svg class="bond" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="6,22 50,3 94,22" fill="none" stroke="#111" stroke-width="2.4" vector-effect="non-scaling-stroke"/></svg>';
 }
 /* S mode reads values first (0 and 6 is 6), then quantities (0 tens 6 ones); C and P read quantities first */
-function lineOrder(numStep,mode){ const L=[]; (mode==='A'? ['val','qty','struct','name'] : ['qty','val','struct','name']).forEach(k=>{ if(S.lines[k] || (mode==='A' && k==='val')) L.push(k); }); if(numStep) L.push('num'); return L; }   // the hidden number is revealed last
+function lineOrder(numStep,mode){ const L=[]; (mode==='A'? ['val','qty','struct','name'] : ['qty','val','num','struct','name']).forEach(k=>{ if(k==='num'){ if(numStep) L.push('num'); return; } if(S.lines[k] || (mode==='A' && k==='val')) L.push(k); }); return L; }   // v105: C and P reveal the numeral after the values
 function cls(step, ctx){ let c=''; if(ctx.shown.has(step)) c+=' shown'; if(ctx.hl===step) c+=' hl'; return c; }
 function cell(val, lab, extra, given){ return '<div class="cell'+(given?' given':'')+'"><div class="line'+(extra||'')+'"><span class="f">'+val+'</span></div><div class="lbl'+(lab?'':' empty')+'">'+(lab||'.')+'</div></div>'; }
 
@@ -1147,16 +1162,32 @@ function symQtyRow(q,labels,ctx){
 }
 
 /* ctx: {mode, rep, numMode:'shown'|'hidden'|'blank', u, shown:Set, hl, key} */
+/* v105 Find The Mistake: each problem is worked out with one common error */
+function mistakeFor(n,mode,i){
+  const big=S.level==='1000', d=big? [Math.floor(n/100),Math.floor(n/10)%10,n%10] : [0,Math.floor(n/10),n%10];
+  const [h,t,o]=d, opts=[];
+  const rev= big? (o*100+t*10+h) : (o*10+t);   // digits written in reverse order
+  if(mode!=='A' && S.lines.qty) opts.push({k:'qty', q: big? [h,t>=1?t-1:t+1,o] : [t>=2?t-1:t+1,o], why:'miscounted the tens'});
+  if(mode!=='A' && S.lines.val && (big? h>=1 : t>=1)) opts.push({k:'val', v: big? [h,t*10,o] : [t,o], why:'left off the zero'});
+  if(mode!=='A' && rev!==n && (big? o>=1 : true)) opts.push({k:'num', n:rev, why:'wrote the digits backwards'});
+  if(S.lines.struct && (big? h!==o : t!==o)) opts.push({k:'struct', s: big? structName3(o,t,h) : plural(o,'ten')+' '+plural(t,'one'), why:'switched the places'});
+  if(S.lines.name && rev!==n) opts.push({k:'name', w: big? words3(rev) : words(rev), why:'said the digits backwards'});
+  if(!opts.length && S.lines.struct){ const t2=t>=2? t-1 : t+1; opts.push({k:'struct', s: big? structName3(h,t2,o) : plural(t2,'ten')+' '+plural(o,'one'), why:'miscounted the tens'}); }
+  if(!opts.length) return null;
+  return opts[(i*7+n)%opts.length];
+}
+function fixRowHTML(ctx){ const e=ctx.err; const was= e.k==='qty'? e.q.join(' · ') : e.k==='val'? e.v.join(' + ') : e.k==='num'? e.n : e.k==='struct'? e.s : e.w;
+  return '<div class="row fixrow'+(ctx.key?' shown':'')+'">'+cell(ctx.key? 'Mistake: '+was : '','Write it correctly',' wide')+'</div>'; }
+function errRow(ctx,k){ return ctx.err&&ctx.err.k===k? (ctx.key? ' errk' : '') : ''; }
+function errUse(ctx,k){ return ctx.err&&ctx.err.k===k&&!ctx.key; }
+function numRowHTML(n,ctx,hid){ if(ctx.err) return '<div class="row shown'+errRow(ctx,'num')+'">'+cell(errUse(ctx,'num')? ctx.err.n : n,'numeral',' numl')+'</div>'; return hid? '<div class="row'+cls('num',ctx)+'">'+cell(n,'numeral',' numl')+'</div>' : '<div class="row"><div class="bignum" style="margin:0">'+n+'</div></div>'; }
 function problemHTML(n, ctx){
   if(S.level==='1000') return problemHTML3(n, ctx);
   const t=ctx.split?ctx.split[0]:Math.floor(n/10), o=ctx.split?ctx.split[1]:n%10, mode=ctx.mode;
   const G = !!ctx.split && mode!=='C';   // non-canonical P/S: the tens are given so students find the ones
   let h='<div class="prob'+(ctx.key?' key':'')+'">';
   const numHidden = (mode==='C' && ctx.numMode!=='shown') || (mode==='P' && ctx.numMode==='hidden');   // printed P problems keep their number
-  if(mode!=='A' && !(mode==='P' && S.pform==='bar')){   // the bar model already shows the whole
-    if(numHidden) h+='<div class="row'+cls('num',ctx)+'" style="margin:0 0 .1em">'+cell(n,'',' numl')+'</div>';
-    else h+='<div class="bignum">'+n+'</div>';
-  }
+  const numLater = mode!=='A' && !(mode==='P' && S.pform==='bar');   // v105: C and P show the numeral after the values (the bar model already shows the whole)
   if(mode==='C') h+='<div class="pic">'+(ctx.rep==='rods'?rodsSVG(t,o,ctx.u):ctx.rep==='disks'?disksSVG(t,o,ctx.u):framesSVG(t,o,ctx.u))+'</div>';
   if(mode==='P') h+=pictorialHTML([t*10,o],['tens','ones'],ctx);
 
@@ -1166,11 +1197,14 @@ function problemHTML(n, ctx){
   } else {
     // how many of each first, then what they are worth as an addition (10 + 8)
     const pl=S.astyle==='sym'?'+':'and', oc=S.astyle==='sym'?'op':'op word';
-    if(S.lines.qty) h+='<div class="row'+cls('qty',ctx)+'">'+cell(t,'tens','',G)+cell(o,'ones')+'</div>';
-    if(S.lines.val) h+='<div class="row'+cls('val',ctx)+'">'+cell(t*10,S.lines.qty?'':'tens','',G)+'<div class="'+oc+'">'+pl+'</div>'+cell(o,S.lines.qty?'':'ones')+'</div>';
+    const Q=errUse(ctx,'qty')? ctx.err.q : [t,o], V=errUse(ctx,'val')? ctx.err.v : [t*10,o];
+    if(S.lines.qty) h+='<div class="row'+cls('qty',ctx)+errRow(ctx,'qty')+'">'+cell(Q[0],'tens','',G)+cell(Q[1],'ones')+'</div>';
+    if(S.lines.val) h+='<div class="row'+cls('val',ctx)+errRow(ctx,'val')+'">'+cell(V[0],S.lines.qty?'':'tens','',G)+'<div class="'+oc+'">'+pl+'</div>'+cell(V[1],S.lines.qty?'':'ones')+'</div>';
   }
-  if(!ctx.noNames && S.lines.struct) h+='<div class="row'+cls('struct',ctx)+'">'+cell(structName(n,t,o),'structure name',' wide')+'</div>';
-  if(!ctx.noNames && S.lines.name)   h+='<div class="row'+cls('name',ctx)+'">'+cell(words(n),'counting name',' wide')+'</div>';
+  if(numLater) h+=numRowHTML(n,ctx,numHidden);
+  if(!ctx.noNames && S.lines.struct) h+='<div class="row'+cls('struct',ctx)+errRow(ctx,'struct')+'">'+cell(errUse(ctx,'struct')? ctx.err.s : structName(n,t,o),'structure name',' wide')+'</div>';
+  if(!ctx.noNames && S.lines.name)   h+='<div class="row'+cls('name',ctx)+errRow(ctx,'name')+'">'+cell(errUse(ctx,'name')? ctx.err.w : words(n),'counting name',' wide')+'</div>';
+  if(ctx.err) h+=fixRowHTML(ctx);
   return h+'</div>';
 }
 
@@ -1308,10 +1342,7 @@ function problemHTML3(n, ctx){
   const Gh=give.includes('h'), Gt=give.includes('t'), Go=give.includes('o');
   let s='<div class="prob'+(ctx.key?' key':'')+'">';
   const numHidden = (mode==='C' && ctx.numMode!=='shown') || (mode==='P' && ctx.numMode==='hidden');   // printed P problems keep their number
-  if(mode!=='A' && !(mode==='P' && S.pform==='bar')){   // the bar model already shows the whole
-    if(numHidden) s+='<div class="row'+cls('num',ctx)+'" style="margin:0 0 .1em">'+cell(n,'',' numl')+'</div>';
-    else s+='<div class="bignum">'+n+'</div>';
-  }
+  const numLater = mode!=='A' && !(mode==='P' && S.pform==='bar');
   if(mode==='C') s+='<div class="pic">'+(ctx.rep==='disks'? disks3SVG(h,t,o,ctx.u) : rods3SVG(h,t,o,ctx.u))+'</div>';
   if(mode==='P') s+=pictorialHTML([h*100,t*10,o],['hundreds','tens','ones'],ctx);
   if(mode==='A'){
@@ -1320,11 +1351,14 @@ function problemHTML3(n, ctx){
   } else {
     const L=(x)=> S.lines.qty? '' : x;
     const pl=S.astyle==='sym'?'+':'and', oc=S.astyle==='sym'?'op':'op word', op='<div class="'+oc+'">'+pl+'</div>';
-    if(S.lines.qty) s+='<div class="row'+cls('qty',ctx)+'">'+cell(h,'hundreds','',Gh)+cell(t,'tens','',Gt)+cell(o,'ones','',Go)+'</div>';
-    if(S.lines.val) s+='<div class="row'+cls('val',ctx)+'">'+cell(h*100,L('hundreds'),'',Gh)+op+cell(t*10,L('tens'),'',Gt)+op+cell(o,L('ones'),'',Go)+'</div>';
+    const Q=errUse(ctx,'qty')? ctx.err.q : [h,t,o], V=errUse(ctx,'val')? ctx.err.v : [h*100,t*10,o];
+    if(S.lines.qty) s+='<div class="row'+cls('qty',ctx)+errRow(ctx,'qty')+'">'+cell(Q[0],'hundreds','',Gh)+cell(Q[1],'tens','',Gt)+cell(Q[2],'ones','',Go)+'</div>';
+    if(S.lines.val) s+='<div class="row'+cls('val',ctx)+errRow(ctx,'val')+'">'+cell(V[0],L('hundreds'),'',Gh)+op+cell(V[1],L('tens'),'',Gt)+op+cell(V[2],L('ones'),'',Go)+'</div>';
   }
-  if(!ctx.noNames && S.lines.struct) s+='<div class="row'+cls('struct',ctx)+'">'+cell(structName3(h,t,o),'structure name',' wide w3')+'</div>';
-  if(!ctx.noNames && S.lines.name)   s+='<div class="row'+cls('name',ctx)+'">'+cell(words3(n),'counting name',' wide w3')+'</div>';
+  if(numLater) s+=numRowHTML(n,ctx,numHidden);
+  if(!ctx.noNames && S.lines.struct) s+='<div class="row'+cls('struct',ctx)+errRow(ctx,'struct')+'">'+cell(errUse(ctx,'struct')? ctx.err.s : structName3(h,t,o),'structure name',' wide w3')+'</div>';
+  if(!ctx.noNames && S.lines.name)   s+='<div class="row'+cls('name',ctx)+errRow(ctx,'name')+'">'+cell(errUse(ctx,'name')? ctx.err.w : words3(n),'counting name',' wide w3')+'</div>';
+  if(ctx.err) s+=fixRowHTML(ctx);
   return s+'</div>';
 }
 /* non-canonical within 1000: trade 1 ten for 10 ones, or 1 hundred for 10 tens.
@@ -2314,11 +2348,19 @@ function cItems(){
   return a;
 }
 /* the picture of a number for a card or mat: C = build, P = number bond, S = expanded form */
+/* v106 non-canonical for centers: unbundle 1 ten (or 1 hundred) and always keep at least 1 of that place */
+function cNonD(n,L){ const d=d3(n,L); if(d[1]>=2) return [d[0],d[1]-1,d[2]+10]; if(L==='1000' && d[0]>=2) return [d[0]-1,d[1]+10,d[2]]; return null; }
+function cNonParts(nd,L){ return L==='1000'? [nd[0]*100,nd[1]*10,nd[2]] : [nd[1]*10,nd[2]]; }
+function cNonName(nd,L){ return (L==='1000'? plural(nd[0],'hundred')+' ' : '')+plural(nd[1],'ten')+' '+plural(nd[2],'one'); }
 function cPic(n,mode,rep,non,W,H){
-  const L=S.level;
-  if(mode==='C'){ let d=d3(n,L); if(non){ d=d.slice(); if(d[1]>0){ d[1]--; d[2]+=10; } else if(d[0]>0){ d[0]--; d[1]+=10; } }
+  const L=S.level, nd= non? cNonD(n,L) : null;
+  if(mode==='A') return '<div class="xcbig">'+(nd? cNonParts(nd,L).join(' + ') : cExp(n,L))+'</div>';
+  if(mode==='C'){ let d= nd || d3(n,L);
     return '<div class="xcpic">'+cfit(u=>buildD(rep,d,L,u,null),W,H,28)+'</div>'; }
-  if(mode==='P'){ const PL=PLACES(L), d=dg(n,L), parts=d.map((v,i)=>v*PL[i][1]);
+  if(mode==='P'){ const PL=PLACES(L), d=dg(n,L), parts= nd? cNonParts(nd,L) : d.map((v,i)=>v*PL[i][1]);
+    if(S.pform==='bar'){ const tot=parts.reduce((a,b)=>a+b,0)||1, MIN=parts.length===3?16:22, raw=parts.map(v=>Math.max(v/tot*100,MIN)), rs=raw.reduce((a,b)=>a+b,0);   // v106: the card follows the chosen pictorial form
+      return '<div class="xcbar"><div class="xbw">?</div><div class="xbp">'+parts.map((v,i)=>'<div style="width:'+(raw[i]/rs*100).toFixed(1)+'%">'+v+'</div>').join('')+'</div></div>'; }
+    if(S.pform==='expanded') return '<div class="xcbig">'+parts.join(' + ')+' = ?</div>';
     return '<div class="xcbond">'+bondBlock('',parts,parts.map(()=>'x'),{key:true,shown:new Set()}).replace('<div class="mwhole"></div>','<div class="mwhole">?</div>')+'</div>'; }
   return '<div class="xcbig">'+cExp(n,L)+'</div>';
 }
@@ -2335,8 +2377,9 @@ function cSign(p){ return p.op==='-'? (WS()?'take away':'−') : (WS()?'and':'+'
 function cTask(it,i,total){
   const mode=cMode(i,total), rep=repFor(i), L=S.level, W=320, H=190;
   if(it.kind==='pv'){
-    const front= mode==='A'? '<div class="xcq">What number is this?</div>'+cPic(it.n,'A',rep,false,W,H) : '<div class="xcq">What number is this?</div>'+cPic(it.n,mode,rep,it.non,W,H);
-    const back='<div class="xcans">'+it.n+'</div><div class="xcsub">'+cSname(it.n,L)+(it.non && mode==='C'? '<br>(built as '+(L==='1000'? cSname(it.n-100,L).replace(/^(\d+)/,m=>m)+'' : plural(Math.floor(it.n/10)-1,'ten')+' '+plural(it.n%10+10,'one'))+')' : '')+'</div>';
+    const nd= it.non? cNonD(it.n,L) : null;
+    const front='<div class="xcq">What number is this?</div>'+cPic(it.n,mode,rep,it.non,W,H);
+    const back='<div class="xcans">'+it.n+'</div><div class="xcsub">'+(nd? cNonName(nd,L)+'<br>is the same as<br>'+cSname(it.n,L) : cSname(it.n,L))+'</div>';
     return {front:front, back:back};
   }
   if(it.kind==='npt'){ const V=nptVals(it);
@@ -2355,8 +2398,8 @@ function cTask(it,i,total){
 /* the three cards that match */
 function cMatch(it,i,total){
   const mode=cMode(i,total), rep=repFor(i), L=S.level, W=220, H=150;
-  if(it.kind==='pv'){ const pic= mode==='A'? '<div class="xcbig">'+cExp(it.n,L)+'</div>' : cPic(it.n,mode,rep,it.non,W,H);
-    return [pic,'<div class="xcbig">'+it.n+'</div>','<div class="xcmid">'+cSname(it.n,L)+'</div>']; }
+  if(it.kind==='pv'){ const nd= it.non? cNonD(it.n,L) : null, pic=cPic(it.n,mode,rep,it.non,W,H);
+    return [pic,'<div class="xcbig">'+it.n+'</div>','<div class="xcmid">'+(nd? cNonName(nd,L) : cSname(it.n,L))+'</div>']; }
   if(it.kind==='npt'){ const V=nptVals(it); return ['<div class="xcbig">'+V.n+'</div>','<div class="xcmid">next '+V.unit+'<br><b>'+V.N+'</b> ('+V.m+' more)</div>','<div class="xcmid">previous '+V.unit+'<br><b>'+V.Pv+'</b> ('+V.l+' less)</div>']; }
   if(it.kind==='cmp'){ const s=it.A<it.B?'<':it.A>it.B?'>':'=', wd=it.A<it.B?'is less than':it.A>it.B?'is greater than':'is equal to';
     return ['<div class="xcbig">'+it.A+' and '+it.B+'</div>','<div class="xcbig">'+it.A+' '+s+' '+it.B+'</div>','<div class="xcmid">'+it.A+' '+wd+' '+it.B+'</div>']; }
@@ -3519,7 +3562,7 @@ function renderSheets(){
   // consistent unit per representation for the whole set
   const units={};
   ['rods','frames','disks'].forEach(rep=>{
-    const ph=Math.max(40,cellH-overhead(fs,lab,'C',S.wNum)-18);
+    const ph=Math.max(40,cellH-overhead(fs,lab,'C',S.wKind==='err'?'hidden':S.wNum)-18-(S.wKind==='err'? fs*2.6 : 0));
     let mw=0, mh=0;
     W.nums.forEach((n,i)=>{ const sp=W.splits&&W.splits[i]; const m= S.level==='1000'? picUnits3(rep==='frames'?'rods':rep,...split3(n,sp)) : picUnits(rep, sp?sp[0]:Math.floor(n/10), sp?sp[1]:n%10); mw=Math.max(mw,m.w); mh=Math.max(mh,m.h); });
     units[rep]=Math.max(4, Math.min(picW/mw, ph/mh));
@@ -3528,13 +3571,15 @@ function renderSheets(){
   passes.forEach(key=>{
     for(let pg=0;pg<W.pages;pg++){
       html+='<div class="page" style="--fs:'+fs+'px;--lab:'+lab+'px"><div class="phead"><span class="nm">'+(key?'':'Name: ')+'</span><span class="pt"><b>Numerics</b> · '+'Place Value'+(wdLabel()?' · '+wdLabel():'')+' · '+rangeLabel()+(W.pages>1?' · '+(pg+1):'')+(key?'<span class="keytag">Answer Key</span>':'')+'</span></div>';
+      if(S.wKind==='err') html+='<div class="errhead">'+(key? 'Answer key: the mistake is outlined in red.' : 'Each problem has one mistake. Circle it. Write it correctly.')+'</div>';
       html+='<div class="grid" style="grid-template-rows:repeat('+rows+',1fr)">';
       for(let c=0;c<per;c++){
         const i=pg*per+c, n=W.nums[i], mode=modeFor(i,total), rep=repFor(i);
         if(n===undefined){ html+='<div class="wcell'+(c>=per-2?' lastrow':'')+'"></div>'; continue; }
-        const shown=new Set(key?['num','val','qty','struct','name']:[]);
+        const ERR= S.wKind==='err'? mistakeFor(n,mode,i) : null;
+        const shown=new Set((key||ERR)?['num','val','qty','struct','name']:[]);
         html+='<div class="wcell'+(c>=per-2?' lastrow':'')+'"><span class="no">'+(c+1)+'.</span>'+
-          (mode==='A'? '<div style="--fs:'+Math.round(fs*1.45)+'px;--lab:'+(lab*1.25)+'px">' : '')+problemHTML(n,{mode:mode,rep:rep,numMode:S.wNum,u:units[rep],shown:shown,hl:null,key:key,split:W.splits&&W.splits[i]})+(mode==='A'?'</div>':'')+'</div>';
+          (mode==='A'? '<div style="--fs:'+Math.round(fs*1.45)+'px;--lab:'+(lab*1.25)+'px">' : '')+problemHTML(n,{mode:mode,rep:rep,numMode:ERR?'hidden':S.wNum,u:units[rep],shown:shown,hl:null,key:key,split:ERR?null:(W.splits&&W.splits[i]),err:ERR})+(mode==='A'?'</div>':'')+'</div>';
       }
       html+='</div><div class="pfoot">© '+2026+' Numerics · Structured Numeracy. All rights reserved.</div></div>';
     }
@@ -3656,6 +3701,7 @@ $('sDown').onclick=downloadDeck;
 sel('wMode','wMode',renderSheets);
 sel('wRep','wRep',renderSheets);
 sel('wNum','wNum',renderSheets);
+sel('wKind','wKind',()=>{ makeSplits(); renderSheets(); });
 sel('wCanon','wCanon',()=>{ makeSplits(); renderSheets(); });
 sel('wPer','wPer',buildSet,true);
 $('wPages').value=S.wPages;
@@ -3699,7 +3745,7 @@ document.addEventListener('keydown',e=>{
   else if(k==='arrowright') $('next').click();
 });
 let rz; window.addEventListener('resize',()=>{ clearTimeout(rz); rz=setTimeout(()=>{ if(A.on) buildAnim(); else renderPresent(); },120); });
-$('animOpen').onclick=()=>{ A.est=false; setEstBtn(); openAnim('bundle'); };
+$('animOpen').onclick=()=>{ A.est=false; setEstBtn(); openAnim(S.pCanon==='non'? 'un' : 'bundle'); };   // v105: one button; the panel has Bundle, Unbundle and Estimate
 $('animOpenEst').onclick=()=>{ A.est=true; setEstBtn(); $('pick').value=''; openAnim('bundle'); };
 function setEstBtn(){ $('animEst').textContent='Estimate: '+(A.est?'On':'Off'); $('animEst').classList.toggle('on',!!A.est); }
 $('animEst').onclick=()=>{ A.est=!A.est; setEstBtn(); if(A.est && A.dir!=='bundle'){ A.dir='bundle'; setDirBtns(); } buildAnim(); };
@@ -4045,6 +4091,32 @@ function pvRep(){ return S.pRep==='frames'? 'frames' : S.pRep==='disks'? 'disks'
 function pvPic(d,L){ const rep=pvRep(); return cfit(u=>buildD(rep,d,L,u,null),1080,330,42); }
 function pvKnow(lesson){ return lesson; }
 /* ---------- Build And Name Numbers, 1–50 (Grade 1 Week 1) ---------- */
+
+function pvWords(T_,n,kind){
+  const {word}=T_, big=n>=100, d=d3(n,big?'1000':'100'), B=s=>'<b>'+s+'</b>';
+  if(kind==='build'||kind==='g1'){
+    word('counting name','The counting name tells '+B('how many')+'. It tells '+B('the number of items')+'.', {});
+    word('ten','A ten is '+B('10 ones')+' bundled together.', {note:'10 ones make 1 ten.'});
+    if(big) word('hundred','A hundred is '+B('10 tens')+' bundled together.', {note:'10 tens make 1 hundred.'});
+    word('structure name','The structure name tells '+B(big? 'how many hundreds, tens and ones' : 'how many tens and how many ones')+'.', {});
+    word('numeral','Each number is represented by a '+B('numeral')+'. The numeral '+B('shows the structure')+' and tells the structure name.', {});
+  }
+  if(kind==='non'){
+    word('bundle','To bundle is to put '+B('10 ones')+' together to make '+B('1 ten')+'.', {});
+    word('unbundle','To unbundle is to open '+B('1 ten')+' to make '+B('10 ones')+'.', {});
+    word('structure name','The structure name tells '+B(big? 'how many hundreds, tens and ones' : 'how many tens and how many ones')+'.', {});
+  }
+  if(kind==='npt'){ const u=big?'hundred':'ten';
+    word('next '+u,'The next '+u+' is the '+u+' that comes '+B('after')+' a number.', {});
+    word('previous '+u,'The previous '+u+' is the '+u+' that comes '+B('before')+' a number.', {});
+  }
+  if(kind==='cmp'){
+    word('compare','To compare is to find which number is '+B('greater')+' and which is '+B('less')+'.', {});
+    word('greater than ( <b>&gt;</b> )','Greater than means '+B('more')+'. '+B('&gt;')+' means '+B('is greater than')+'.', {big:'&gt;'});
+    word('less than ( <b>&lt;</b> )','Less than means '+B('fewer')+'. '+B('&lt;')+' means '+B('is less than')+'.', {big:'&lt;'});
+    word('equal to ( <b>=</b> )','Equal to means '+B('the same')+'. '+B('=')+' means '+B('is equal to')+'.', {big:'='});
+  }
+}
 function g1BuildSteps(){
   const T_=tSteps(), {q,say,sec,goal}=T_;
   const A=tKeyScenes(10,'a'), B=tKeyScenes(30,'b');
@@ -4052,6 +4124,7 @@ function g1BuildSteps(){
   const eA=fitSet([A.loose,A.fin].concat(A.fill,A.rod)); fitSet([B.loose,B.fin].concat(B.fill,B.rod)); TU.W=Math.max(eA.W,4); TU.H=Math.max(eA.H,5);
   T_.know('g1');
   goal('Today we will bundle 10 ones into 1 ten, and build tens.');
+  pvWords(T_,10,'g1');
   sec('Build 10');
   q('How can we find out if we have 10 ones?', 'We can move the ones onto the ten frame.', {sc:A.loose});
   say('We can move the ones onto the ten frame.', {sc:A.fill[0]});
@@ -4114,6 +4187,7 @@ function pvBuildSteps(n){
   const T_=tSteps(), {q,say,sec,goal}=T_, big=n>=100, d=d3(n,big?'1000':'100'), h=d[0], t=d[1], o=d[2];
   T_.know(big?'pv3':'pv2');
   goal('Today we will build '+n+', bundle it and name its structure.');
+  pvWords(T_,n,'build');
   sec('Build And Bundle');
   if(!big){
     const K=tKeyScenes(n); tFit([K.loose,K.fin].concat(K.fill,K.rod));
@@ -4137,6 +4211,7 @@ function pvUnbundleSteps(n){
   const T_=tSteps(), {q,say,sec,goal}=T_, big=n>=100, d=d3(n,big?'1000':'100'), h=d[0], t=d[1], o=d[2];
   T_.know(big?'pv3':'pv2');
   goal('Today we will unbundle 1 ten and name the new structure.');
+  pvWords(T_,n,'non');
   sec('Unbundle');
   if(!big){
     const K=tKeyScenes(n); tFit([K.fin,K.unb[0]]);
@@ -4166,6 +4241,7 @@ function pvLineSteps(n){
   const T_=tSteps(), {q,say,sec,goal}=T_, big=n>=100, L=big?'1000':'100', V=nptVals({A:n,lvl:L}), u=V.unit;
   T_.know(big?'npt3':'npt');
   goal('Today we will find the next '+u+' and the previous '+u+'.');
+  pvWords(T_,n,'npt');
   sec('Number Line');
   const d=d3(n,L);
   say('This is '+n+'. '+n+' is '+pvStruct(d[0],d[1],d[2],big)+'.', {line:'none', lineN:n, lvl:L});
@@ -4185,27 +4261,30 @@ function pvCompareSteps(n){
   const rel=(a,b)=> a<b? 'less than' : a>b? 'greater than' : 'equal to';
   T_.know('cmp');
   goal('Today we will compare two numbers.');
+  pvWords(T_,n,'cmp');
   const one=(a,b,label)=>{
     const da=d3(a,L), db=d3(b,L), P=pvPairPic(a,b,L);
     sec('Compare '+a+' and '+b);
-    say('Which is greater, '+a+' or '+b+'? Look at both.', {pic:P});
-    say(a+' is '+pvStruct(da[0],da[1],da[2],big)+'.<br>'+b+' is '+pvStruct(db[0],db[1],db[2],big)+'.', {pic:P});
+    say('Compare '+a+' and '+b+'.<br>We read from left to right.', {pic:P});
+    q('What is the structure name of '+a+'?', a+' is '+pvStruct(da[0],da[1],da[2],big)+'.', {pic:P});
+    q('What is the structure name of '+b+'?', b+' is '+pvStruct(db[0],db[1],db[2],big)+'.', {pic:P});
     q('Which place do we compare first?', 'We compare the '+(big?'hundreds':'tens')+' first.', {pic:P});
     const places= big? [['hundreds',pvHun],['tens',pvTen],['ones',pvOne]] : [['tens',pvTen],['ones',pvOne]];
     for(let i=0;i<places.length;i++){
       const ia=(big?da[i]:da[i+1]), ib=(big?db[i]:db[i+1]), nmf=places[i][1];
       if(i>0) say('Then compare the '+places[i][0]+'.', {pic:P});
-      if(ia===ib){ q(nmf(ia)+' and '+nmf(ib)+'. Which is greater?', 'Neither. '+nmf(ia)+' and '+nmf(ib)+' are the same.', {pic:P}); continue; }
-      q(nmf(ia)+' and '+nmf(ib)+'. Which is greater?', nmf(Math.max(ia,ib))+' is greater than '+nmf(Math.min(ia,ib))+'.', {pic:P});
+      if(ia===ib){ q('Compare '+nmf(ia)+' and '+nmf(ib)+'.', nmf(ia)+' is equal to '+nmf(ib)+'. They are the same.', {pic:P}); continue; }
+      q('Compare '+nmf(ia)+' and '+nmf(ib)+'.', nmf(ia)+' is '+(ia<ib?'less than ':'greater than ')+nmf(ib)+'.', {pic:P});
       break;
     }
-    say('So '+a+' is '+rel(a,b)+' '+b+'.<br>'+a+' '+(a<b?'<':a>b?'>':'=')+' '+b, {pic:P});
+    q('So which number is greater?', a+' is '+rel(a,b)+' '+b+'.<br>'+a+' <b>'+(a<b?'&lt;':a>b?'&gt;':'=')+'</b> '+b, {pic:P});
     q('What is the difference?', 'The difference is '+Math.abs(a-b)+'.', {pic:P});
   };
   one(A1,B1); one(A2,B2);
   return T_.S_;
 }
-function pvPairPic(a,b,L){ const rep=pvRep(); return cfit(u=>compose([buildD(rep,d3(a,L),L,u,null,true),buildD(rep,d3(b,L),L,u,null,true)],u,'|'),1080,330,40); }
+function pvPairPic(a,b,L){ const rep=pvRep(); const one=v=>cfit(u=>buildD(rep,d3(v,L),L,u,null,true),500,280,60);
+  return '<div class="tpair"><div><div class="tpn">'+a+'</div>'+one(a)+'</div><div><div class="tpn">'+b+'</div>'+one(b)+'</div></div>'; }
 
 function g1Range(){ return S.level==='100' && /^(1-20|1-50|20-50)$/.test(S.range); }
 function lessonSteps(n){ const l=tLesson(); if(l==='build') return (g1Range()&&n<=50)? g1BuildSteps() : pvBuildSteps(n); if(l==='non') return pvUnbundleSteps(n); if(l==='npt') return pvLineSteps(n); if(l==='cmp') return pvCompareSteps(n); return pvBuildSteps(n); }
@@ -4420,6 +4499,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     clickSeg('level',R.level);
     setSel('range',R.range);
     clickSeg('pMode',pm); setSel('wMode',m); setSel('sKind','prob'); setSel('sMode',m);
+    if(pm==='C'||pm==='P'){ clickSeg('pNum','hidden'); setSel('sNum','hidden'); }   // v105: the numeral is revealed after the values
     var c=reps('C'), cr= (LS.rep.C && c.some(function(x){return x.id===LS.rep.C;}))? LS.rep.C : c[0].id;
     clickSeg('pRep',cr); setSel('wRep',cr); setSel('sRep',cr);
     if(s==='pv'||s==='non'){
@@ -4475,7 +4555,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
       step(guide,2,'Focus').appendChild(P.skill);
       var c3=step(guide,3,'How should it look?'); c3.appendChild(P.method); c3.appendChild(P.rep); c3.appendChild(P.repTxt); c3.appendChild(P.side);
       if(job==='sheets'){
-        var c4=step(guide,4,'Print'); park($('wPer').closest('.grp'),c4,parkedG); park($('wPages').closest('.grp'),c4,parkedG); park($('wKey').closest('label'),c4,parkedG); park($('wNew'),c4,parkedG); park($('wPrint'),c4,parkedG);
+        var c4=step(guide,4,'Print'); park($('wKind').closest('.grp'),c4,parkedG); park($('wPer').closest('.grp'),c4,parkedG); park($('wPages').closest('.grp'),c4,parkedG); park($('wKey').closest('label'),c4,parkedG); park($('wNew'),c4,parkedG); park($('wPrint'),c4,parkedG);
       } else {
         var c4b=step(guide,4,'Download'); park($('sCount').closest('.grp'),c4b,parkedG); park($('sTitle').closest('label'),c4b,parkedG); park($('sNew'),c4b,parkedG); park($('sDown'),c4b,parkedG);
       }
