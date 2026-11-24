@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v106</title>
+<title>Numerics · Place Value Toolkit v108</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -42,10 +42,14 @@
   /* ---------- problem ---------- */
   #stage{display:flex;justify-content:center;padding:18px 20px 40px}
   .prob{font-size:var(--fs);text-align:center;display:flex;flex-direction:column;align-items:center;line-height:1}
+  #stage.side .prob{display:grid;grid-template-columns:auto auto;column-gap:70px;align-items:center;justify-content:center;align-content:center;min-height:calc(100vh - 220px)}
+  #stage.side .prob>*{grid-column:2;justify-self:center}
+  #stage.side .prob>.pic{grid-column:1;grid-row:1 / span 9;align-self:center}
   .bignum{font-size:1em;line-height:1.15;margin-bottom:.12em}
   .pic{margin:.1em 0 .25em;display:flex;justify-content:center}
   .pic svg{display:block}
   .bond{width:1.9em;height:.42em;display:block;margin:-.05em auto .05em}
+  .bwhole{margin:0 0 .02em}
   .row{display:flex;justify-content:center;align-items:flex-end;gap:.45em;margin-top:.12em}
   .cell{display:flex;flex-direction:column;align-items:center}
   .line{width:1.6em;height:1.12em;border-bottom:max(2px,.045em) solid var(--ink);display:flex;align-items:flex-end;justify-content:center;padding:0 .08em}
@@ -382,7 +386,7 @@
   .owntag{display:none;font-size:12px;background:#F3E3C0;color:#7a5a12;border-radius:8px;padding:2px 8px}
   body.ownset .owntag{display:inline-block}
   #intro .isteps .gstep, #guide .gstep{min-width:0}
-  #intro .isteps .gstep:nth-child(-n+3) .gc, #guide.steps .gstep:nth-child(-n+3) .gc{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
+  #intro .isteps .gstep:nth-child(-n+4) .gc, #guide.steps .gstep:nth-child(-n+4) .gc{display:flex;flex-direction:column;align-items:flex-start;gap:8px}
   #intro .isteps select.lp, #guide.steps select.lp{max-width:100%;width:100%}
   #intro .isteps .gstep{background:#fff;border:1px solid #e3ded4;border-radius:10px;padding:10px 14px;display:flex;flex-direction:column;gap:8px}
   #intro .isteps .gt{font-weight:bold;color:var(--navy);display:flex;align-items:center;gap:8px;font-size:15px}
@@ -602,6 +606,7 @@
       <option value="expanded">Expanded form</option>
       <option value="bar">Bar model</option>
     </select>
+    <select id="pGiven"><option value="parts">Show the parts</option><option value="whole">Show the whole</option><option value="miss">Show the whole and one part</option><option value="mix">Mixed</option></select>
   </div>
   <div class="grp tp-pv"><span class="t">Equation form</span>
     <select id="aform">
@@ -746,7 +751,7 @@
       </select>
     </div>
     <div class="grp tp-pv"><span class="t">Practice</span>
-      <select id="wKind"><option value="do">Complete The Problems</option><option value="err">Find The Mistake</option></select>
+      <select id="wKind"><option value="do">Complete The Problems</option><option value="err">Find The Error</option></select>
     </div>
     <div class="grp tp-pv"><span class="t">Partition</span>
       <select id="wCanon">
@@ -886,7 +891,7 @@
 const S = {
   range:'1-20', cmin:10, cmax:30,
   lines:{val:true,qty:true,struct:true,name:true},
-  scheme:'by', fill:'five', astyle:'sym', awhole:'left', aform:'mix', level:'100', pform:'bond', grade:'g1',
+  scheme:'by', fill:'five', astyle:'sym', awhole:'left', aform:'mix', level:'100', pform:'bond', pGiven:'parts', grade:'g1',
   pMode:'C', pRep:'rods', pNum:'hidden', zoom:1,
   wKind:'do', wMode:'C', wRep:'rods', wNum:'shown', wPer:4, wPages:2, wTitle:'Place Value', wKey:true, wList:'', wCanon:'canon', pCanon:'canon',
   topic:'pv', asOp:'add', asStrat:'ten', cmpT:'mix', cmpW:'words', cmpDiff:true,
@@ -1100,23 +1105,32 @@ function fitUnit(rep, picW, picH, mt){
 /* ---------------- problem markup ---------------- */
 /* P mode: number bond, expanded form or bar model. The values appear when the values line is revealed (or in an answer key). */
 function pictorialHTML(vals,labels,ctx){
-  const three=vals.length===3, show=ctx.key||ctx.shown.has('val'), sh=show?' shown':'';
+  const three=vals.length===3, sh=' shown';
+  // v108: the picture gives the parts, the whole, or the whole and one part; what is not given shows at its step (parts at the values, the whole at the numeral)
+  let g=S.pGiven||'parts'; if(g==='mix') g=['parts','whole','miss'][(ctx.seed||0)%3];
+  const total=vals.reduce((a,b)=>a+b,0), wholeOn= g!=='parts' || ctx.key || ctx.shown.has('num') || ctx.numMode==='shown';
+  const hideIdx= g==='whole'? vals.map((v,i)=>i) : g==='miss'? [((ctx.seed||0)%vals.length)] : [];
+  const partTxt=(v,i)=> (hideIdx.indexOf(i)<0 || ctx.key || ctx.shown.has('val'))? v : '';
+  const box=(t)=>'<div class="xcell"><div class="xbox"><span class="f">'+t+'</span></div></div>';
+  const W_=wholeOn? total : '';
   if(S.pform==='expanded'){
     const op='<span class="xop'+(S.astyle==='sym'?'':' w')+'">'+(S.astyle==='sym'?'+':'and')+'</span>';
-    return '<div class="xform'+sh+'">'+vals.map((v,i)=>'<div class="xcell"><div class="xbox"><span class="f">'+v+'</span></div></div>').join(op)+'</div>';   // values only: no place label under 90
+    const parts=vals.map((v,i)=>box(partTxt(v,i))).join(op);
+    return '<div class="xform'+sh+'">'+(g!=='parts'? box(W_)+'<span class="xop">=</span>' : '')+parts+'</div>';
   }
   if(S.pform==='bar'){
-    const tot=vals.reduce((a,b)=>a+b,0)||1;
+    const tot=total||1;
     // v104: each box is sized by its value (12 ones is wider than 1 ten); a small part keeps room for its number
-    const MIN= three? 16 : 22, raw=vals.map(v=>Math.max(v/tot*100,MIN)), rs=raw.reduce((a,b)=>a+b,0), segs=raw.map(v=>v/rs*100), sum=100;
-    const wholeHid = ctx.numMode==='hidden' && !ctx.key && !ctx.shown.has('num');
-    let top='<div class="barw"><span'+(wholeHid?' style="visibility:hidden"':'')+'>'+vals.reduce((a,b)=>a+b,0)+'</span></div>', bot='<div class="barp'+sh+'">', lab='<div class="barl">';
-    vals.forEach((v,i)=>{ const w=(segs[i]/sum*100).toFixed(2)+'%'; bot+='<div style="width:'+w+'"><span class="f">'+v+'</span></div>'; });
-    return '<div class="barm'+(three?' b3':'')+'">'+top+bot+'</div></div>';   // values only: no place label under 90
+    const MIN= three? 16 : 22, raw=vals.map(v=>Math.max(v/tot*100,MIN)), rs=raw.reduce((a,b)=>a+b,0), segs=raw.map(v=>v/rs*100);
+    let top='<div class="barw"><span>'+(wholeOn? total : '&nbsp;')+'</span></div>', bot='<div class="barp'+sh+'">';
+    vals.forEach((v,i)=>{ const t=partTxt(v,i); bot+='<div style="width:'+segs[i].toFixed(2)+'%"><span class="f">'+(t===''?'&nbsp;':t)+'</span></div>'; });
+    return '<div class="barm'+(three?' b3':'')+'">'+top+bot+'</div></div>';
   }
-  return three
+  const bwhole='<div class="xform shown bwhole">'+box(W_)+'</div>';
+  const bparts='<div class="xform shown bparts">'+vals.map((v,i)=>box(partTxt(v,i))).join('<span class="xop" style="visibility:hidden">+</span>')+'</div>';   // v108: the bond shows its whole and parts
+  return bwhole+(three
     ? '<svg class="bond bond3" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="6,22 50,3 94,22" fill="none" stroke="#111" stroke-width="2.4" vector-effect="non-scaling-stroke"/><line x1="50" y1="3" x2="50" y2="22" stroke="#111" stroke-width="2.4" vector-effect="non-scaling-stroke"/></svg>'
-    : '<svg class="bond" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="6,22 50,3 94,22" fill="none" stroke="#111" stroke-width="2.4" vector-effect="non-scaling-stroke"/></svg>';
+    : '<svg class="bond" viewBox="0 0 100 24" preserveAspectRatio="none"><polyline points="6,22 50,3 94,22" fill="none" stroke="#111" stroke-width="2.4" vector-effect="non-scaling-stroke"/></svg>')+bparts;
 }
 /* S mode reads values first (0 and 6 is 6), then quantities (0 tens 6 ones); C and P read quantities first */
 function lineOrder(numStep,mode){ const L=[]; (mode==='A'? ['val','qty','struct','name'] : ['qty','val','num','struct','name']).forEach(k=>{ if(k==='num'){ if(numStep) L.push('num'); return; } if(S.lines[k] || (mode==='A' && k==='val')) L.push(k); }); return L; }   // v105: C and P reveal the numeral after the values
@@ -1177,7 +1191,7 @@ function mistakeFor(n,mode,i){
   return opts[(i*7+n)%opts.length];
 }
 function fixRowHTML(ctx){ const e=ctx.err; const was= e.k==='qty'? e.q.join(' · ') : e.k==='val'? e.v.join(' + ') : e.k==='num'? e.n : e.k==='struct'? e.s : e.w;
-  return '<div class="row fixrow'+(ctx.key?' shown':'')+'">'+cell(ctx.key? 'Mistake: '+was : '','Write it correctly',' wide')+'</div>'; }
+  return '<div class="row fixrow'+(ctx.key?' shown':'')+'">'+cell(ctx.key? 'Error: '+was : '','Write it correctly',' wide')+'</div>'; }
 function errRow(ctx,k){ return ctx.err&&ctx.err.k===k? (ctx.key? ' errk' : '') : ''; }
 function errUse(ctx,k){ return ctx.err&&ctx.err.k===k&&!ctx.key; }
 function numRowHTML(n,ctx,hid){ if(ctx.err) return '<div class="row shown'+errRow(ctx,'num')+'">'+cell(errUse(ctx,'num')? ctx.err.n : n,'numeral',' numl')+'</div>'; return hid? '<div class="row'+cls('num',ctx)+'">'+cell(n,'numeral',' numl')+'</div>' : '<div class="row"><div class="bignum" style="margin:0">'+n+'</div></div>'; }
@@ -1265,15 +1279,18 @@ function renderPresent(){
   const n=P.hist[P.idx], z=S.zoom;
   const fs=60*z, lab=15*z;
   stage.style.setProperty('--fs',fs+'px'); stage.style.setProperty('--lab',lab+'px');
-  const availW=Math.max(300,stage.clientWidth-40);
-  const availH=Math.max(160,(window.innerHeight-stage.getBoundingClientRect().top-30) - overhead(fs,lab,S.pMode,S.pNum));
-  const base = S.pRep==='rods'? 25*z : 46*z;  // frames and disks
+  // v108: concrete puts the picture on the left and the answer lines on the right, so the picture can be big
+  const side = S.pMode==='C' && stage.clientWidth>=900;
+  stage.classList.toggle('side',side);
+  const availW= side? Math.max(260,(stage.clientWidth-40)*0.46) : Math.max(300,stage.clientWidth-40);
+  const availH= side? Math.max(200,window.innerHeight-stage.getBoundingClientRect().top-60) : Math.max(160,(window.innerHeight-stage.getBoundingClientRect().top-30) - overhead(fs,lab,S.pMode,S.pNum));
+  const base = (S.pRep==='rods'? 25*z : 46*z)*(side? 1.8 : 1);  // frames and disks
   let u;
   const sp=P.splits[P.idx]||null;
   const W0=worstUnits(S.pRep, S.pCanon);
   const cur = S.level==='1000'? picUnits3(S.pRep==='frames'?'rods':S.pRep,...split3(n,sp)) : picUnits(S.pRep, sp?sp[0]:Math.floor(n/10), sp?sp[1]:n%10);
   u=Math.min(base, availW/Math.max(W0.w,cur.w), availH/Math.max(W0.h,cur.h));
-  stage.innerHTML=problemHTML(n,{mode:S.pMode, rep:S.pRep, numMode:S.pNum, u:u, shown:P.shown, hl:P.hl, split:sp});
+  stage.innerHTML=problemHTML(n,{mode:S.pMode, rep:S.pRep, numMode:S.pNum, u:u, shown:P.shown, hl:P.hl, split:sp, seed:P.idx+n});
 }
 function revealNext(){
   const order=curOrder();
@@ -3571,7 +3588,7 @@ function renderSheets(){
   passes.forEach(key=>{
     for(let pg=0;pg<W.pages;pg++){
       html+='<div class="page" style="--fs:'+fs+'px;--lab:'+lab+'px"><div class="phead"><span class="nm">'+(key?'':'Name: ')+'</span><span class="pt"><b>Numerics</b> · '+'Place Value'+(wdLabel()?' · '+wdLabel():'')+' · '+rangeLabel()+(W.pages>1?' · '+(pg+1):'')+(key?'<span class="keytag">Answer Key</span>':'')+'</span></div>';
-      if(S.wKind==='err') html+='<div class="errhead">'+(key? 'Answer key: the mistake is outlined in red.' : 'Each problem has one mistake. Circle it. Write it correctly.')+'</div>';
+      if(S.wKind==='err') html+='<div class="errhead">'+(key? 'Answer key: the error is outlined in red.' : 'Each problem has one error. Circle it. Write it correctly.')+'</div>';
       html+='<div class="grid" style="grid-template-rows:repeat('+rows+',1fr)">';
       for(let c=0;c<per;c++){
         const i=pg*per+c, n=W.nums[i], mode=modeFor(i,total), rep=repFor(i);
@@ -3579,7 +3596,7 @@ function renderSheets(){
         const ERR= S.wKind==='err'? mistakeFor(n,mode,i) : null;
         const shown=new Set((key||ERR)?['num','val','qty','struct','name']:[]);
         html+='<div class="wcell'+(c>=per-2?' lastrow':'')+'"><span class="no">'+(c+1)+'.</span>'+
-          (mode==='A'? '<div style="--fs:'+Math.round(fs*1.45)+'px;--lab:'+(lab*1.25)+'px">' : '')+problemHTML(n,{mode:mode,rep:rep,numMode:ERR?'hidden':S.wNum,u:units[rep],shown:shown,hl:null,key:key,split:ERR?null:(W.splits&&W.splits[i]),err:ERR})+(mode==='A'?'</div>':'')+'</div>';
+          (mode==='A'? '<div style="--fs:'+Math.round(fs*1.45)+'px;--lab:'+(lab*1.25)+'px">' : '')+problemHTML(n,{mode:mode,rep:rep,numMode:ERR?'hidden':S.wNum,u:units[rep],shown:shown,hl:null,key:key,split:ERR?null:(W.splits&&W.splits[i]),err:ERR,seed:i+n})+(mode==='A'?'</div>':'')+'</div>';
       }
       html+='</div><div class="pfoot">© '+2026+' Numerics · Structured Numeracy. All rights reserved.</div></div>';
     }
@@ -3648,6 +3665,7 @@ document.querySelectorAll('[data-line]').forEach(cb=>{
 sel('fill','fill',()=>refreshAll(false));
 sel('astyle','astyle',()=>refreshAll(false));
 sel('pform','pform',()=>refreshAll(false));
+sel('pGiven','pGiven',()=>refreshAll(false));
 /* starting point sets the language (Words says "and" and "is"), the level and a starting range */
 $('grade').value=S.grade;
 $('grade').onchange=()=>{
@@ -4458,6 +4476,10 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     P.repTxt=document.createElement('span'); P.repTxt.className='lptxt';
     P.side=document.createElement('div'); P.side.className='seg lpside'; P.side.title='Where the whole goes'; P.side.innerHTML='<button type="button" data-v="left">Whole Left</button><button type="button" data-v="right">Whole Right</button>';
     P.side.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; LS.side=b.dataset.v; changed(); });
+    P.given=document.createElement('select'); P.given.className='lp lpgiven'; P.given.title='What the picture gives';   // v108
+    P.given.innerHTML='<option value="parts">Show The Parts (Find The Whole)</option><option value="whole">Show The Whole (Find The Parts)</option><option value="miss">Show The Whole And One Part</option><option value="mix">Mixed</option>';
+    P.given.addEventListener('change',function(){ LS.given=P.given.value; changed(); });
+    P.side.appendChild=(function(orig){ return function(el){ return orig.call(this,el); }; })(P.side.appendChild);
     P.range.addEventListener('change',function(){ LS.range=P.range.value; changed(); });
     P.skill.addEventListener('change',function(){ LS.skill=P.skill.value; changed(); });
     P.method.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; LS.method=b.dataset.v; changed(); });
@@ -4470,6 +4492,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     var m= (!P.mixed && LS.method==='CPA')? 'C' : LS.method;
     [].forEach.call(P.method.querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.v===m); });
     var RL=reps(m); opt(P.rep,RL,curRep()); var one=RL.length<2; P.rep.style.display=one?'none':''; P.repTxt.style.display=one?'':'none'; P.repTxt.textContent=RL[0].label;
+    var givOn=(m==='P') && (LS.skill==='pv'||LS.skill==='non'); P.given.style.display=givOn?'':'none'; P.given.value=LS.given||'parts';
     var sideOn=(m==='A'||m==='CPA') && (LS.skill==='pv'||LS.skill==='non'); P.side.style.display=sideOn?'':'none'; var sv=LS.side||'right'; [].forEach.call(P.side.querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.v===sv); });
   }
   /* every word capitalized on buttons, tabs, labels and choices (not in example sums like "10 and 8 make 18") */
@@ -4484,7 +4507,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   function refreshAll(){ curRep(); PICKS.forEach(refreshOne); titleUI(); try{ localStorage.setItem('numerics-pick',JSON.stringify(LS)); }catch(e){} }
   function inline(P,host,labels){
     var add=function(lab,el){ var g=document.createElement('span'); g.className='lpg'; if(labels&&lab) g.innerHTML='<span class="t">'+lab+'</span>'; g.appendChild(el); host.appendChild(g); };
-    add('Numbers',P.range); add('Focus',P.skill); add('Method',P.method); add('Show',P.rep); P.rep.parentNode.appendChild(P.repTxt); P.rep.parentNode.appendChild(P.side);
+    add('Number Range',P.range); add('Focus',P.skill); add('Method',P.method); add('Representation',P.rep); P.rep.parentNode.appendChild(P.repTxt); P.rep.parentNode.appendChild(P.side); P.rep.parentNode.appendChild(P.given);
   }
   /* ---------- applying the choice to the toolkit ---------- */
   function fire(el,ev){ el.dispatchEvent(new Event(ev||'change',{bubbles:true})); }
@@ -4502,6 +4525,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     if(pm==='C'||pm==='P'){ clickSeg('pNum','hidden'); setSel('sNum','hidden'); }   // v105: the numeral is revealed after the values
     var c=reps('C'), cr= (LS.rep.C && c.some(function(x){return x.id===LS.rep.C;}))? LS.rep.C : c[0].id;
     clickSeg('pRep',cr); setSel('wRep',cr); setSel('sRep',cr);
+    setSel('pGiven',LS.given||'parts');
     if(s==='pv'||s==='non'){
       var can= s==='non'? 'non' : 'canon'; clickSeg('pCanon',can); setSel('wCanon',can); setSel('sCanon',can);
 
@@ -4551,21 +4575,23 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     var more=$('moreBtn'); more.textContent='More settings ⚙';
     if(job==='sheets'||job==='slides'){
       guide.className='steps'; var P=picker(true);
-      step(guide,1,'Which numbers?').appendChild(P.range);
+      step(guide,1,'Number Range').appendChild(P.range);
       step(guide,2,'Focus').appendChild(P.skill);
-      var c3=step(guide,3,'How should it look?'); c3.appendChild(P.method); c3.appendChild(P.rep); c3.appendChild(P.repTxt); c3.appendChild(P.side);
+      step(guide,3,'Method').appendChild(P.method);
+      var c3=step(guide,4,'Representation'); c3.appendChild(P.rep); c3.appendChild(P.repTxt); c3.appendChild(P.side); c3.appendChild(P.given);
       if(job==='sheets'){
-        var c4=step(guide,4,'Print'); park($('wKind').closest('.grp'),c4,parkedG); park($('wPer').closest('.grp'),c4,parkedG); park($('wPages').closest('.grp'),c4,parkedG); park($('wKey').closest('label'),c4,parkedG); park($('wNew'),c4,parkedG); park($('wPrint'),c4,parkedG);
+        var c4=step(guide,5,'Print'); park($('wKind').closest('.grp'),c4,parkedG); park($('wPer').closest('.grp'),c4,parkedG); park($('wPages').closest('.grp'),c4,parkedG); park($('wKey').closest('label'),c4,parkedG); park($('wNew'),c4,parkedG); park($('wPrint'),c4,parkedG);
       } else {
-        var c4b=step(guide,4,'Download'); park($('sCount').closest('.grp'),c4b,parkedG); park($('sTitle').closest('label'),c4b,parkedG); park($('sNew'),c4b,parkedG); park($('sDown'),c4b,parkedG);
+        var c4b=step(guide,5,'Download'); park($('sCount').closest('.grp'),c4b,parkedG); park($('sTitle').closest('label'),c4b,parkedG); park($('sNew'),c4b,parkedG); park($('sDown'),c4b,parkedG);
       }
       var m=mk('div','gmore',ownTag); guide.appendChild(m); park(more,m,parkedG); more.textContent='More choices ⚙';
     } else if(job==='centers'){
       guide.className='steps'; var R=picker(true);
-      step(guide,1,'Numbers').appendChild(R.range);
+      step(guide,1,'Number Range').appendChild(R.range);
       step(guide,2,'Focus').appendChild(R.skill);
-      var k3=step(guide,3,'How should it look?'); k3.appendChild(R.method); k3.appendChild(R.rep); k3.appendChild(R.repTxt); k3.appendChild(R.side);
-      var k4=step(guide,4,'Activity'); park($('cKind'),k4,parkedG); park($('cCount').closest('.grp'),k4,parkedG); park($('cNew'),k4,parkedG); park($('cPrint'),k4,parkedG);
+      step(guide,3,'Method').appendChild(R.method);
+      var k3=step(guide,4,'Representation'); k3.appendChild(R.rep); k3.appendChild(R.repTxt); k3.appendChild(R.side); k3.appendChild(R.given);
+      var k4=step(guide,5,'Activity'); park($('cKind'),k4,parkedG); park($('cCount').closest('.grp'),k4,parkedG); park($('cNew'),k4,parkedG); park($('cPrint'),k4,parkedG);
       var mm=mk('div','gmore',ownTag); guide.appendChild(mm); park(more,mm,parkedG); more.textContent='More choices ⚙';
     } else {
       guide.className='strip'; var Q=picker(false);
@@ -4610,10 +4636,10 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   document.addEventListener('keydown',function(e){ if(!intro.classList.contains('hidden')) e.stopImmediatePropagation(); },true);
   /* home: number range → skill → method → representation → format */
   var P1=picker(false), st=$('introSteps');
-  step(st,1,'Numbers').appendChild(P1.range);
+  step(st,1,'Number Range').appendChild(P1.range);
   step(st,2,'Focus').appendChild(P1.skill);
   step(st,3,'Method').appendChild(P1.method);
-  var s4=step(st,4,'Show with'); s4.appendChild(P1.rep); s4.appendChild(P1.repTxt); s4.appendChild(P1.side);
+  var s4=step(st,4,'Representation'); s4.appendChild(P1.rep); s4.appendChild(P1.repTxt); s4.appendChild(P1.side); s4.appendChild(P1.given);
   var s5=step(st,5,'Format');
   s5.innerHTML='<div class="ifmt"><button type="button" class="fbtn" data-job="teach" style="background:#1F3A5F">Lesson presentation</button><button type="button" class="fbtn" data-job="present" style="background:#355E3B">Practice presentation</button><button type="button" class="fbtn" data-job="sheets" style="background:#8E4F3A">Practice pages</button><button type="button" class="fbtn" data-job="centers" style="background:#6E4E63">Center activities</button></div>';
   [].forEach.call(s5.querySelectorAll('.fbtn'),function(b){ b.addEventListener('click',function(){ go(b.dataset.job); }); });
