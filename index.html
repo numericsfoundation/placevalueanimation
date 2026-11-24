@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v112</title>
+<title>Numerics · Place Value Toolkit v113</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -184,6 +184,16 @@
   .line.cbox{align-items:center}
   /* v110: task cards and match-up cards look different */
   .xccard.xs{border:1.5px dashed #9AA3AD}
+  .xset{position:absolute;top:6px;right:8px;min-width:22px;height:22px;border-radius:50%;color:#fff;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;z-index:2}
+  .xctask .xset{top:8px;right:10px;border:2px solid #fff}
+  .xset.big{position:static;display:inline-flex;width:30px;height:30px;font-size:17px;margin-right:6px;vertical-align:middle}
+  .xs2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:6px}.xs2 h5{margin:4px 0;font-size:16px;color:#1F3A5F}.xs2 ul{margin:0;padding-left:18px;font-size:14px}
+  .xcsm{font-size:20px;line-height:1.3;text-align:center}.xsline svg{max-width:100%;height:auto}
+  .xrecs{display:flex;flex-direction:column;gap:18px}.xrec{border:2px solid #1F3A5F;border-radius:12px;padding:12px 16px;font-size:15px}
+  .xrh{display:flex;gap:10px;align-items:flex-end;font-weight:700;color:#1F3A5F}.xrn{flex:1;border-bottom:1.5px solid #111;height:1em}
+  .xrt{font-weight:700;color:#1F3A5F;margin:8px 0 2px}.xrsort{display:grid;grid-template-columns:1fr 1fr;gap:16px}.xrpath{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+  .xrl{border-bottom:1.2px solid #444;height:24px}.xrm{margin-top:4px}
+  .xmrec{width:100%;border-collapse:collapse;margin-top:10px;font-size:16px}.xmrec th{background:#1F3A5F;color:#fff;padding:8px;text-align:left}.xmrec td{border:1.5px solid #555;height:72px}
   .mcardslot{margin:6px auto 10px;width:190px;height:120px;border:3px dashed #1F3A5F;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;color:#1F3A5F;font-size:15px;padding:8px;box-sizing:border-box}
   .mats.one .mat{min-height:880px}
   .mats.one .mrec{font-size:20px;line-height:2.1}
@@ -428,6 +438,7 @@
   #intro .isteps.i5 .gstep:nth-child(5){grid-column:1 / -1}
   #intro .isteps .gstep{padding:18px 18px 20px;gap:14px}
   #intro .isteps .gt{font-size:20px}
+  #intro .ghint{font-size:14px;color:#5b6570;margin:-6px 0 2px;line-height:1.3}
   #intro .isteps .gn{width:30px;height:30px;font-size:16px}
   #intro .isteps select.lp{font-size:17px;padding:8px 8px}
   #intro .isteps .lpm button{font-size:18px;padding:8px 16px}
@@ -723,7 +734,8 @@
 <!-- ============ SLIDES ============ -->
 <section id="centers" class="hidden">
   <div class="bar">
-    <div class="grp"><span class="t">Activity</span><div class="seg" id="cKind"><button type="button" data-v="task" class="on">Task cards</button><button type="button" data-v="match">Match-up cards</button><button type="button" data-v="sort" class="tp-pv">Sort, path &amp; memory</button><button type="button" data-v="mat">Build-it mats</button></div></div>
+    <div class="grp"><span class="t">Activity</span><div class="seg" id="cKind"><button type="button" data-v="task" class="on">Task cards</button><button type="button" data-v="match">Match-up cards</button><button type="button" data-v="sort">Sort, path &amp; memory</button><button type="button" data-v="mat">Build-it mats</button></div></div>
+    <div class="grp" id="cLevG"><span class="t">Level</span><select id="cLev"><option value="1">1 · clearly different</option><option value="2" selected>2 · closer</option><option value="3">3 · easy to confuse</option></select></div>
     <div class="grp"><span class="t">How many</span><select id="cCount"><option value="6">6</option><option value="12" selected>12</option><option value="18">18</option></select></div>
     <div class="spacer"></div>
     <button class="btn alt" id="cNew" type="button">New set</button>
@@ -2127,7 +2139,11 @@ function cmpHTML(p,ctx){
   const mode=ctx.mode, on=k=>ctx.key||ctx.shown.has(k), w=S.cmpW==='words', cp=cmpPlaces(p), PL=PLACES(p.lvl);
   const L=p.lvl, rep=(L==='1000'&&ctx.rep==='frames')?'rods':ctx.rep;
   // both builds get the same height (bottom-aligned) so the tens/ones blanks line up
-  const svgA= mode==='C'? buildD(rep,d3(p.A,L),L,ctx.u,null,true) : '', svgB= mode==='C'? buildD(rep,d3(p.B,L),L,ctx.u,null,true) : '';
+  let svgA= mode==='C'? buildD(rep,d3(p.A,L),L,ctx.u,null,true) : '', svgB= mode==='C'? buildD(rep,d3(p.B,L),L,ctx.u,null,true) : '';
+  // v113: when the deciding place is shown, the other places fade so the place being compared stands out on both pictures
+  const PCOL= L==='1000'? [['#3E7D45','#355E3B'],['#2F6DB5'],['#F6CF3A']] : [['#2F6DB5'],['#F6CF3A']];
+  const fadeOthers=s=>{ if(!(mode==='C' && on('dec') && cp.dec>=0)) return s; PCOL.forEach((cs,i)=>{ if(i===cp.dec) return; cs.forEach(c=>{ s=s.split('fill="'+c+'"').join('fill="'+c+'" opacity=".18"'); }); }); return s; };
+  svgA=fadeOthers(svgA); svgB=fadeOthers(svgB);
   const picH= mode==='C'? Math.max(svgInner(svgA).h, svgInner(svgB).h) : 0;
   const col=n=>{
     const d=dg(n,L);
@@ -2495,69 +2511,118 @@ function cFoot(){ return '<div class="pfoot">© 2026 Numerics · Structured Nume
    Several representations of a focus number and of numbers that are easy to confuse with it.
    1 Sort: the focus number in one pile, not the focus number in the other.  2 Path: numerals in a row, the matching representations under each.
    3 Memory: cards face down; turn 2; a match is kept, no match stays face up; the goal is for every card to be matched. */
+/* v113 Sort, Path & Memory for every Focus, with 3 levels, set colours, a center plan and recording sheets */
+const SETCOL=['#1F3A5F','#2E6B3F','#8A3B2E','#5C4A72','#9A6B12','#1C6E7A','#7A2E5C','#4F5B2A'];
+function setTag(){ const k=(CT.setNo||0)%8; return {L:'ABCDEFGH'[k], c:SETCOL[k]}; }
+function setCorner(){ const t=setTag(); return '<span class="xset" style="background:'+t.c+'">'+t.L+'</span>'; }
+function sortTopic(){ return (S.topic==='npt'||S.topic==='cmp'||(S.topic==='as'&&S.level!=='1000'))? S.topic : 'pv'; }
 function sortNums(){
-  const L=S.level, ok=v=> L==='1000'? v>=100&&v<=999 : v>=11&&v<=99, f=CT.focus||cNum(0); CT.focus=f;
-  const d=d3(f,L), rev= L==='1000'? d[2]*100+d[1]*10+d[0] : d[2]*10+d[1];
-  const c=[rev, f+10, f-10, f+1, f-1, f+100, f-100].filter(v=>ok(v)&&v!==f);
-  const out=[f]; c.forEach(v=>{ if(out.length<4 && out.indexOf(v)<0) out.push(v); }); return out;
+  const L=S.level, tp=sortTopic(), lev=+(CT.lev||2);
+  let ok=v=> L==='1000'? v>=100&&v<=999 : v>=11&&v<=99;
+  if(tp==='as') ok=v=>v>=11&&v<=19;
+  if(tp==='npt') { const o0=ok; ok=v=>o0(v)&&v%10!==0; }
+  let f=CT.focus; if(!f||!ok(f)){ for(let k=0;k<80;k++){ f=cNum(0); if(tp==='as') f=11+((f*7)%9); if(ok(f)) break; } } CT.focus=f;
+  const d=d3(f,L), rev= L==='1000'? d[2]*100+d[1]*10+d[0] : d[2]*10+d[1], big=L==='1000'? 100 : 10;
+  let c;
+  if(tp==='as') c= lev===1? [f+3,f-3,f+5,f-5] : lev===2? [f+2,f-2,f+1,f-1] : [f+1,f-1,f+2,f-2];
+  else if(lev===1) c=[f+2*big,f-2*big,f+3*big,f-3*big,f+5,f-5];
+  else if(lev===2) c=[f+big,f-big,f+1,f-1,f+2*big];
+  else c=[rev,f+1,f-1,f+big,f-big,f+10,f-10];
+  const out=[f]; c.forEach(v=>{ if(out.length<4 && ok(v) && out.indexOf(v)<0) out.push(v); });
+  for(let k=1;out.length<4&&k<40;k++){ [f+k*3,f-k*3].forEach(v=>{ if(out.length<4&&ok(v)&&out.indexOf(v)<0) out.push(v); }); }
+  return out;
 }
 function sortCards(n){
-  const L=S.level, non= S.wCanon==='non' || S.wCanon==='mix', W=210, H=140, keep=S.pform, cards=[];
-  const pic=(rep,nn)=>cPic(n,'C',rep,nn,W,H);
-  const P=(form)=>{ S.pform=form; const g=S.pGiven; S.pGiven='parts'; const s=cPic(n,'P','rods',false,W,H); S.pGiven=g; S.pform=keep; return s; };
-  cards.push({k:'num', f:'<div class="xsnum">'+n+'</div>'});
-  cards.push({k:'pic', f:pic('rods',false)});
-  cards.push({k:'pic', f:pic(L==='1000'?'disks':'frames',false)});
-  if(non && cNonD(n,L)) cards.push({k:'pic', f:pic('rods',true)});
-  cards.push({k:'p', f:P('bond')});
-  cards.push({k:'p', f:P('bar')});
-  cards.push({k:'s', f:'<div class="xcbig">'+cExp(n,L)+'</div>'});
-  cards.push({k:'w', f:'<div class="xcmid">'+cSname(n,L)+'</div>'});
-  cards.push({k:'w', f:'<div class="xcmid">'+(L==='1000'? words3(n) : words(n))+'</div>'});
+  const L=S.level, tp=sortTopic(), lev=+(CT.lev||2), W=210, H=140, keep=S.pform, cards=[], big=L==='1000';
+  const num=()=>cards.push({k:'num', f:'<div class="xsnum">'+n+'</div>'});
+  const pic=(rep,nn)=>cards.push({k:'pic', f:cPic(n,'C',rep,nn,W,H)});
+  const txt=(s,cls)=>cards.push({k:'w', f:'<div class="'+(cls||'xcmid')+'">'+s+'</div>'});
+  const P=(form)=>{ S.pform=form; const g=S.pGiven; S.pGiven='parts'; const s=cPic(n,'P','rods',false,W,H); S.pGiven=g; S.pform=keep; cards.push({k:'p', f:s}); };
+  const name= big? words3(n) : words(n);
+  num();
+  if(tp==='npt'){ const u=big?100:10, PT=Math.floor(n/u)*u, NT=PT+u;
+    pic(big?'disks':'rods',false);
+    cards.push({k:'p', f:'<div class="xsline">'+nptLineSVG({A:n,lvl:L},'none',420)+'</div>'});
+    txt((NT-n)+' more makes '+NT+'.'); txt((n-PT)+' more than '+PT+'.'); txt('Between '+PT+' and '+NT+'.<br>Closer to '+((n-PT)<(NT-n)?PT:(n-PT)>(NT-n)?NT:PT+' and '+NT)+'.','xcsm'); txt(name);
+    return cards; }
+  if(tp==='cmp'){ pic(big?'disks':'rods',false);
+    txt('1 more than '+(n-1)+'.'); txt('1 less than '+(n+1)+'.'); txt('Greater than '+(n-1)+',<br>less than '+(n+1)+'.','xcsm'); txt((big?100:10)+' more than '+(n-(big?100:10))+'.'); txt(cSname(n,L)); txt(name);
+    return cards; }
+  if(tp==='as'){ pic('frames',false); txt('10 + '+(n-10),'xcbig'); const sums=[]; for(let a=9;a>=6&&sums.length<3;a--){ const b=n-a; if(b>=2&&b<=9&&b<=a) sums.push(a+' + '+b); } sums.forEach(s=>txt(s,'xcbig')); txt(cSname(n,L)); txt(name);
+    return cards; }
+  pic('rods',false); pic(big?'disks':'frames',false);
+  if(lev>=2 && cNonD(n,L)) pic('rods',true);
+  P('bond'); P('bar'); txt(cExp(n,L),'xcbig'); txt(cSname(n,L));
+  if(lev>=2 && cNonD(n,L)) txt(cNonName(cNonD(n,L),L));
+  txt(name);
   return cards;
 }
 function sortSetHTML(){
-  const nums=sortNums(), f=nums[0], all=[];
+  const nums=sortNums(), f=nums[0], all=[], tp=sortTopic(), lev=+(CT.lev||2), T=setTag();
   nums.forEach(n=>sortCards(n).forEach(c=>all.push(Object.assign({n:n},c))));
-  shuffleSeed(all, f*7+3);
-  let h='<div class="page cpage">'+cHead('Sort, Path & Memory · How To Play')+'<div class="xsguide"><h4>One card set, three activities</h4>'+
-    '<p><b>Numbers in this set:</b> '+nums.join(', ')+'. <b>Focus:</b> '+f+'.</p>'+
+  shuffleSeed(all, f*7+3+lev);
+  const watch= tp==='npt'? ['Counting on by ones instead of using the next ten.','Mixing up the next ten and the previous ten.','Calling a ten its own previous ten (40 is not between 40 and 50).']
+    : tp==='cmp'? ['Looking at the ones before the tens.','Reading 1 more and 1 less the wrong way round.','Saying “bigger” for the number with more digits showing on the card.']
+    : tp==='as'? ['Counting every item instead of making a ten.','Making a ten with the wrong number (8 needs 2 to make 10).','Thinking 10 + 3 and 8 + 5 cannot be the same number.']
+    : ['Reversed digits: matching 43 with 34.','Counting every item instead of the tens.','Thinking an unbundled structure (2 tens 14 ones) is a different number.'];
+  const ask= tp==='npt'? ['How many more to the next ten? How do you know?','Which ten is it closer to?']
+    : tp==='cmp'? ['Which place did you compare first? Why?','How do you know it is 1 more?']
+    : tp==='as'? ['How did you make a ten?','Show me another way to make '+f+'.']
+    : ['How do you know it is not '+(+String(f).split('').reverse().join('')===f? f+10 : +String(f).split('').reverse().join(''))+'?','Show me another card that matches '+f+'.','Which card was hardest? Why?'];
+  // center plan and how to play
+  let h='<div class="page cpage">'+cHead('Sort, Path & Memory · Center Plan · Set '+T.L)+'<div class="xsguide">'+
+    '<h4><span class="xset big" style="background:'+T.c+'">'+T.L+'</span> Set '+T.L+' · Level '+lev+' · Focus: '+f+'</h4>'+
+    '<p><b>Numbers in this set:</b> '+nums.join(', ')+'. '+all.length+' cards. Every card has the letter '+T.L+' in its corner so mixed-up cards go back to the right set.</p>'+
     '<ol><li><b>Sort.</b> Use the two sorting cards. Put every card that shows '+f+' in the <b>'+f+'</b> pile. Put every other card in the <b>Not '+f+'</b> pile.</li>'+
-    '<li><b>Path.</b> Find the numeral cards (the ones with a thick border). Lay them in a row to make a path. Under each numeral, place every card that matches it.</li>'+
+    '<li><b>Path.</b> Find the numeral cards (thick border). Lay them in a row to make a path. Under each numeral, place every card that matches it.</li>'+
     '<li><b>Memory.</b> Take one set. Place the cards face down. Turn over 2 cards. If they match, the student keeps them. If they do not match, the cards stay face up. The goal is for all of the cards to be matched, not for one person to get the most.</li></ol>'+
-    '<p class="xsnote">Print one copy per group. Cut on the dashed lines.</p></div>'+
-    '<div class="xcgrid c2 xsmats"><div class="xccard xsmat"><div class="xsmt">'+f+'</div><div class="xsms">Sort here</div></div><div class="xccard xsmat"><div class="xsmt">Not '+f+'</div><div class="xsms">Sort here</div></div></div>'+cFoot()+'</div>';
+    '<div class="xs2"><div><h5>Watch for</h5><ul>'+watch.map(s=>'<li>'+s+'</li>').join('')+'</ul></div><div><h5>Ask</h5><ul>'+ask.map(s=>'<li>'+s+'</li>').join('')+'</ul></div></div>'+
+    '<p class="xsnote">Level 1: clearly different numbers. Level 2: closer numbers'+(tp==='pv'?' and unbundled structures':'')+'. Level 3: numbers that are easy to confuse. Print one copy per group. Cut on the dashed lines.</p></div>'+
+    '<div class="xcgrid c2 xsmats"><div class="xccard xsmat">'+setCorner()+'<div class="xsmt">'+f+'</div><div class="xsms">Sort here</div></div><div class="xccard xsmat">'+setCorner()+'<div class="xsmt">Not '+f+'</div><div class="xsms">Sort here</div></div></div>'+cFoot()+'</div>';
   const per=12, pages=Math.ceil(all.length/per);
   for(let pg=0;pg<pages;pg++){ const cs=all.slice(pg*per,pg*per+per); while(cs.length<per) cs.push(null);
-    h+='<div class="page cpage">'+cHead('Sort, Path & Memory'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(c=>'<div class="xccard xs'+(c&&c.k==='num'?' xsn':'')+'">'+(c?c.f:'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
-  h+='<div class="page cpage">'+cHead('Sort, Path & Memory · Answer Key')+'<div class="xckey">'+nums.map(n=>'<div class="xckrow"><b>'+n+'</b> '+(n===f?'(focus)':'')+' — '+sortCards(n).length+' cards: numeral, rods, '+(S.level==='1000'?'disks':'ten frames')+', number bond, bar model, expanded form, structure name, counting name</div>').join('')+'</div>'+cFoot()+'</div>';
+    h+='<div class="page cpage">'+cHead('Sort, Path & Memory · Set '+T.L+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(c=>'<div class="xccard xs'+(c&&c.k==='num'?' xsn':'')+'">'+(c? setCorner()+c.f:'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
+  // recording sheet: two half pages
+  const sorted=nums.slice().sort((a,b)=>a-b), lines=k=>Array.from({length:k},()=>'<div class="xrl"></div>').join('');
+  const sheet='<div class="xrec"><div class="xrh">Name: <span class="xrn"></span> Set '+T.L+'</div>'+
+    '<div class="xrt">1 Sort</div><div class="xrsort"><div><b>'+f+'</b>'+lines(4)+'</div><div><b>Not '+f+'</b>'+lines(4)+'</div></div>'+
+    '<div class="xrt">2 Path</div><div class="xrpath">'+sorted.map(n=>'<div><b>'+n+'</b>'+lines(3)+'</div>').join('')+'</div>'+
+    '<div class="xrt">3 Memory</div><div class="xrm">We matched ______ pairs. Were all of the cards matched?  Yes  /  No</div></div>';
+  h+='<div class="page cpage">'+cHead('Sort, Path & Memory · Recording Sheet')+'<div class="xrecs">'+sheet+sheet+'</div>'+cFoot()+'</div>';
+  h+='<div class="page cpage">'+cHead('Sort, Path & Memory · Answer Key · Set '+T.L)+'<div class="xckey">'+nums.map(n=>'<div class="xckrow"><b>'+n+'</b> '+(n===f?'(focus)':'')+' · '+sortCards(n).length+' cards</div>').join('')+'</div>'+cFoot()+'</div>';
   return h;
+}
+function matRecordHTML(){   // v113: Build-It recording sheet
+  const big=S.level==='1000', rows=Array.from({length:8},()=>'<tr><td></td><td></td><td></td>'+(big?'<td></td>':'')+'</tr>').join('');
+  return '<div class="page cpage">'+cHead('Build-It Mat · Recording Sheet')+'<table class="xmrec"><tr><th>Numeral</th><th>Structure name</th><th>Counting name</th>'+(big?'<th>Expanded form</th>':'')+'</tr>'+rows+'</table>'+cFoot()+'</div>';
 }
 function renderCenters(){
   if(CT._newFocus){ CT.focus=0; CT._newFocus=false; }
   const tag=[S.topic,S.level,S.range,S.wMode,S.wRep,S.wCanon,S.asOp,S.asStrat,S.cmpT,CT.n].join('|');
   if(!CT.items || CT.tag!==tag){ CT.items=cItems(); CT.tag=tag; CT.focus=0; }
+  if($('cLevG')) $('cLevG').style.display= CT.kind==='sort'? '' : 'none';
   const its=CT.items, total=its.length; let h='';
   if(CT.kind==='task'){
     const per=6, pages=Math.ceil(total/per), C=its.map((it,i)=>cTask(it,i,total));
     for(let pg=0;pg<pages;pg++){
       const idx=[]; for(let c=0;c<per;c++) idx.push(pg*per+c);
-      h+='<div class="page cpage">'+cHead('Task Cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c2">'+idx.map((i,c)=>'<div class="xccard xctask">'+(i<total? '<div class="xtband">Task Card '+(i+1)+(/class="xcq">([^<]*)</.test(C[i].front)? ' · '+C[i].front.match(/class="xcq">([^<]*)</)[1] : '')+'</div>'+C[i].front+'<div class="xtans">Answer: <span></span></div>' : '')+'</div>').join('')+'</div>'+cFoot()+'</div>';
+      h+='<div class="page cpage">'+cHead('Task Cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c2">'+idx.map((i,c)=>'<div class="xccard xctask">'+(i<total? setCorner()+'<div class="xtband">Task Card '+(i+1)+(/class="xcq">([^<]*)</.test(C[i].front)? ' · '+C[i].front.match(/class="xcq">([^<]*)</)[1] : '')+'</div>'+C[i].front+'<div class="xtans">Answer: <span></span></div>' : '')+'</div>').join('')+'</div>'+cFoot()+'</div>';
       // back: columns swapped so each answer lands behind its card (double-sided, flip on the long edge)
       const back=[]; for(let rr=0;rr<per/2;rr++){ back.push(idx[rr*2+1]); back.push(idx[rr*2]); }
       h+='<div class="page cpage">'+cHead('Task Cards'+(pages>1?' · '+(pg+1):'')+' · Backs')+'<div class="xcgrid c2">'+back.map(i=>'<div class="xccard xcback"><span class="xcno">'+(i<total?i+1:'')+'</span>'+(i<total?C[i].back:'')+'</div>').join('')+'</div>'+cFoot()+'</div>';
     }
-  } else if(CT.kind==='sort' && S.topic==='pv'){ h=sortSetHTML(); }
+  } else if(CT.kind==='sort'){ h=sortSetHTML(); }
   else if(CT.kind==='match'){
     const cards=[]; its.forEach((it,i)=>cMatch(it,i,total).forEach((f,j)=>cards.push({f:f,set:i+1}))); shuffleSeed(cards,its.length*7+3);
     const per=12, pages=Math.ceil(cards.length/per);
     for(let pg=0;pg<pages;pg++){ const cs=cards.slice(pg*per,pg*per+per); while(cs.length<per) cs.push(null);
-      h+='<div class="page cpage">'+cHead('Match-Up Cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(c=>'<div class="xccard xcm">'+(c?'<div class="xmtag">Match</div>'+c.f:'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
+      h+='<div class="page cpage">'+cHead('Match-Up Cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(c=>'<div class="xccard xcm">'+(c?setCorner()+'<div class="xmtag">Match</div>'+c.f:'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
     h+='<div class="page cpage">'+cHead('Match-Up Cards · Answer Key')+'<div class="xckey">'+its.map((it,i)=>'<div class="xckrow"><b>'+(i+1)+'.</b> '+cMatch(it,i,total).map(f=>f.replace(/<div class="xcpic">[\s\S]*<\/div>$/,'<i>picture</i>')).map(f=>'<span>'+f.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()+'</span>').join(' · ')+'</div>').join('')+'</div>'+cFoot()+'</div>';
   } else {
     const per=2, pages=Math.ceil(total/per);
     if(S.topic==='pv'){   // v110: one mat for every build, plus numeral cards to choose from
       h+='<div class="page cpage">'+cHead('Build-It Mat')+'<div class="mats one">'+cMat({kind:'pvAny'},0)+'</div>'+cFoot()+'</div>';
+      h+=matRecordHTML();
       const nums=its.map(it=>it.n), cp=12;
       for(let pg=0;pg<Math.ceil(nums.length/cp);pg++){ const cs=nums.slice(pg*cp,pg*cp+cp); while(cs.length<cp) cs.push(null);
         h+='<div class="page cpage">'+cHead('Numeral Cards'+(nums.length>cp?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(n=>'<div class="xccard xs'+(n!==null?' xsn':'')+'">'+(n!==null?'<div class="xsnum">'+n+'</div>':'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
@@ -3671,7 +3736,7 @@ function renderSheets(){
   if(slidesVisible()) renderSlidePreview();
   if(S.topic!=='pv'){ renderTopicSheets(); return; }
   const per=+S.wPer, rows=per/2, total=W.nums.length;
-  const ER=S.wKind==='err'? .86 : 1;
+  const ER=(S.wKind==='err'? .86 : 1)*(S.level==='1000'? .86 : 1);   // v113: hundreds get a little more room for the picture
   const fs= (per===2? 34 : per===4? 30 : 25)*ER, lab= per===2? 12 : per===4? 11 : 10;   // v110: bigger numbers and labels
   const cellW=(8.5-1)*96/2, cellH=((11-1)*96 - .42*96 - .3*96)/rows;
   const picW=cellW-36;
@@ -3839,7 +3904,8 @@ const cNotes={task:'Print double-sided and flip on the long edge: each answer pr
 const cSetNote=()=>{ $('cNote').textContent=cNotes[CT.kind]; };
 $('cKind').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; CT.kind=b.dataset.v; $('cKind').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); cSetNote(); renderCenters(); });
 $('cCount').addEventListener('change',()=>{ CT.n=+$('cCount').value; CT.items=null; renderCenters(); });
-$('cNew').onclick=()=>{ CT.items=null; CT._newFocus=true; renderCenters(); };
+$('cNew').onclick=()=>{ CT.items=null; CT._newFocus=true; CT.setNo=(CT.setNo||0)+1; renderCenters(); };
+$('cLev').onchange=()=>{ CT.lev=+$('cLev').value; renderCenters(); };
 cSetNote();
 
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
@@ -4259,6 +4325,7 @@ function g1BuildSteps(){
   q('0 ones, so this is just 1. Do we agree?', 'No. The 1 tells us 1 ten. The 0 tells us 0 ones.', {numeral:true, digits:true, num:10});
   q('Even when there are 0 ones, what is still there?', 'The ten is still there.', {sc:A.fin});
   q('What number did I build?', 'I built 10.', {sc:A.fin});
+  if(TCH.short) return T_.S_;   // v113: the short lesson builds 10 only
   sec('Build More Tens');
   say('Let us build more tens.', {sc:B.loose});
   q('Do we need to count every item we put into the frame?', 'No. A full ten frame shows 10 ones.', {sc:B.fill[0]});
@@ -4289,12 +4356,13 @@ function pvCPS(T_,n,h,t,o,big,scC,picC){
     q('How many tens?', 'There '+(t===1?'is ':'are ')+pvTen(t)+'.', o2);
     q('How many ones?', 'There '+(o===1?'is ':'are ')+pvOne(o)+'.', o2); };
   sec('Concrete');
-  counts(C); worth(C);
+  counts(C); if(!TCH.short) worth(C);   // v113: the short lesson skips the values
   const canon=(n===h*100+t*10+o)&&t<10&&o<10;
   if(canon){ q('What is the numeral?', 'The numeral is '+n+'.', {numeral:true, num:n});
     q('The numeral shows the structure. Tell me the structure name.', n+' is '+pvStruct(h,t,o,big)+'.', {numeral:true, digits:true, num:n}); }
   else q('Tell me the structure name.', n+' is '+pvStruct(h,t,o,big)+'.', C);
   q('Tell me the counting name.', 'The counting name is '+nm+'.', C);
+  if(TCH.short) return;   // v113: the short lesson stops after concrete
   sec('Pictorial');
   q('What are the parts?', 'The parts are '+parts.join(' and ')+'.', {bond:{whole:n, parts:parts}});
   q('What is the whole?', 'The whole is '+n+'.', {bond:{whole:n, parts:parts}});
@@ -4399,7 +4467,7 @@ function pvCompareSteps(n){
     q('So which number is greater?', a+' is '+rel(a,b)+' '+b+'.<br>'+a+' <b>'+(a<b?'&lt;':a>b?'&gt;':'=')+'</b> '+b, {pic:P});
     q('What is the difference?', 'The difference is '+Math.abs(a-b)+'.', {pic:P});
   };
-  one(A1,B1); one(A2,B2);
+  one(A1,B1); if(!TCH.short) one(A2,B2);   // v113: the short lesson has one comparison
   return T_.S_;
 }
 function pvPairPic(a,b,L){ const rep=pvRep(); const one=v=>cfit(u=>buildD(rep,d3(v,L),L,u,null,true),500,280,60);
@@ -4407,6 +4475,7 @@ function pvPairPic(a,b,L){ const rep=pvRep(); const one=v=>cfit(u=>buildD(rep,d3
 
 function g1Range(){ return S.level==='100' && /^(1-20|1-50|20-50)$/.test(S.range); }
 function lessonSteps(n){ const l=tLesson(); if(l==='build') return (g1Range()&&n<=50)? g1BuildSteps() : pvBuildSteps(n); if(l==='non') return pvUnbundleSteps(n); if(l==='npt') return pvLineSteps(n); if(l==='cmp') return pvCompareSteps(n); return pvBuildSteps(n); }
+document.addEventListener('change',e=>{ if(e.target && e.target.id==='tchLen'){ TCH.short= e.target.value==='short'; if(TCH.n && TCH.steps && TCH.steps.length) teachLoad(TCH.n); } });
 function teachLoad(n){ TCH.n=n; TCH.steps=lessonSteps(n); TCH.i=0; teachStop(); teachRender(); $('tchMsg').textContent=''; }
 function teachStop(){ if(TCH.timer){ clearInterval(TCH.timer); TCH.timer=null; } $('tchPlay').textContent='Play ▶'; }
 function teachPlay(){
@@ -4492,7 +4561,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   <div id="teachBox">
     <div id="tchHead"><b id="tchTitle">Lesson: Build And Name Numbers</b><span class="tchnote" id="tchNote"></span><button id="tchLiveBtn" class="ttab on" type="button">Step through a number</button><button id="tchWatchBtn" class="ttab" type="button">Watch the teaching video ▶</button><button id="tchHome" type="button" title="Back to Home">⌂ Home</button> <button id="tchClose" type="button">Close ✕</button></div>
     <div id="tchLive">
-      <div id="tchBar"><select id="tchLesson" title="Lesson"><option value="build">Build And Name Numbers</option><option value="non">Bundle And Unbundle</option><option value="npt">Next And Previous Ten</option><option value="cmp">Compare Numbers</option></select> Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
+      <div id="tchBar"><select id="tchLesson" title="Lesson"><option value="build">Build And Name Numbers</option><option value="non">Bundle And Unbundle</option><option value="npt">Next And Previous Ten</option><option value="cmp">Compare Numbers</option></select><select id="tchLen" title="Lesson length"><option value="full">Full Lesson</option><option value="short">Short Lesson</option></select> Number <input type="text" id="tchNum" inputmode="numeric" autocomplete="off"> <button class="btn ghost" id="tchGo" type="button">Show</button>
         <button class="btn round" id="tchPrev" type="button" title="Previous">←</button><button class="btn alt" id="tchPlay" type="button">Play ▶</button><button class="btn round" id="tchNext" type="button" title="Next">→</button>
         <span id="tchPos"></span><button class="btn" id="tchDown" type="button">Download PowerPoint</button><span id="tchMsg"></span></div>
       <div id="tchView"><div id="tchStage"></div></div>
@@ -4692,7 +4761,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
       step(guide,2,'Focus').appendChild(R.skill);
       step(guide,3,'Method').appendChild(R.method);
       var k3=step(guide,4,'Representation'); k3.appendChild(R.rep); k3.appendChild(R.repTxt); k3.appendChild(R.side); k3.appendChild(R.given);
-      var k4=step(guide,5,'Activity'); park($('cKind'),k4,parkedG); park($('cCount').closest('.grp'),k4,parkedG); park($('cNew'),k4,parkedG); park($('cPrint'),k4,parkedG);
+      var k4=step(guide,5,'Activity'); park($('cKind'),k4,parkedG); park($('cCount').closest('.grp'),k4,parkedG); park($('cLevG'),k4,parkedG); park($('cNew'),k4,parkedG); park($('cPrint'),k4,parkedG);
       var mm=mk('div','gmore',ownTag); guide.appendChild(mm); park(more,mm,parkedG); more.textContent='More choices ⚙';
     } else {
       guide.className='strip'; var Q=picker(false);
@@ -4737,11 +4806,13 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   document.addEventListener('keydown',function(e){ if(!intro.classList.contains('hidden')) e.stopImmediatePropagation(); },true);
   /* home: number range → skill → method → representation → format */
   var P1=picker(false), st=$('introSteps');
-  step(st,1,'Number Range').appendChild(P1.range);
-  step(st,2,'Focus').appendChild(P1.skill);
-  step(st,3,'Method').appendChild(P1.method);
-  var s4=step(st,4,'Representation'); s4.appendChild(P1.rep); s4.appendChild(P1.repTxt); s4.appendChild(P1.side); s4.appendChild(P1.given);
-  var s5=step(st,5,'Format');
+  // v113: a one-line hint under each Home step for teachers who are new to the toolkit
+  function hint(c,t){ var h=mk('div','ghint',t); c.parentNode.insertBefore(h,c); return c; }
+  hint(step(st,1,'Number Range'),'The numbers your class is working with.').appendChild(P1.range);
+  hint(step(st,2,'Focus'),'The part of place value for today.').appendChild(P1.skill);
+  hint(step(st,3,'Method'),'C concrete · P pictorial · S symbolic.').appendChild(P1.method);
+  var s4=hint(step(st,4,'Representation'),'How the number is shown.'); s4.appendChild(P1.rep); s4.appendChild(P1.repTxt); s4.appendChild(P1.side); s4.appendChild(P1.given);
+  var s5=hint(step(st,5,'Format'),'What you need: teach, practise on the board, print pages or make centers.');
   s5.innerHTML='<div class="ifmt"><button type="button" class="fbtn" data-job="teach" style="background:#1F3A5F">Lesson presentation</button><button type="button" class="fbtn" data-job="present" style="background:#355E3B">Practice presentation</button><button type="button" class="fbtn" data-job="sheets" style="background:#8E4F3A">Practice pages</button><button type="button" class="fbtn" data-job="centers" style="background:#6E4E63">Center activities</button></div>';
   [].forEach.call(s5.querySelectorAll('.fbtn'),function(b){ b.addEventListener('click',function(){ go(b.dataset.job); }); });
   $('introHow').addEventListener('click',function(){ var h=$('howBtn'); if(h) h.click(); });
