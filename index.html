@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v109</title>
+<title>Numerics · Place Value Toolkit v110</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -42,7 +42,7 @@
   /* ---------- problem ---------- */
   #stage{display:flex;justify-content:center;padding:18px 20px 40px}
   .prob{font-size:var(--fs);text-align:center;display:flex;flex-direction:column;align-items:center;line-height:1}
-  #stage.side .prob{display:grid;grid-template-columns:auto auto;column-gap:70px;align-items:center;justify-content:center;align-content:center;min-height:calc(100vh - 220px)}
+  #stage.side .prob{display:grid;grid-template-columns:auto auto;column-gap:110px;align-items:center;justify-content:center;align-content:center;min-height:calc(100vh - 220px)}
   #stage.side .prob>*{grid-column:2;justify-self:center}
   #stage.side .prob>.pic{grid-column:1;grid-row:1 / span 9;align-self:center}
   .bignum{font-size:1em;line-height:1.15;margin-bottom:.12em}
@@ -144,6 +144,10 @@
   .wcell:nth-child(2n){border-right:0}
   .wcell.lastrow{border-bottom:0}
   .wcell .no{position:absolute;left:6px;top:5px;font-size:11px;color:#444}
+  .wcell .barm{font-size:1.3em} .wcell .bwhole,.wcell .bparts,.wcell .bond{font-size:1.2em}
+  .wcell.wside .prob{display:grid;grid-template-columns:auto auto;column-gap:22px;align-items:center;justify-content:center}
+  .wcell.wside .prob>*{grid-column:2;justify-self:center}
+  .wcell.wside .prob>.pic{grid-column:1;grid-row:1 / span 9;align-self:center}
   .pfoot{height:.3in;display:flex;align-items:flex-end;justify-content:center;font-size:9px;color:#555;border-top:1px solid #cfcfcf;padding-top:3px}
   .keytag{color:var(--green);font-weight:bold;margin-left:8px}
 
@@ -178,6 +182,22 @@
   .line.cbox{width:1.25em;height:1.1em;border:max(2px,.04em) solid #111;border-radius:.14em;margin-top:.02em}
   .line.cbox.cw{width:6.6em}
   .line.cbox{align-items:center}
+  /* v110: task cards and match-up cards look different */
+  .xccard.xs{border:1.5px dashed #9AA3AD}
+  .mcardslot{margin:6px auto 10px;width:190px;height:120px;border:3px dashed #1F3A5F;border-radius:12px;display:flex;align-items:center;justify-content:center;text-align:center;color:#1F3A5F;font-size:15px;padding:8px;box-sizing:border-box}
+  .mats.one .mat{min-height:880px}
+  .mats.one .mrec{font-size:20px;line-height:2.1}
+  .xccard.xsn{border:5px solid #1F3A5F!important;margin:4px}
+  .xsnum{font-size:64px;font-weight:700;color:#1F3A5F}
+  .xsguide{padding:6px 18px;font-size:16px;line-height:1.45}.xsguide h4{font-size:22px;margin:4px 0 8px;color:#1F3A5F}.xsguide li{margin:6px 0}.xsnote{color:#555;font-size:13px}
+  .xsmats{margin-top:14px}.xccard.xsmat{min-height:250px;border:3px solid #1F3A5F!important;border-radius:14px;margin:8px}.xsmt{font-size:56px;font-weight:700;color:#1F3A5F}.xsms{font-size:14px;color:#666}
+  .xccard.xctask{border:3px solid #1F3A5F!important;border-radius:14px;margin:6px;padding-top:44px;padding-bottom:40px}
+  .xctask .xcq{display:none}
+  .xctask .xtband{position:absolute;left:0;right:0;top:0;background:#1F3A5F;color:#fff;font-weight:700;font-size:17px;padding:7px 12px;border-radius:10px 10px 0 0;text-align:left}
+  .xctask .xtans{position:absolute;left:18px;right:18px;bottom:12px;font-size:17px;color:#1F3A5F;display:flex;gap:8px;align-items:flex-end}
+  .xctask .xtans span{flex:1;border-bottom:2px solid #111;height:1.1em}
+  .xccard.xcm{background:#F7F5F1;border:2px dashed #8a6d3b!important;border-radius:16px;margin:6px}
+  .xcm .xmtag{position:absolute;top:7px;left:10px;font-size:12px;font-weight:700;letter-spacing:.06em;color:#8a6d3b;text-transform:uppercase}
   .xcbar{width:78%;margin:8px auto;font-size:26px;text-align:center;border:2px solid #111}
   .xcbar .xbw{background:#EFE8DE;border-bottom:2px solid #111;padding:6px 0}
   .xcbar .xbp{display:flex}
@@ -703,7 +723,7 @@
 <!-- ============ SLIDES ============ -->
 <section id="centers" class="hidden">
   <div class="bar">
-    <div class="grp"><span class="t">Activity</span><div class="seg" id="cKind"><button type="button" data-v="task" class="on">Task cards</button><button type="button" data-v="match">Match-up cards</button><button type="button" data-v="mat">Build-it mats</button></div></div>
+    <div class="grp"><span class="t">Activity</span><div class="seg" id="cKind"><button type="button" data-v="task" class="on">Task cards</button><button type="button" data-v="match">Match-up cards</button><button type="button" data-v="sort" class="tp-pv">Sort, path &amp; memory</button><button type="button" data-v="mat">Build-it mats</button></div></div>
     <div class="grp"><span class="t">How many</span><select id="cCount"><option value="6">6</option><option value="12" selected>12</option><option value="18">18</option></select></div>
     <div class="spacer"></div>
     <button class="btn alt" id="cNew" type="button">New set</button>
@@ -1290,15 +1310,16 @@ function renderPresent(){
   if(A.on && P.idx>=0){ A.n=P.hist[P.idx]; $('animWrap').style.setProperty('--z',S.zoom); buildAnim(); return; }
   const stage=document.getElementById('stage');
   if(P.idx<0){ newProblem(); return; }
-  const n=P.hist[P.idx], z=S.zoom;
-  const fs=60*z, lab=15*z;
+  const n=P.hist[P.idx], z=S.zoom, side0 = S.pMode==='C' && stage.clientWidth>=900;
+  const sfs= side0? Math.max(50,Math.min(80,(window.innerHeight-210)/7.6)) : 60;   // v110: fit the answer lines to the screen height
+  const fs=sfs*z, lab=(side0? sfs*.3 : 15)*z;   // v110: bigger answer lines and labels beside the picture
   stage.style.setProperty('--fs',fs+'px'); stage.style.setProperty('--lab',lab+'px');
   // v108: concrete puts the picture on the left and the answer lines on the right, so the picture can be big
   const side = S.pMode==='C' && stage.clientWidth>=900;
   stage.classList.toggle('side',side);
-  const availW= side? Math.max(260,(stage.clientWidth-40)*0.46) : Math.max(300,stage.clientWidth-40);
-  const availH= side? Math.max(200,window.innerHeight-stage.getBoundingClientRect().top-60) : Math.max(160,(window.innerHeight-stage.getBoundingClientRect().top-30) - overhead(fs,lab,S.pMode,S.pNum));
-  const base = (S.pRep==='rods'? 25*z : 46*z)*(side? 1.8 : 1);  // frames and disks
+  const availW= side? Math.max(260,(stage.clientWidth-40)*(S.level==='1000'? 0.38 : 0.5)) : Math.max(300,stage.clientWidth-40);
+  const availH= side? Math.max(200,window.innerHeight-stage.getBoundingClientRect().top-90) : Math.max(160,(window.innerHeight-stage.getBoundingClientRect().top-30) - overhead(fs,lab,S.pMode,S.pNum));
+  const base = side? 64*z : (S.pRep==='rods'? 25*z : 46*z);  // v110: beside the answers the picture fills the space
   let u;
   const sp=P.splits[P.idx]||null;
   const W0=worstUnits(S.pRep, S.pCanon);
@@ -2444,7 +2465,9 @@ function cMat(it,i){
   const mat='<div class="mmat">'+PL.map(p=>col(p[0])).join('')+'</div>';
   const ln=w=>'<span class="mln" style="width:'+w+'em"></span>';
   let top, rec;
-  if(it.kind==='pv'){ top='<div class="mtitle">Build <b>'+it.n+'</b>'+(it.non?' another way':'')+'.</div>';
+  if(it.kind==='pvAny'){ top='<div class="mtitle">Choose a numeral card. Build it.</div><div class="mcardslot">Place your numeral card here</div>';   // v110: one mat for every build
+    rec= (big? ln(2.2)+' hundreds '+ln(2.2)+' tens '+ln(2.2)+' ones' : ln(2.2)+' tens '+ln(2.2)+' ones')+'<br>'+ln(3)+' = '+ln(3)+' + '+ln(3)+(big?' + '+ln(3):'')+'<br>Structure name: '+ln(11)+'<br>Counting name: '+ln(11); }
+  else if(it.kind==='pv'){ top='<div class="mtitle">Build <b>'+it.n+'</b>'+(it.non?' another way':'')+'.</div>';
     rec= (big? ln(2.2)+' hundreds '+ln(2.2)+' tens '+ln(2.2)+' ones' : ln(2.2)+' tens '+ln(2.2)+' ones')+'<br>'+it.n+' = '+ln(3)+' + '+ln(3)+(big?' + '+ln(3):'')+'<br>'+(it.non? 'Another way: '+ln(2.2)+' tens '+ln(2.2)+' ones' : 'Counting name: '+ln(12)); }
   else if(it.kind==='npt'){ const V=nptVals(it); top='<div class="mtitle">Build <b>'+V.n+'</b>.</div>';
     rec='Fill to the next '+V.unit+': '+ln(3)+' more. The next '+V.unit+' is '+ln(3)+'.<br>Take away to the previous '+V.unit+': '+ln(3)+' less. The previous '+V.unit+' is '+ln(3)+'.'; }
@@ -2456,27 +2479,77 @@ function cMat(it,i){
 }
 function cHead(sub){ return '<div class="phead"><span class="nm">'+(CT.kind==='mat'?'Name: ':'')+'</span><span class="pt"><b>Numerics</b> · '+topicName()+' · '+rangeLabel()+' · '+sub+'</span></div>'; }
 function cFoot(){ return '<div class="pfoot">© 2026 Numerics · Structured Numeracy. All rights reserved.</div>'; }
+/* v110 Sort, Path & Memory: one card set used three ways.
+   Several representations of a focus number and of numbers that are easy to confuse with it.
+   1 Sort: the focus number in one pile, not the focus number in the other.  2 Path: numerals in a row, the matching representations under each.
+   3 Memory: cards face down; turn 2; a match is kept, no match stays face up; the goal is for every card to be matched. */
+function sortNums(){
+  const L=S.level, ok=v=> L==='1000'? v>=100&&v<=999 : v>=11&&v<=99, f=CT.focus||cNum(0); CT.focus=f;
+  const d=d3(f,L), rev= L==='1000'? d[2]*100+d[1]*10+d[0] : d[2]*10+d[1];
+  const c=[rev, f+10, f-10, f+1, f-1, f+100, f-100].filter(v=>ok(v)&&v!==f);
+  const out=[f]; c.forEach(v=>{ if(out.length<4 && out.indexOf(v)<0) out.push(v); }); return out;
+}
+function sortCards(n){
+  const L=S.level, non= S.wCanon==='non' || S.wCanon==='mix', W=210, H=140, keep=S.pform, cards=[];
+  const pic=(rep,nn)=>cPic(n,'C',rep,nn,W,H);
+  const P=(form)=>{ S.pform=form; const g=S.pGiven; S.pGiven='parts'; const s=cPic(n,'P','rods',false,W,H); S.pGiven=g; S.pform=keep; return s; };
+  cards.push({k:'num', f:'<div class="xsnum">'+n+'</div>'});
+  cards.push({k:'pic', f:pic('rods',false)});
+  cards.push({k:'pic', f:pic(L==='1000'?'disks':'frames',false)});
+  if(non && cNonD(n,L)) cards.push({k:'pic', f:pic('rods',true)});
+  cards.push({k:'p', f:P('bond')});
+  cards.push({k:'p', f:P('bar')});
+  cards.push({k:'s', f:'<div class="xcbig">'+cExp(n,L)+'</div>'});
+  cards.push({k:'w', f:'<div class="xcmid">'+cSname(n,L)+'</div>'});
+  cards.push({k:'w', f:'<div class="xcmid">'+(L==='1000'? words3(n) : words(n))+'</div>'});
+  return cards;
+}
+function sortSetHTML(){
+  const nums=sortNums(), f=nums[0], all=[];
+  nums.forEach(n=>sortCards(n).forEach(c=>all.push(Object.assign({n:n},c))));
+  shuffleSeed(all, f*7+3);
+  let h='<div class="page cpage">'+cHead('Sort, Path & Memory · How To Play')+'<div class="xsguide"><h4>One card set, three activities</h4>'+
+    '<p><b>Numbers in this set:</b> '+nums.join(', ')+'. <b>Focus:</b> '+f+'.</p>'+
+    '<ol><li><b>Sort.</b> Use the two sorting cards. Put every card that shows '+f+' in the <b>'+f+'</b> pile. Put every other card in the <b>Not '+f+'</b> pile.</li>'+
+    '<li><b>Path.</b> Find the numeral cards (the ones with a thick border). Lay them in a row to make a path. Under each numeral, place every card that matches it.</li>'+
+    '<li><b>Memory.</b> Take one set. Place the cards face down. Turn over 2 cards. If they match, the student keeps them. If they do not match, the cards stay face up. The goal is for all of the cards to be matched, not for one person to get the most.</li></ol>'+
+    '<p class="xsnote">Print one copy per group. Cut on the dashed lines.</p></div>'+
+    '<div class="xcgrid c2 xsmats"><div class="xccard xsmat"><div class="xsmt">'+f+'</div><div class="xsms">Sort here</div></div><div class="xccard xsmat"><div class="xsmt">Not '+f+'</div><div class="xsms">Sort here</div></div></div>'+cFoot()+'</div>';
+  const per=12, pages=Math.ceil(all.length/per);
+  for(let pg=0;pg<pages;pg++){ const cs=all.slice(pg*per,pg*per+per); while(cs.length<per) cs.push(null);
+    h+='<div class="page cpage">'+cHead('Sort, Path & Memory'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(c=>'<div class="xccard xs'+(c&&c.k==='num'?' xsn':'')+'">'+(c?c.f:'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
+  h+='<div class="page cpage">'+cHead('Sort, Path & Memory · Answer Key')+'<div class="xckey">'+nums.map(n=>'<div class="xckrow"><b>'+n+'</b> '+(n===f?'(focus)':'')+' — '+sortCards(n).length+' cards: numeral, rods, '+(S.level==='1000'?'disks':'ten frames')+', number bond, bar model, expanded form, structure name, counting name</div>').join('')+'</div>'+cFoot()+'</div>';
+  return h;
+}
 function renderCenters(){
+  if(CT._newFocus){ CT.focus=0; CT._newFocus=false; }
   const tag=[S.topic,S.level,S.range,S.wMode,S.wRep,S.wCanon,S.asOp,S.asStrat,S.cmpT,CT.n].join('|');
-  if(!CT.items || CT.tag!==tag){ CT.items=cItems(); CT.tag=tag; }
+  if(!CT.items || CT.tag!==tag){ CT.items=cItems(); CT.tag=tag; CT.focus=0; }
   const its=CT.items, total=its.length; let h='';
   if(CT.kind==='task'){
     const per=6, pages=Math.ceil(total/per), C=its.map((it,i)=>cTask(it,i,total));
     for(let pg=0;pg<pages;pg++){
       const idx=[]; for(let c=0;c<per;c++) idx.push(pg*per+c);
-      h+='<div class="page cpage">'+cHead('Task Cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c2">'+idx.map((i,c)=>'<div class="xccard"><span class="xcno">'+(i<total?i+1:'')+'</span>'+(i<total?C[i].front:'')+'</div>').join('')+'</div>'+cFoot()+'</div>';
+      h+='<div class="page cpage">'+cHead('Task Cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c2">'+idx.map((i,c)=>'<div class="xccard xctask">'+(i<total? '<div class="xtband">Task Card '+(i+1)+(/class="xcq">([^<]*)</.test(C[i].front)? ' · '+C[i].front.match(/class="xcq">([^<]*)</)[1] : '')+'</div>'+C[i].front+'<div class="xtans">Answer: <span></span></div>' : '')+'</div>').join('')+'</div>'+cFoot()+'</div>';
       // back: columns swapped so each answer lands behind its card (double-sided, flip on the long edge)
       const back=[]; for(let rr=0;rr<per/2;rr++){ back.push(idx[rr*2+1]); back.push(idx[rr*2]); }
       h+='<div class="page cpage">'+cHead('Task Cards'+(pages>1?' · '+(pg+1):'')+' · Backs')+'<div class="xcgrid c2">'+back.map(i=>'<div class="xccard xcback"><span class="xcno">'+(i<total?i+1:'')+'</span>'+(i<total?C[i].back:'')+'</div>').join('')+'</div>'+cFoot()+'</div>';
     }
-  } else if(CT.kind==='match'){
+  } else if(CT.kind==='sort' && S.topic==='pv'){ h=sortSetHTML(); }
+  else if(CT.kind==='match'){
     const cards=[]; its.forEach((it,i)=>cMatch(it,i,total).forEach((f,j)=>cards.push({f:f,set:i+1}))); shuffleSeed(cards,its.length*7+3);
     const per=12, pages=Math.ceil(cards.length/per);
     for(let pg=0;pg<pages;pg++){ const cs=cards.slice(pg*per,pg*per+per); while(cs.length<per) cs.push(null);
-      h+='<div class="page cpage">'+cHead('Match-Up Cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(c=>'<div class="xccard xcm">'+(c?c.f:'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
+      h+='<div class="page cpage">'+cHead('Match-Up Cards'+(pages>1?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(c=>'<div class="xccard xcm">'+(c?'<div class="xmtag">Match</div>'+c.f:'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
     h+='<div class="page cpage">'+cHead('Match-Up Cards · Answer Key')+'<div class="xckey">'+its.map((it,i)=>'<div class="xckrow"><b>'+(i+1)+'.</b> '+cMatch(it,i,total).map(f=>f.replace(/<div class="xcpic">[\s\S]*<\/div>$/,'<i>picture</i>')).map(f=>'<span>'+f.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()+'</span>').join(' · ')+'</div>').join('')+'</div>'+cFoot()+'</div>';
   } else {
     const per=2, pages=Math.ceil(total/per);
+    if(S.topic==='pv'){   // v110: one mat for every build, plus numeral cards to choose from
+      h+='<div class="page cpage">'+cHead('Build-It Mat')+'<div class="mats one">'+cMat({kind:'pvAny'},0)+'</div>'+cFoot()+'</div>';
+      const nums=its.map(it=>it.n), cp=12;
+      for(let pg=0;pg<Math.ceil(nums.length/cp);pg++){ const cs=nums.slice(pg*cp,pg*cp+cp); while(cs.length<cp) cs.push(null);
+        h+='<div class="page cpage">'+cHead('Numeral Cards'+(nums.length>cp?' · '+(pg+1):''))+'<div class="xcgrid c3">'+cs.map(n=>'<div class="xccard xs'+(n!==null?' xsn':'')+'">'+(n!==null?'<div class="xsnum">'+n+'</div>':'')+'</div>').join('')+'</div>'+cFoot()+'</div>'; }
+    } else
     for(let pg=0;pg<pages;pg++){ h+='<div class="page cpage">'+cHead('Build-It Mats'+(pages>1?' · '+(pg+1):''))+'<div class="mats">'+its.slice(pg*per,pg*per+per).map((it,i)=>cMat(it,pg*per+i)).join('')+'</div>'+cFoot()+'</div>'; }
   }
   $('cpages').innerHTML=h;
@@ -3586,17 +3659,18 @@ function renderSheets(){
   if(slidesVisible()) renderSlidePreview();
   if(S.topic!=='pv'){ renderTopicSheets(); return; }
   const per=+S.wPer, rows=per/2, total=W.nums.length;
-  const fs= per===4? 26 : 21, lab= per===4? 9.5 : 8.5;
+  const fs= per===2? 34 : per===4? 30 : 25, lab= per===2? 12 : per===4? 11 : 10;   // v110: bigger numbers and labels
   const cellW=(8.5-1)*96/2, cellH=((11-1)*96 - .42*96 - .3*96)/rows;
   const picW=cellW-36;
   const allOrder=[]; let html='';
   // consistent unit per representation for the whole set
   const units={};
   ['rods','frames','disks'].forEach(rep=>{
-    const ph=Math.max(40,cellH-overhead(fs,lab,'C',S.wKind==='err'?'hidden':S.wNum)-18-(S.wKind==='err'? fs*2.6 : 0));
+    const sideR= rep==='rods' && S.level!=='1000';   // v110: rods are tall, so they sit beside the answer lines; frames and disks are wide, so they stay on top
+    const ph= sideR? Math.max(60,cellH-50) : Math.max(40,cellH-overhead(fs,lab,'C',S.wKind==='err'?'hidden':S.wNum)-18-(S.wKind==='err'? fs*2.6 : 0));
     let mw=0, mh=0;
     W.nums.forEach((n,i)=>{ const sp=W.splits&&W.splits[i]; const m= S.level==='1000'? picUnits3(rep==='frames'?'rods':rep,...split3(n,sp)) : picUnits(rep, sp?sp[0]:Math.floor(n/10), sp?sp[1]:n%10); mw=Math.max(mw,m.w); mh=Math.max(mh,m.h); });
-    units[rep]=Math.max(4, Math.min(picW/mw, ph/mh));
+    units[rep]=Math.max(4, Math.min((sideR? picW*0.4 : picW)/mw, ph/mh, sideR? 30 : 40));
   });
   const passes = S.wKey ? [false,true] : [false];
   passes.forEach(key=>{
@@ -3609,7 +3683,7 @@ function renderSheets(){
         if(n===undefined){ html+='<div class="wcell'+(c>=per-2?' lastrow':'')+'"></div>'; continue; }
         const ERR= S.wKind==='err'? mistakeFor(n,mode,i) : null;
         const shown=new Set((key||ERR)?['num','val','qty','struct','name']:[]);
-        html+='<div class="wcell'+(c>=per-2?' lastrow':'')+'"><span class="no">'+(c+1)+'.</span>'+
+        html+='<div class="wcell'+(c>=per-2?' lastrow':'')+(mode==='C'&&rep==='rods'&&S.level!=='1000'?' wside':'')+'"><span class="no">'+(c+1)+'.</span>'+
           (mode==='A'? '<div style="--fs:'+Math.round(fs*1.45)+'px;--lab:'+(lab*1.25)+'px">' : '')+problemHTML(n,{mode:mode,rep:rep,numMode:ERR?'hidden':S.wNum,u:units[rep],shown:shown,hl:null,key:key,split:ERR?null:(W.splits&&W.splits[i]),err:ERR,seed:i+n})+(mode==='A'?'</div>':'')+'</div>';
       }
       html+='</div><div class="pfoot">© '+2026+' Numerics · Structured Numeracy. All rights reserved.</div></div>';
@@ -3752,7 +3826,7 @@ const cNotes={task:'Print double-sided and flip on the long edge: each answer pr
 const cSetNote=()=>{ $('cNote').textContent=cNotes[CT.kind]; };
 $('cKind').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; CT.kind=b.dataset.v; $('cKind').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b)); cSetNote(); renderCenters(); });
 $('cCount').addEventListener('change',()=>{ CT.n=+$('cCount').value; CT.items=null; renderCenters(); });
-$('cNew').onclick=()=>{ CT.items=null; renderCenters(); };
+$('cNew').onclick=()=>{ CT.items=null; CT._newFocus=true; renderCenters(); };
 cSetNote();
 
 document.querySelectorAll('.tab').forEach(t=>t.onclick=()=>{
@@ -4396,7 +4470,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
 <div id="intro" class="hidden">
   <div class="ihead"><b>Numerics</b><span>Place Value Toolkit</span><button type="button" id="introHow" class="ihow">How to use ▶</button></div>
   <div class="ibody">
-    <h3>Choose Your Lesson</h3>
+    <h3>Build Your Materials</h3>
     <div class="iwin pad"><div class="isteps i5" id="introSteps"></div></div>
     <div class="iskip" style="display:none"><button type="button" id="introSkip">Full view with every setting ›</button> <label><input type="checkbox" id="introRemember"> Always open the full view</label></div>
   </div>
