@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v116</title>
+<title>Numerics · Place Value Toolkit v118</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -4670,6 +4670,9 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     P.given=document.createElement('select'); P.given.className='lp lpgiven'; P.given.title='What the picture gives';   // v108
     P.given.innerHTML='<option value="parts">Show The Parts</option><option value="whole">Show The Whole</option><option value="miss">Show The Whole And One Part</option><option value="mix">Mixed</option>';
     P.given.addEventListener('change',function(){ LS.given=P.given.value; changed(); });
+    P.canon=document.createElement('select'); P.canon.className='lp lpcanon'; P.canon.title='Canonical or non-canonical structures';   // v118
+    P.canon.innerHTML='<option value="">Structure: Usual</option><option value="canon">Canonical (3 Tens 4 Ones)</option><option value="non">Non-Canonical (2 Tens 14 Ones)</option><option value="mix">Both</option>';
+    P.canon.addEventListener('change',function(){ LS.canon=P.canon.value; changed(); });
     P.side.appendChild=(function(orig){ return function(el){ return orig.call(this,el); }; })(P.side.appendChild);
     P.range.addEventListener('change',function(){ LS.range=P.range.value; changed(); });
     P.skill.addEventListener('change',function(){ LS.skill=P.skill.value; changed(); });
@@ -4683,6 +4686,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     var m= (!P.mixed && LS.method==='CPA')? 'C' : LS.method;
     [].forEach.call(P.method.querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.v===m); });
     var RL=reps(m); opt(P.rep,RL,curRep()); var one=RL.length<2; P.rep.style.display=one?'none':''; P.repTxt.style.display=one?'':'none'; P.repTxt.textContent=RL[0].label;
+    P.canon.style.display= LS.skill==='pv'? '' : 'none'; P.canon.value=LS.canon||'';
     var givOn=(m==='P') && (LS.skill==='pv'||LS.skill==='non'); P.given.style.display=givOn?'':'none'; P.given.value=LS.given||'parts';
     var sideOn=(m==='A'||m==='CPA') && (LS.skill==='pv'||LS.skill==='non'); P.side.style.display=sideOn?'':'none'; var sv=LS.side||'right'; [].forEach.call(P.side.querySelectorAll('button'),function(b){ b.classList.toggle('on',b.dataset.v===sv); });
   }
@@ -4698,7 +4702,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   function refreshAll(){ curRep(); PICKS.forEach(refreshOne); titleUI(); try{ localStorage.setItem('numerics-pick',JSON.stringify(LS)); }catch(e){} }
   function inline(P,host,labels){
     var add=function(lab,el){ var g=document.createElement('span'); g.className='lpg'; if(labels&&lab) g.innerHTML='<span class="t">'+lab+'</span>'; g.appendChild(el); host.appendChild(g); };
-    add('Number Range',P.range); add('Focus',P.skill); add('Method',P.method); add('Representation',P.rep); P.rep.parentNode.appendChild(P.repTxt); P.rep.parentNode.appendChild(P.side); P.rep.parentNode.appendChild(P.given);
+    add('Number Range',P.range); add('Focus',P.skill); add('Method',P.method); add('Representation',P.rep); P.rep.parentNode.appendChild(P.repTxt); P.rep.parentNode.appendChild(P.side); P.rep.parentNode.appendChild(P.given); P.rep.parentNode.appendChild(P.canon);
   }
   /* ---------- applying the choice to the toolkit ---------- */
   function fire(el,ev){ el.dispatchEvent(new Event(ev||'change',{bubbles:true})); }
@@ -4718,7 +4722,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     clickSeg('pRep',cr); setSel('wRep',cr); setSel('sRep',cr);
     setSel('pGiven',LS.given||'parts');
     if(s==='pv'||s==='non'){
-      var can= s==='non'? 'non' : (pm==='P'? 'mix' : 'canon');   // v116: pictorial Build And Name mixes canonical and non-canonical parts
+      var can= s==='non'? 'non' : (LS.canon || (pm==='P'? 'mix' : 'canon'));   // v116: pictorial Build And Name mixes canonical and non-canonical parts
       clickSeg('pCanon',can); setSel('wCanon',can); setSel('sCanon',can);
 
       var pr=LS.rep.P, ar=LS.rep.A;
@@ -4770,7 +4774,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
       step(guide,1,'Number Range').appendChild(P.range);
       step(guide,2,'Focus').appendChild(P.skill);
       step(guide,3,'Method').appendChild(P.method);
-      var c3=step(guide,4,'Representation'); c3.appendChild(P.rep); c3.appendChild(P.repTxt); c3.appendChild(P.side); c3.appendChild(P.given);
+      var c3=step(guide,4,'Representation'); c3.appendChild(P.rep); c3.appendChild(P.repTxt); c3.appendChild(P.side); c3.appendChild(P.given); c3.appendChild(P.canon);
       if(job==='sheets'){
         var c4=step(guide,5,'Print'); park($('wKind').closest('.grp'),c4,parkedG); park($('wPer').closest('.grp'),c4,parkedG); park($('wPages').closest('.grp'),c4,parkedG); park($('wKey').closest('label'),c4,parkedG); park($('wNew'),c4,parkedG); park($('wPrint'),c4,parkedG);
       } else {
@@ -4782,7 +4786,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
       step(guide,1,'Number Range').appendChild(R.range);
       step(guide,2,'Focus').appendChild(R.skill);
       step(guide,3,'Method').appendChild(R.method);
-      var k3=step(guide,4,'Representation'); k3.appendChild(R.rep); k3.appendChild(R.repTxt); k3.appendChild(R.side); k3.appendChild(R.given);
+      var k3=step(guide,4,'Representation'); k3.appendChild(R.rep); k3.appendChild(R.repTxt); k3.appendChild(R.side); k3.appendChild(R.given); k3.appendChild(R.canon);
       var k4=step(guide,5,'Activity'); park($('cKind'),k4,parkedG); park($('cCount').closest('.grp'),k4,parkedG); park($('cLevG'),k4,parkedG); park($('cNew'),k4,parkedG); park($('cPrint'),k4,parkedG);
       var mm=mk('div','gmore',ownTag); guide.appendChild(mm); park(more,mm,parkedG); more.textContent='More choices ⚙';
     } else {
@@ -4798,6 +4802,10 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     if(on){ document.body.classList.add('simple'); buildGuide(job||'present'); titleUI(); }
     else { closeDrawer(); unpark(parkedG); guide.innerHTML=''; document.body.classList.remove('simple'); }
   }
+  // v117: switching views with the header tabs rebuilds the steps for that view (the Present screen no longer shows the Print steps)
+  document.querySelectorAll('.tab').forEach(function(t){ t.addEventListener('click',function(){
+    if(!document.body.classList.contains('simple')) return;
+    closeDrawer(); unpark(parkedG); guide.innerHTML=''; buildGuide(t.dataset.view||'present'); titleUI(); }); });
   $('moreBtn').addEventListener('click',function(){ if(document.body.classList.contains('more')) closeDrawer(); else openDrawer(); });
   $('drawerX').addEventListener('click',closeDrawer);
   $('drawerBack').addEventListener('click',function(){ apply(); });
@@ -4833,7 +4841,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   hint(step(st,1,'Number Range'),'The numbers your class is working with.').appendChild(P1.range);
   hint(step(st,2,'Focus'),'The part of place value for today.').appendChild(P1.skill);
   hint(step(st,3,'Method'),'C concrete · P pictorial · S symbolic.').appendChild(P1.method);
-  var s4=hint(step(st,4,'Representation'),'How the number is shown.'); s4.appendChild(P1.rep); s4.appendChild(P1.repTxt); s4.appendChild(P1.side); s4.appendChild(P1.given);
+  var s4=hint(step(st,4,'Representation'),'How the number is shown.'); s4.appendChild(P1.rep); s4.appendChild(P1.repTxt); s4.appendChild(P1.side); s4.appendChild(P1.given); s4.appendChild(P1.canon);
   var s5=hint(step(st,5,'Format'),'What you need: teach, practise on the board, print pages or make centers.');
   s5.innerHTML='<div class="ifmt"><button type="button" class="fbtn" data-job="teach" style="background:#1F3A5F">Lesson presentation</button><button type="button" class="fbtn" data-job="present" style="background:#355E3B">Practice presentation</button><button type="button" class="fbtn" data-job="sheets" style="background:#8E4F3A">Practice pages</button><button type="button" class="fbtn" data-job="centers" style="background:#6E4E63">Center activities</button></div>';
   [].forEach.call(s5.querySelectorAll('.fbtn'),function(b){ b.addEventListener('click',function(){ go(b.dataset.job); }); });
