@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v111</title>
+<title>Numerics · Place Value Toolkit v112</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -1310,12 +1310,12 @@ function renderPresent(){
   if(A.on && P.idx>=0){ A.n=P.hist[P.idx]; $('animWrap').style.setProperty('--z',S.zoom); buildAnim(); return; }
   const stage=document.getElementById('stage');
   if(P.idx<0){ newProblem(); return; }
-  const n=P.hist[P.idx], z=S.zoom, side0 = S.pMode==='C' && stage.clientWidth>=900;
+  const n=P.hist[P.idx], z=S.zoom, side0 = S.pMode==='C' && stage.clientWidth>=900 && S.level!=='1000';
   const sfs= side0? Math.max(50,Math.min(80,(window.innerHeight-210)/7.6)) : 60;   // v110: fit the answer lines to the screen height
   const fs=sfs*z, lab=(side0? sfs*.3 : 15)*z;   // v110: bigger answer lines and labels beside the picture
   stage.style.setProperty('--fs',fs+'px'); stage.style.setProperty('--lab',lab+'px');
   // v108: concrete puts the picture on the left and the answer lines on the right, so the picture can be big
-  const side = S.pMode==='C' && stage.clientWidth>=900;
+  const side = S.pMode==='C' && stage.clientWidth>=900 && S.level!=='1000';   // v112: hundreds pictures are wide, so they stay on top
   stage.classList.toggle('side',side);
   const availW= side? Math.max(260,(stage.clientWidth-40)*(S.level==='1000'? 0.38 : 0.5)) : Math.max(300,stage.clientWidth-40);
   const availH= side? Math.max(200,window.innerHeight-stage.getBoundingClientRect().top-90) : Math.max(160,(window.innerHeight-stage.getBoundingClientRect().top-30) - overhead(fs,lab,S.pMode,S.pNum));
@@ -2429,9 +2429,21 @@ function cSign(p){ return p.op==='-'? (WS()?'take away':'−') : (WS()?'and':'+'
 function cTask(it,i,total){
   const mode=cMode(i,total), rep=repFor(i), L=S.level, W=320, H=190;
   if(it.kind==='pv'){
-    const nd= it.non? cNonD(it.n,L) : null;
-    const front='<div class="xcq">What number is this?</div>'+cPic(it.n,mode,rep,it.non,W,H);
-    const back='<div class="xcans">'+it.n+'</div><div class="xcsub">'+(nd? cNonName(nd,L)+'<br>is the same as<br>'+cSname(it.n,L) : cSname(it.n,L))+'</div>';
+    const nd= it.non? cNonD(it.n,L) : null, n=it.n;
+    // v112: four kinds of task card take turns: What number is this? / Build it / Is this n? / Show it another way
+    let kind=i%4; const alt=cNonD(n,L); if(kind===3 && !alt) kind=0;
+    const repName= rep==='frames'? 'ten frames' : rep==='disks'? 'disks' : 'rods';
+    let front, back;
+    if(kind===1){ front='<div class="xcq">Build '+n+'.</div><div class="xsnum">'+n+'</div><div class="xcsub">Build it with '+repName+'. Then say its structure name.</div>';
+      back='<div class="xcans">'+n+'</div>'+cPic(n,'C',rep,false,W,H*.7)+'<div class="xcsub">'+cSname(n,L)+'</div>'; }
+    else if(kind===2){ const d=d3(n,L), rev= L==='1000'? d[2]*100+d[1]*10+d[0] : d[2]*10+d[1], ok=v=> L==='1000'? v>=100&&v<=999 : v>=10&&v<=99;
+      const other= [rev, n+10, n-10].find(v=>ok(v)&&v!==n), yes= !other || ((i>>2)%2===0), m= yes? n : other;
+      front='<div class="xcq">Is this '+n+'?</div>'+cPic(m,mode,rep,false,W,H*.85)+'<div class="xcsub">Yes or no? How do you know?</div>';
+      back='<div class="xcans">'+(yes? 'Yes.' : 'No.')+'</div><div class="xcsub">'+(yes? 'It is '+n+'.<br>'+cSname(n,L)+'.' : 'It is '+m+', not '+n+'.<br>'+cSname(m,L)+'.')+'</div>'; }
+    else if(kind===3){ front='<div class="xcq">Show '+n+' another way.</div>'+cPic(n,mode==='A'?'C':mode,rep,false,W,H*.85)+'<div class="xcsub">Unbundle 1 '+(alt[1]===d3(n,L)[1]-1?'ten':'hundred')+'.</div>';
+      back='<div class="xcans">'+n+'</div><div class="xcsub">'+cNonName(alt,L)+'<br>is the same as<br>'+cSname(n,L)+'</div>'; }
+    else { front='<div class="xcq">What number is this?</div>'+cPic(n,mode,rep,it.non,W,H);
+      back='<div class="xcans">'+n+'</div><div class="xcsub">'+(nd? cNonName(nd,L)+'<br>is the same as<br>'+cSname(n,L) : cSname(n,L))+'</div>'; }
     return {front:front, back:back};
   }
   if(it.kind==='npt'){ const V=nptVals(it);
@@ -3659,18 +3671,19 @@ function renderSheets(){
   if(slidesVisible()) renderSlidePreview();
   if(S.topic!=='pv'){ renderTopicSheets(); return; }
   const per=+S.wPer, rows=per/2, total=W.nums.length;
-  const fs= per===2? 34 : per===4? 30 : 25, lab= per===2? 12 : per===4? 11 : 10;   // v110: bigger numbers and labels
+  const ER=S.wKind==='err'? .86 : 1;
+  const fs= (per===2? 34 : per===4? 30 : 25)*ER, lab= per===2? 12 : per===4? 11 : 10;   // v110: bigger numbers and labels
   const cellW=(8.5-1)*96/2, cellH=((11-1)*96 - .42*96 - .3*96)/rows;
   const picW=cellW-36;
   const allOrder=[]; let html='';
   // consistent unit per representation for the whole set
   const units={};
   ['rods','frames','disks'].forEach(rep=>{
-    const sideR= rep==='rods' && S.level!=='1000';   // v110: rods are tall, so they sit beside the answer lines; frames and disks are wide, so they stay on top
+    const sideR= S.level!=='1000' && (rep==='rods' || S.wKind==='err');   // v112: Find The Error always puts the picture beside its lines so it stays full size   // v110: rods are tall, so they sit beside the answer lines; frames and disks are wide, so they stay on top
     const ph= sideR? Math.max(60,cellH-50) : Math.max(40,cellH-overhead(fs,lab,'C',S.wKind==='err'?'hidden':S.wNum)-18-(S.wKind==='err'? fs*2.6 : 0));
     let mw=0, mh=0;
     W.nums.forEach((n,i)=>{ const sp=W.splits&&W.splits[i]; const m= S.level==='1000'? picUnits3(rep==='frames'?'rods':rep,...split3(n,sp)) : picUnits(rep, sp?sp[0]:Math.floor(n/10), sp?sp[1]:n%10); mw=Math.max(mw,m.w); mh=Math.max(mh,m.h); });
-    units[rep]=Math.max(4, Math.min((sideR? picW*0.4 : picW)/mw, ph/mh, sideR? 30 : 40));
+    units[rep]=Math.max(4, Math.min((sideR? picW*(S.wKind==='err'&&rep!=='rods'? 0.46 : 0.4) : picW)/mw, ph/mh, sideR? 30 : 40));
   });
   const passes = S.wKey ? [false,true] : [false];
   passes.forEach(key=>{
@@ -3683,7 +3696,7 @@ function renderSheets(){
         if(n===undefined){ html+='<div class="wcell'+(c>=per-2?' lastrow':'')+'"></div>'; continue; }
         const ERR= S.wKind==='err'? mistakeFor(n,mode,i) : null;
         const shown=new Set((key||ERR)?['num','val','qty','struct','name']:[]);
-        html+='<div class="wcell'+(c>=per-2?' lastrow':'')+(mode==='C'&&rep==='rods'&&S.level!=='1000'?' wside':'')+'"><span class="no">'+(c+1)+'.</span>'+
+        html+='<div class="wcell'+(c>=per-2?' lastrow':'')+(mode==='C'&&S.level!=='1000'&&(rep==='rods'||S.wKind==='err')?' wside':'')+'"><span class="no">'+(c+1)+'.</span>'+
           (mode==='A'? '<div style="--fs:'+Math.round(fs*1.45)+'px;--lab:'+(lab*1.25)+'px">' : '')+problemHTML(n,{mode:mode,rep:rep,numMode:ERR?'hidden':S.wNum,u:units[rep],shown:shown,hl:null,key:key,split:ERR?null:(W.splits&&W.splits[i]),err:ERR,seed:i+n})+(mode==='A'?'</div>':'')+'</div>';
       }
       html+='</div><div class="pfoot">© '+2026+' Numerics · Structured Numeracy. All rights reserved.</div></div>';
