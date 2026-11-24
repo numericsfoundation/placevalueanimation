@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v103</title>
+<title>Numerics · Place Value Toolkit v104</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -907,7 +907,8 @@ function pool(){
   const MX=lvlMax();
   if(S.range==='custom'){ lo=Math.max(1,Math.min(MX,+S.cmin||1)); hi=Math.max(1,Math.min(MX,+S.cmax||MX)); if(lo>hi){const x=lo;lo=hi;hi=x;} }
   else { const p=S.range.split('-'); lo=+p[0]; hi=+p[1]; }
-  if(S.topic==='pv' && S.level!=='1000' && lo<10 && hi>=10) lo=10;   // place value: no single-digit numbers (they have 0 tens)
+  if(S.topic==='pv' && S.level!=='1000' && lo<10 && hi>=10) lo=10;
+  if(S.topic==='pv' && S.pCanon==='non' && S.level!=='1000' && lo<20 && hi>=20) lo=20;   // v104: unbundling must leave at least 1 ten   // place value: no single-digit numbers (they have 0 tens)
   const a=[]; for(let i=lo;i<=hi;i++) a.push(i); return a;
 }
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -1091,8 +1092,8 @@ function pictorialHTML(vals,labels,ctx){
   }
   if(S.pform==='bar'){
     const tot=vals.reduce((a,b)=>a+b,0)||1;
-    const segs= three? [3,2,1] : [2,1];   // boxes sized by place: hundreds 3/6, tens 2/6, ones 1/6 (within 100: tens 2/3, ones 1/3)
-    const sum=segs.reduce((a,b)=>a+b,0);
+    // v104: each box is sized by its value (12 ones is wider than 1 ten); a small part keeps room for its number
+    const MIN= three? 16 : 22, raw=vals.map(v=>Math.max(v/tot*100,MIN)), rs=raw.reduce((a,b)=>a+b,0), segs=raw.map(v=>v/rs*100), sum=100;
     const wholeHid = ctx.numMode==='hidden' && !ctx.key && !ctx.shown.has('num');
     let top='<div class="barw"><span'+(wholeHid?' style="visibility:hidden"':'')+'>'+vals.reduce((a,b)=>a+b,0)+'</span></div>', bot='<div class="barp'+sh+'">', lab='<div class="barl">';
     vals.forEach((v,i)=>{ const w=(segs[i]/sum*100).toFixed(2)+'%'; bot+='<div style="width:'+w+'"><span class="f">'+v+'</span></div>'; });
@@ -1152,7 +1153,7 @@ function problemHTML(n, ctx){
   const G = !!ctx.split && mode!=='C';   // non-canonical P/S: the tens are given so students find the ones
   let h='<div class="prob'+(ctx.key?' key':'')+'">';
   const numHidden = (mode==='C' && ctx.numMode!=='shown') || (mode==='P' && ctx.numMode==='hidden');   // printed P problems keep their number
-  if(mode!=='A'){
+  if(mode!=='A' && !(mode==='P' && S.pform==='bar')){   // the bar model already shows the whole
     if(numHidden) h+='<div class="row'+cls('num',ctx)+'" style="margin:0 0 .1em">'+cell(n,'',' numl')+'</div>';
     else h+='<div class="bignum">'+n+'</div>';
   }
@@ -1189,8 +1190,8 @@ function presentSplit(n){
   const non = S.pCanon==='non' || (S.pCanon==='mix' && Math.random()<.5);
   if(!non) return null;
   if(S.level==='1000') return makeSplit3(n);
-  const t=Math.floor(n/10); if(t<1) return null;
-  const give=(t>=2 && Math.random()<.35)?2:1;
+  const t=Math.floor(n/10); if(t<2) return null;   // v104: keep at least 1 ten after unbundling
+  const give=(t>=3 && Math.random()<.35)?2:1;
   return [t-give, n-10*(t-give)];
 }
 function pushProblem(n){ P.hist=P.hist.slice(0,P.idx+1); P.splits=P.splits.slice(0,P.idx+1); P.hist.push(n); P.splits.push(presentSplit(n)); P.idx=P.hist.length-1; resetReveal(); }
@@ -1307,7 +1308,7 @@ function problemHTML3(n, ctx){
   const Gh=give.includes('h'), Gt=give.includes('t'), Go=give.includes('o');
   let s='<div class="prob'+(ctx.key?' key':'')+'">';
   const numHidden = (mode==='C' && ctx.numMode!=='shown') || (mode==='P' && ctx.numMode==='hidden');   // printed P problems keep their number
-  if(mode!=='A'){
+  if(mode!=='A' && !(mode==='P' && S.pform==='bar')){   // the bar model already shows the whole
     if(numHidden) s+='<div class="row'+cls('num',ctx)+'" style="margin:0 0 .1em">'+cell(n,'',' numl')+'</div>';
     else s+='<div class="bignum">'+n+'</div>';
   }
@@ -1330,7 +1331,7 @@ function problemHTML3(n, ctx){
    In P and S the two places that did not change are printed, so students find the third. */
 function makeSplit3(n){
   let [h,t,o]=split3(n);
-  const canTen=t>=1, canHund=h>=1 && h<10;
+  const canTen=t>=1, canHund=h>=2 && h<10;
   if(!canTen && !canHund) return null;
   if(canTen && (!canHund || Math.random()<.5)) return [h,t-1,o+10,'ho'.replace('o','t')];   // ones changed: give hundreds, tens
   return [h-1,t+10,o,'ho'];                                                              // tens changed: give hundreds, ones
@@ -2534,7 +2535,7 @@ function buildSlides(){
     if(!nums.length){ nums=[]; let p=[]; while(nums.length<n){ if(!p.length) p=shuffle(pool().slice()); nums.push(p.pop()); } }
     nums.forEach((v,i)=>{
       const non=S.sCanon==='non'||(S.sCanon==='mix'&&i%2===1); let sp=null;
-      if(non){ if(S.level==='1000') sp=makeSplit3(v); else { const t=Math.floor(v/10); if(t>=1){ const give=(t>=2&&Math.random()<.35)?2:1; sp=[t-give, v-10*(t-give)]; } } }
+      if(non){ if(S.level==='1000') sp=makeSplit3(v); else { const t=Math.floor(v/10); if(t>=2){ const give=(t>=3&&Math.random()<.35)?2:1; sp=[t-give, v-10*(t-give)]; } } }
       SL.items.push(bunKind()? {kind:bunKind(), n:v} : {kind:'pv', n:v, split:sp});
     });
   } else {
@@ -2827,7 +2828,7 @@ function lessonItems(){
   const pl=shuffle(pool().slice()), used=new Set(list), take=f=>{ const i=pl.findIndex(v=>!used.has(v)&&(!f||f(v))); const v= i<0? pl[0] : pl.splice(i,1)[0]; used.add(v); return v; };
   const e1=list[0]||take(), e2=list[1]||take(), a=list[2]||take(), b=list[3]||take(okNonCanon);
   let sp=null;
-  if(S.level==='1000') sp=makeSplit3(b); else { const t=Math.floor(b/10); if(t>=1){ const give=(t>=2&&Math.random()<.35)?2:1; sp=[t-give, b-10*(t-give)]; } }
+  if(S.level==='1000') sp=makeSplit3(b); else { const t=Math.floor(b/10); if(t>=2){ const give=(t>=3&&Math.random()<.35)?2:1; sp=[t-give, b-10*(t-give)]; } }
   const keep=S.cmpT; S.cmpT='seq'; const c1=genCMP(0), c2=genCMP(1); S.cmpT=keep;
   c1.mode='C'; c2.mode='C';
   return reviewItems().concat([{kind:'bun',n:e1},{kind:'bun',n:e2}], [{kind:'cbn',n:a,steps:cbnSteps(a)}], ['C','P','A'].map(m=>({kind:'pv',n:a,split:null,mode:m,noNames:m!=='C'})), 
@@ -2849,7 +2850,7 @@ function reviewItems(){
 function revStruct(r){   // the non-canonical structure asked about
   const L=S.level; if(r.q) return r.q;
   if(L==='1000'){ const sp=makeSplit3(r.n); return sp? [sp[0],sp[1],sp[2]] : d3(r.n,L); }
-  const t=Math.floor(r.n/10); return t>=1? [0,t-1,r.n-10*(t-1)] : [0,0,r.n];
+  const t=Math.floor(r.n/10); return t>=2? [0,t-1,r.n-10*(t-1)] : [0,t,r.n%10];
 }
 function revHTML(r,ans,u,rep){
   const L=S.level, words3n= L==='1000'? words3 : words, tag='<div class="bcap rtag">Review '+r.ri+' of '+r.rn+'</div>';
@@ -3497,7 +3498,8 @@ function makeSplits(){
     if(non && S.level==='1000' && window.ALL_TENS && n>=100) return [0,Math.floor(n/10),n%10,'ho'];   // Unit 2 Day 1: every hundred shown as 10 tens
     if(non && S.level==='1000') return makeSplit3(n);
     if(!non || t<1) return null;
-    const give = (t>=2 && Math.random()<.35) ? 2 : 1;
+    if(t<2) return null;
+    const give = (t>=3 && Math.random()<.35) ? 2 : 1;
     return [t-give, n-10*(t-give)];
   });
 }
