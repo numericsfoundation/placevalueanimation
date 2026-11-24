@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Numerics · Place Value Toolkit v108</title>
+<title>Numerics · Place Value Toolkit v109</title>
 <style>
   :root{
     --navy:#1F3A5F; --green:#355E3B; --putty:#E6DCC8; --taupe:#D8CFC4; --silver:#B9BDC2;
@@ -400,6 +400,20 @@
   #intro .ihead{background:var(--navy);color:#fff;padding:14px 26px;display:flex;gap:14px;align-items:baseline}
   #intro .ihead b{font-size:22px}#intro .ihead span{opacity:.85}
   #intro .ibody{max-width:1400px;margin:0 auto;padding:44px 40px}
+  /* v109 Home: bigger, centred, no empty space */
+  #intro .ibody{max-width:1180px;min-height:calc(100vh - 60px);box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;padding:30px 40px}
+  #intro .ibody>h3{font-size:34px;margin:0 0 18px;color:var(--navy);text-align:center}
+  #intro .iwin.pad{padding:22px}
+  #intro .isteps.i5{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:16px}
+  #intro .isteps.i5 .gstep:nth-child(5){grid-column:1 / -1}
+  #intro .isteps .gstep{padding:18px 18px 20px;gap:14px}
+  #intro .isteps .gt{font-size:20px}
+  #intro .isteps .gn{width:30px;height:30px;font-size:16px}
+  #intro .isteps select.lp{font-size:17px;padding:8px 8px}
+  #intro .isteps .lpm button{font-size:18px;padding:8px 16px}
+  #intro .ifmt{grid-template-columns:repeat(4,1fr)!important;gap:14px}
+  #intro .fbtn{font-size:20px!important;padding:26px 12px!important;border-radius:12px}
+  @media(max-width:1000px){#intro .isteps.i5{grid-template-columns:repeat(2,minmax(0,1fr))!important} #intro .ifmt{grid-template-columns:repeat(2,1fr)!important}}
   #intro h1{margin:0;color:var(--navy);font-size:38px}#intro .ibody>p{margin:8px 0 0;color:#555;font-size:18px}
   #intro .icards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;margin-top:34px}
   @media(max-width:900px){#intro .icards{grid-template-columns:repeat(2,minmax(0,1fr))}}
@@ -4384,7 +4398,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   <div class="ibody">
     <h3>Choose Your Lesson</h3>
     <div class="iwin pad"><div class="isteps i5" id="introSteps"></div></div>
-    <div class="iskip"><button type="button" id="introSkip">Full view with every setting ›</button> <label><input type="checkbox" id="introRemember"> Always open the full view</label></div>
+    <div class="iskip" style="display:none"><button type="button" id="introSkip">Full view with every setting ›</button> <label><input type="checkbox" id="introRemember"> Always open the full view</label></div>
   </div>
 </div>
 <div id="teachWrap" class="hidden" role="dialog" aria-label="Teach">
@@ -4477,7 +4491,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
     P.side=document.createElement('div'); P.side.className='seg lpside'; P.side.title='Where the whole goes'; P.side.innerHTML='<button type="button" data-v="left">Whole Left</button><button type="button" data-v="right">Whole Right</button>';
     P.side.addEventListener('click',function(e){ var b=e.target.closest('button'); if(!b) return; LS.side=b.dataset.v; changed(); });
     P.given=document.createElement('select'); P.given.className='lp lpgiven'; P.given.title='What the picture gives';   // v108
-    P.given.innerHTML='<option value="parts">Show The Parts (Find The Whole)</option><option value="whole">Show The Whole (Find The Parts)</option><option value="miss">Show The Whole And One Part</option><option value="mix">Mixed</option>';
+    P.given.innerHTML='<option value="parts">Show The Parts</option><option value="whole">Show The Whole</option><option value="miss">Show The Whole And One Part</option><option value="mix">Mixed</option>';
     P.given.addEventListener('change',function(){ LS.given=P.given.value; changed(); });
     P.side.appendChild=(function(orig){ return function(el){ return orig.call(this,el); }; })(P.side.appendChild);
     P.range.addEventListener('change',function(){ LS.range=P.range.value; changed(); });
@@ -4647,7 +4661,7 @@ document.addEventListener('contextmenu',function(e){var t=e.target;if(t&&t.close
   refreshAll();
   function tchTitle(){ var t=$('tchTitle'), l=$('tchLesson'); if(t&&l) t.textContent='Lesson: '+(l.value==='npt'? 'Next And Previous Ten' : l.value==='cmp'? 'Compare Numbers' : l.value==='non'? 'Bundle And Unbundle' : 'Build And Name Numbers'); }
   if($('tchLesson')){ $('tchLesson').addEventListener('change',tchTitle); new MutationObserver(tchTitle).observe($('teachWrap'),{attributes:true,attributeFilter:['class']}); }
-  var full=false; try{ full=localStorage.getItem('numerics-full')==='1'; }catch(e){}
+  var full=false; try{ localStorage.removeItem('numerics-full'); }catch(e){}   // v109: Home always opens
   if(full){ intro.classList.add('hidden'); simple(false); apply(); } else showIntro();
 })();</script>
 </body>
